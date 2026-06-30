@@ -1,0 +1,615 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  nama          String    @db.VarChar(100)
+  username      String    @unique @db.VarChar(50)
+  password_hash String    @db.VarChar(255)
+  role          UserRole  @default(petugas)
+  unit_id       Int?
+  aktif           Boolean   @default(true)
+  allowed_modules String?   @db.Text
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  unit            Unit?     @relation(fields: [unit_id], references: [id])
+
+  @@map("users")
+}
+
+model Unit {
+  id         Int      @id @default(autoincrement())
+  nama_unit  String   @db.VarChar(100)
+  kode_unit  String   @unique @db.VarChar(20)
+  aktif      Boolean  @default(true)
+  created_at DateTime @default(now())
+
+  users      User[]
+
+  @@map("units")
+}
+
+model Periode {
+  id         Int           @id @default(autoincrement())
+  bulan      Int           @db.TinyInt
+  tahun      Int           @db.SmallInt
+  status     PeriodeStatus @default(open)
+  created_at DateTime      @default(now())
+
+  @@unique([bulan, tahun])
+  @@map("periode")
+}
+
+model AuditLog {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  tabel      String    @db.VarChar(50)
+  record_id  Int
+  aksi       AuditAksi
+  data_lama  Json?
+  data_baru  Json?
+  created_at DateTime  @default(now())
+
+  @@index([tabel])
+  @@index([user_id])
+  @@map("audit_log")
+}
+
+// === INDIKATOR TABLES ===
+
+model RisikoJatuh {
+  id              Int         @id @default(autoincrement())
+  periode_id      Int
+  unit_id         Int
+  nama_pasien     String      @db.VarChar(100)
+  usia            Int         @db.TinyInt
+  no_rm           String      @db.VarChar(20)
+  asesmen_awal    DilakukanEnum
+  asesmen_ulang   DilakukanEnum
+  intervensi      DilakukanEnum
+  edukasi         DilakukanEnum
+  created_by      Int
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("risiko_jatuh")
+}
+
+model InsidenKeselamatan {
+  id                Int           @id @default(autoincrement())
+  periode_id        Int
+  unit_id           Int
+  tanggal_kejadian  DateTime      @db.Date
+  jam_kejadian      DateTime      @db.Time(0)
+  nama_pasien       String        @db.VarChar(100)
+  no_rm             String        @db.VarChar(20)
+  deskripsi_insiden String        @db.Text
+  jenis_insiden     JenisInsiden
+  created_by        Int
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("insiden_keselamatan")
+}
+
+model ReaksiTransfusi {
+  id                     Int      @id @default(autoincrement())
+  periode_id             Int
+  unit_id                Int
+  nama_pasien            String   @db.VarChar(100)
+  no_rm                  String   @db.VarChar(20)
+  ada_reaksi             Boolean  @default(false)
+  jumlah_permintaan_kolf Int      @db.TinyInt
+  darah_masuk_kolf       Int      @db.TinyInt
+  keterangan             String?  @db.VarChar(200)
+  created_by             Int
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("reaksi_transfusi")
+}
+
+model AngkaKematian {
+  id             Int      @id @default(autoincrement())
+  periode_id     Int
+  unit_id        Int
+  lokasi         LokasiKematian
+  nama_pasien    String   @db.VarChar(100)
+  no_rm          String   @db.VarChar(20)
+  tanggal_masuk  DateTime @db.Date
+  jam_masuk      DateTime @db.Time(0)
+  tanggal_keluar DateTime @db.Date
+  jam_keluar     DateTime @db.Time(0)
+  keterangan     String?  @db.VarChar(200)
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("angka_kematian")
+}
+
+model DoubleCheckHighAlert {
+  id             Int      @id @default(autoincrement())
+  periode_id     Int
+  unit_id        Int
+  nama_pasien    String   @db.VarChar(100)
+  no_rm          String   @db.VarChar(20)
+  diagnosis      String   @db.VarChar(255)
+  nama_obat      String   @db.VarChar(100)
+  nama_penyerah  String   @db.VarChar(100)
+  nama_penerima  String   @db.VarChar(100)
+  keterangan     String?  @db.VarChar(200)
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("double_check_high_alert")
+}
+
+model WaktuTanggapSc {
+  id                      Int      @id @default(autoincrement())
+  periode_id              Int
+  unit_id                 Int
+  nama_pasien             String   @db.VarChar(100)
+  no_rm                   String   @db.VarChar(20)
+  diagnosis               String   @db.VarChar(255)
+  jam_ditentukan_operasi  DateTime @db.Time(0)
+  jam_sayatan_pertama     DateTime @db.Time(0)
+  selisih_menit           Int      @db.SmallInt
+  created_by              Int
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("waktu_tanggap_sc")
+}
+
+model IdentifikasiPasien {
+  id                    Int                @id @default(autoincrement())
+  periode_id            Int
+  unit_id               Int
+  tanggal               DateTime           @db.Date
+  nama_pasien           String             @db.VarChar(100)
+  no_rm                 String             @db.VarChar(20)
+  pemberian_obat        IdentifikasiEnum
+  nutrisi_ngt           IdentifikasiEnum
+  pemberian_darah       IdentifikasiEnum
+  tindakan_keperawatan  IdentifikasiEnum
+  created_by            Int
+  created_at            DateTime           @default(now())
+  updated_at            DateTime           @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("identifikasi_pasien")
+}
+
+model AlurKlinis {
+  id          Int            @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  nama_pasien String         @db.VarChar(100)
+  no_rm       String         @db.VarChar(20)
+  diagnosis   String         @db.VarChar(255)
+  ruangan     String         @db.VarChar(50)
+  bulan       String         @db.VarChar(20)
+  los         SesuaiEnum
+  penunjang   SesuaiEnum
+  obat        SesuaiEnum
+  created_by  Int
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("alur_klinis")
+}
+
+model VisitDokter {
+  id               Int            @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  nama_dpjp        String         @db.VarChar(100)
+  nama_pasien      String         @db.VarChar(100)
+  no_rm            String         @db.VarChar(20)
+  jam_mulai_selesai String        @db.VarChar(20)
+  jam_visit        DateTime       @db.Time(0)
+  kategori_visit   KategoriVisit
+  created_by       Int
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("visit_dokter")
+}
+
+model EmergencyResponseTime {
+  id                   Int      @id @default(autoincrement())
+  periode_id           Int
+  unit_id              Int
+  nama_pasien          String   @db.VarChar(100)
+  no_rm                String   @db.VarChar(20)
+  jam_datang           DateTime @db.Time(0)
+  jam_dilayani_dokter  DateTime @db.Time(0)
+  respon_time_menit    Decimal  @db.Decimal(5, 2)
+  triase               Triase
+  created_by           Int
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("emergency_response_time")
+}
+
+model AsesmenAwalIgd {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  nama_pasien String   @db.VarChar(100)
+  no_rm       String   @db.VarChar(20)
+  anamnesis   AdaEnum
+  ttv         AdaEnum
+  tb          AdaEnum
+  bb          AdaEnum
+  diagnosis   AdaEnum
+  terapi      AdaEnum
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("asesmen_awal_igd")
+}
+
+model PasienTertahanIgd {
+  id                 Int      @id @default(autoincrement())
+  periode_id         Int
+  unit_id            Int
+  nama_pasien        String   @db.VarChar(100)
+  no_rm              String   @db.VarChar(20)
+  jam_masuk          DateTime @db.Time(0)
+  jam_pindah_ruangan DateTime @db.Time(0)
+  waktu_tunggu_menit Int
+  keterangan         String?  @db.VarChar(200)
+  created_by         Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("pasien_tertahan_igd")
+}
+
+model GelangIdentitas {
+  id               Int            @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  nama_pasien      String         @db.VarChar(100)
+  no_rm            String         @db.VarChar(20)
+  gelang_identitas DilakukanEnum
+  alergi           DilakukanEnum
+  fall_risk        DilakukanEnum
+  dnr              DilakukanEnum
+  keterangan       String?        @db.VarChar(200)
+  created_by       Int
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("gelang_identitas")
+}
+
+model SerahTerimaPasien {
+  id          Int        @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  nama_pasien String     @db.VarChar(100)
+  akun        SesuaiEnum2
+  keluhan     SesuaiEnum2
+  ttv         SesuaiEnum2
+  penunjang   SesuaiEnum2
+  konsul      SesuaiEnum2
+  tindakan    SesuaiEnum2
+  obat        SesuaiEnum2
+  keterangan  String?    @db.VarChar(200)
+  created_by  Int
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("serah_terima_pasien")
+}
+
+model KembaliIcu {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  nama_pasien String   @db.VarChar(100)
+  no_rm       String   @db.VarChar(20)
+  diagnosis   String   @db.VarChar(255)
+  dpjp        String   @db.VarChar(100)
+  keterangan  String?  @db.Text
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("kembali_icu")
+}
+
+model KetidakpatuhanHd {
+  id                    Int      @id @default(autoincrement())
+  periode_id            Int
+  nama_pasien           String   @db.VarChar(100)
+  no_rm                 String   @db.VarChar(20)
+  jadwal_hd_per_minggu  String   @db.VarChar(50)
+  hari_tidak_datang     String   @db.VarChar(30)
+  alasan                String?  @db.Text
+  created_by            Int
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("ketidakpatuhan_hd")
+}
+
+model PeriodeHdSummary {
+  id              Int      @id @default(autoincrement())
+  periode_id      Int      @unique
+  total_pasien_hd Int      @default(0)
+  total_avgraft_avf Int    @default(0)
+  updated_at      DateTime @updatedAt
+
+  @@map("periode_hd_summary")
+}
+
+model InsidenClotting {
+  id                     Int      @id @default(autoincrement())
+  periode_id             Int
+  tanggal_kejadian       DateTime @db.Date
+  nama_pasien            String   @db.VarChar(100)
+  no_rm                  String   @db.VarChar(20)
+  deskripsi_insiden      String?  @db.Text
+  pemberian_antiplatelet String?  @db.Text
+  created_by             Int
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("insiden_clotting")
+}
+
+model InsidenJarumVena {
+  id               Int      @id @default(autoincrement())
+  periode_id       Int
+  tanggal_kejadian DateTime @db.Date
+  nama_pasien      String   @db.VarChar(100)
+  no_rm            String   @db.VarChar(20)
+  perawat_pemasang String   @db.VarChar(100)
+  penyebab         String?  @db.Text
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("insiden_jarum_vena")
+}
+
+model PeriodeJarumVenaSummary {
+  id                      Int      @id @default(autoincrement())
+  periode_id              Int      @unique
+  total_pemasangan_bulan  Int      @default(0)
+  updated_at              DateTime @updatedAt
+
+  @@map("periode_jarum_vena_summary")
+}
+
+model PenundaanOperasi {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  tanggal             DateTime @db.Date
+  nama_pasien         String   @db.VarChar(100)
+  no_rm               String   @db.VarChar(20)
+  dpjp                String   @db.VarChar(100)
+  jadwal_jam_operasi  DateTime @db.Time(0)
+  jam_mulai_operasi   DateTime @db.Time(0)
+  waktu_tunggu_menit  Int
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("penundaan_operasi")
+}
+
+model InformedConsent {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  jenis       JenisConsent
+  tanggal     DateTime @db.Date
+  nama_pasien String   @db.VarChar(100)
+  no_rm       String   @db.VarChar(20)
+  dpjp        String   @db.VarChar(100)
+  diisi       Boolean
+  keterangan  String?  @db.VarChar(200)
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("informed_consent")
+}
+
+model AsesmenPraOperasi {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  jenis       JenisAsesmen
+  tanggal     DateTime @db.Date
+  nama_pasien String   @db.VarChar(100)
+  no_rm       String   @db.VarChar(20)
+  dpjp        String   @db.VarChar(100)
+  diisi       Boolean
+  keterangan  String?  @db.VarChar(200)
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("asesmen_pra_operasi")
+}
+
+model SurgicalChecklist {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  jenis       JenisSurgical
+  tanggal     DateTime @db.Date
+  nama_pasien String   @db.VarChar(100)
+  no_rm       String   @db.VarChar(20)
+  dpjp        String   @db.VarChar(100)
+  sign_in     Boolean
+  time_out    Boolean
+  sign_out    Boolean
+  keterangan  String?  @db.VarChar(200)
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("surgical_checklist")
+}
+
+model PenandaanLokasiOperasi {
+  id              Int      @id @default(autoincrement())
+  periode_id      Int
+  tanggal         DateTime @db.Date
+  nama_pasien     String   @db.VarChar(100)
+  no_rm           String   @db.VarChar(20)
+  diagnosis       String   @db.VarChar(255)
+  dpjp            String   @db.VarChar(100)
+  dilakukan       Boolean
+  not_applicable  Boolean  @default(false)
+  keterangan      String?  @db.VarChar(200)
+  created_by      Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("penandaan_lokasi_operasi")
+}
+
+// === ENUMS ===
+
+enum UserRole {
+  admin
+  pic_mutu
+  komite
+  petugas
+}
+
+enum PeriodeStatus {
+  open
+  closed
+}
+
+enum AuditAksi {
+  create
+  update
+  delete
+}
+
+enum DilakukanEnum {
+  dilakukan
+  tidak_dilakukan @map("tidak dilakukan")
+}
+
+enum IdentifikasiEnum {
+  dilakukan
+  tidak_dilakukan   @map("tidak dilakukan")
+  tidak_ada_peluang @map("tidak ada peluang")
+}
+
+enum SesuaiEnum {
+  sesuai
+  tidak_sesuai @map("tidak sesuai")
+}
+
+enum SesuaiEnum2 {
+  Sesuai
+  Tidak_Sesuai @map("Tidak Sesuai")
+}
+
+enum JenisInsiden {
+  KTD
+  KNC
+  KPC
+  Sentinel
+  KTC
+}
+
+enum LokasiKematian {
+  ranap
+  igd
+}
+
+enum KategoriVisit {
+  cepat
+  tepat_waktu
+  terlambat
+  sangat_terlambat
+  tidak_visit
+}
+
+enum Triase {
+  Merah
+  Kuning
+  Hijau
+  Hitam
+}
+
+enum AdaEnum {
+  ada
+  tidak_ada @map("tidak ada")
+}
+
+enum JenisConsent {
+  pembedahan
+  anestesi
+}
+
+enum JenisAsesmen {
+  pra_bedah
+  pra_anestesi
+}
+
+enum JenisSurgical {
+  sc
+  operasi_umum
+}

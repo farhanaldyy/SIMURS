@@ -1,0 +1,13 @@
+/* Module page common styles */
+.module-page .page-header {
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.module-page .summary-box {
+  animation: fadeIn 300ms ease 200ms both;
+}
+
+.module-page .table-wrapper {
+  animation: fadeIn 300ms ease 100ms both;
+}
