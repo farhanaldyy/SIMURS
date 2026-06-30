@@ -15,12 +15,12 @@ router.post('/', [
   body('unit_id').isInt().withMessage('Unit wajib dipilih'),
   body('nama_pasien').notEmpty().withMessage('Nama pasien wajib diisi'),
   body('no_rm').notEmpty().withMessage('No RM wajib diisi'),
-  body('anamnesis').isIn(['ada', 'tidak ada']).withMessage('Anamnesis tidak valid'),
-  body('ttv').isIn(['ada', 'tidak ada']).withMessage('TTV tidak valid'),
-  body('tb').isIn(['ada', 'tidak ada']).withMessage('TB tidak valid'),
-  body('bb').isIn(['ada', 'tidak ada']).withMessage('BB tidak valid'),
-  body('diagnosis').isIn(['ada', 'tidak ada']).withMessage('Diagnosis tidak valid'),
-  body('terapi').isIn(['ada', 'tidak ada']).withMessage('Terapi tidak valid'),
+  body('anamnesis').isIn(['ada', 'tidak ada', 'tidak_ada']).withMessage('Anamnesis tidak valid'),
+  body('ttv').isIn(['ada', 'tidak ada', 'tidak_ada']).withMessage('TTV tidak valid'),
+  body('tb').isIn(['ada', 'tidak ada', 'tidak_ada']).withMessage('TB tidak valid'),
+  body('bb').isIn(['ada', 'tidak ada', 'tidak_ada']).withMessage('BB tidak valid'),
+  body('diagnosis').isIn(['ada', 'tidak ada', 'tidak_ada']).withMessage('Diagnosis tidak valid'),
+  body('terapi').isIn(['ada', 'tidak ada', 'tidak_ada']).withMessage('Terapi tidak valid'),
 ], validate, ctrl.create);
 
 router.put('/:id', ctrl.update);

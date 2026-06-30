@@ -8,7 +8,31 @@ async function loadData() {
   const pid = Store.periodeAktif?.id;
   const uid = Store.unitAktif?.id;
 
-  if (!pid) return;
+  // Update print subtitle dynamically
+  const printSubtitle = document.getElementById('print-subtitle');
+  if (printSubtitle) {
+    const bulanNama = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const pBulan = Store.periodeAktif ? bulanNama[Store.periodeAktif.bulan - 1] : '';
+    const pTahun = Store.periodeAktif ? Store.periodeAktif.tahun : '';
+    const unitText = Store.unitAktif ? `| Unit: ${Store.unitAktif.nama_unit}` : '| Unit: Semua Unit';
+    printSubtitle.innerHTML = `Periode: ${pBulan} ${pTahun} ${unitText}`;
+  }
+
+  const printDate = document.getElementById('print-date');
+  if (printDate) {
+    printDate.innerHTML = `Kendal, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  }
+
+  if (!pid) {
+    const previewBody = document.getElementById('report-summary-table-body');
+    if (previewBody) {
+      previewBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-muted); padding: 24px;">Pilih periode terlebih dahulu.</td></tr>';
+    }
+    return;
+  }
 
   let url = `/dashboard/indicator-summaries?periode_id=${pid}`;
   if (uid) url += `&unit_id=${uid}`;
@@ -20,17 +44,70 @@ async function loadData() {
   }
 }
 
+const serviceToHash = {
+  'Risiko Jatuh': '#/risiko-jatuh',
+  'Insiden Keselamatan': '#/insiden-keselamatan',
+  'Identifikasi Pasien': '#/identifikasi-pasien',
+  'Reaksi Transfusi': '#/reaksi-transfusi',
+  'Gelang Identitas': '#/gelang-identitas',
+  'Serah Terima Pasien': '#/serah-terima-pasien',
+  'Angka Kematian Ranap': '#/angka-kematian-ranap',
+  'Double Check High Alert': '#/double-check-high-alert',
+  'Visit Dokter Spesialis': '#/visit-dokter',
+  'Kembali ICU < 24 Jam': '#/kembali-icu',
+  'Alur Klinis': '#/alur-klinis',
+  'Waktu Tanggap SC': '#/waktu-tanggap-sc',
+  'Emergency Response Time': '#/emergency-response-time',
+  'Angka Kematian IGD': '#/angka-kematian-igd',
+  'Asesmen Awal IGD': '#/asesmen-awal-igd',
+  'Pasien Tertahan IGD': '#/pasien-tertahan-igd',
+  'Ketidakpatuhan Pasien HD': '#/ketidakpatuhan-hd',
+  'Insiden Clotting Durante HD': '#/insiden-clotting',
+  'Insiden Jarum Vena HD': '#/insiden-jarum-vena',
+  'Penundaan Operasi Elektif': '#/penundaan-operasi',
+  'Informed Consent Bedah': '#/informed-consent-pembedahan',
+  'Informed Consent Anestesi': '#/informed-consent-anestesi',
+  'Asesmen Pra Bedah': '#/asesmen-pra-bedah',
+  'Asesmen Pra Anestesi': '#/asesmen-pra-anestesi',
+  'Surgical Safety Checklist SC': '#/surgical-checklist-sc',
+  'Surgical Safety Checklist Op': '#/surgical-checklist-operasi',
+  'Penandaan Lokasi Operasi': '#/penandaan-lokasi-operasi'
+};
+
 function renderReportTable() {
   const container = document.getElementById('report-summary-table-body');
   if (!container) return;
 
-  const rows = Object.entries(state.summaries).map(([name, s], idx) => {
+  const user = Store.get('user');
+  const role = user ? user.role : '';
+  let allowed = [];
+  if (user && user.allowed_modules) {
+    try {
+      allowed = JSON.parse(user.allowed_modules);
+    } catch (e) {
+      allowed = [];
+    }
+  }
+
+  let entries = Object.entries(state.summaries);
+  if (role === 'petugas') {
+    entries = entries.filter(([name]) => {
+      const hash = serviceToHash[name];
+      return hash && allowed.includes(hash);
+    });
+  }
+
+  if (entries.length === 0) {
+    container.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-muted); padding: 24px;">Tidak ada data untuk periode dan unit terpilih.</td></tr>';
+    return;
+  }
+
+  const rows = entries.map(([name, s], idx) => {
     let achieved = false;
     let hasil = `${s.persen || 0}%`;
 
     if (s.rataRata !== undefined) {
       hasil = `${s.rataRata}`;
-      // Parse targets like <= 5 or <= 240
       const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
       if (s.standar.includes('≤')) {
         achieved = s.rataRata <= targetVal;
@@ -39,7 +116,7 @@ function renderReportTable() {
       }
     } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting')) {
       hasil = `${s.total} Kasus`;
-      achieved = s.total === 0; // Case counts target is usually 0 cases
+      achieved = s.total === 0;
     } else {
       achieved = parseFloat(s.persen) >= parseFloat(s.standar);
     }
@@ -50,12 +127,12 @@ function renderReportTable() {
 
     return `
       <tr>
-        <td>${idx + 1}</td>
+        <td style="text-align: center;">${idx + 1}</td>
         <td><strong>${s.category}</strong></td>
         <td>${name}</td>
-        <td>${s.standar}</td>
-        <td style="font-weight: bold">${hasil}</td>
-        <td>${badge}</td>
+        <td style="text-align: center;">${s.standar}</td>
+        <td style="font-weight: bold; text-align: center;">${hasil}</td>
+        <td style="text-align: center;">${badge}</td>
       </tr>
     `;
   }).join('');
@@ -143,19 +220,72 @@ async function handleImport(e) {
   }
 }
 
-export const render = async (container) => {
-  const pBulan = Store.periodeAktif ? [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ][Store.periodeAktif.bulan - 1] : '';
-  const pTahun = Store.periodeAktif ? Store.periodeAktif.tahun : '';
+async function populateFilters() {
+  const { getPeriode, getUnits } = await import('../api/master.js');
+  
+  if (!Store.periodeList || Store.periodeList.length === 0) {
+    const res = await getPeriode();
+    if (res.success) Store.periodeList = res.data;
+  }
+  if (!Store.unitList || Store.unitList.length === 0) {
+    const res = await getUnits();
+    if (res.success) Store.unitList = res.data;
+  }
 
+  const filterPeriode = document.getElementById('filter-periode');
+  const filterUnit = document.getElementById('filter-unit');
+
+  if (filterPeriode && Store.periodeList) {
+    const bulanNama = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    filterPeriode.innerHTML = '<option value="">Pilih Periode</option>' +
+      Store.periodeList.map(p => {
+        const selected = Store.periodeAktif && Store.periodeAktif.id === p.id ? 'selected' : '';
+        return `<option value="${p.id}" ${selected}>${bulanNama[p.bulan]} ${p.tahun} ${p.status === 'closed' ? '🔒' : ''}</option>`;
+      }).join('');
+  }
+
+  if (filterUnit && Store.unitList) {
+    filterUnit.innerHTML = '<option value="">Semua Unit</option>' +
+      Store.unitList.map(u => {
+        const selected = Store.unitAktif && Store.unitAktif.id === u.id ? 'selected' : '';
+        return `<option value="${u.id}" ${selected}>${u.nama_unit}</option>`;
+      }).join('');
+  }
+}
+
+function handleGlobalFilterChange() {
+  const filterPeriode = document.getElementById('filter-periode');
+  const filterUnit = document.getElementById('filter-unit');
+  if (filterPeriode) filterPeriode.value = Store.periodeAktif?.id || '';
+  if (filterUnit) filterUnit.value = Store.unitAktif?.id || '';
+  loadData();
+}
+
+export const render = async (container) => {
   container.innerHTML = `
     <div class="module-page no-print">
       <div class="page-header">
         <div>
           <h1 class="page-title">Cetak & Ekspor Laporan</h1>
           <p class="page-subtitle">Unduh rekapitulasi data mutu bulanan format Excel/PDF</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px; padding: 24px;">
+        <h3 style="margin-top: 0; margin-bottom: 16px;">Filter Laporan</h3>
+        <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+          <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+            <label class="form-label">Periode</label>
+            <select class="form-control" id="filter-periode">
+              <option value="">Pilih Periode</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+            <label class="form-label">Unit</label>
+            <select class="form-control" id="filter-unit">
+              <option value="">Semua Unit</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -180,20 +310,20 @@ export const render = async (container) => {
 
       <div class="card" style="padding: 24px;">
         <h3 style="margin-top: 0; margin-bottom: 16px;">Pratinjau Kepatuhan Indikator</h3>
-        <div class="table-container">
-          <table class="table">
+        <div class="table-wrapper">
+          <table class="data-table">
             <thead>
               <tr>
-                <th style="width: 50px;">No</th>
-                <th>Kategori</th>
-                <th>Nama Indikator</th>
-                <th>Target Standar</th>
-                <th>Hasil Pencapaian</th>
-                <th>Status</th>
+                <th style="width: 60px; text-align: center;">No</th>
+                <th style="text-align: left;">Kategori</th>
+                <th style="text-align: left;">Nama Indikator</th>
+                <th style="text-align: center; width: 140px;">Target Standar</th>
+                <th style="text-align: center; width: 150px;">Hasil Pencapaian</th>
+                <th style="text-align: center; width: 140px;">Status</th>
               </tr>
             </thead>
             <tbody id="report-summary-table-body">
-              <tr><td colspan="6" style="text-align: center; color: var(--text-light)">Memuat ringkasan data...</td></tr>
+              <tr><td colspan="6" style="text-align: center; color: var(--color-muted); padding: 24px;">Memuat ringkasan data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -202,33 +332,43 @@ export const render = async (container) => {
 
     <!-- Print-only layout container -->
     <div class="print-only">
-      <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="margin: 0; font-size: 1.8rem; color: #1e293b;">LAPORAN CAPAIAN INDIKATOR MUTU</h1>
-        <h2 style="margin: 4px 0 0 0; font-size: 1.3rem; color: #64748b;">RUMAH SAKIT ISLAM KENDAL</h2>
-        <div style="margin-top: 8px; font-size: 1rem; color: #334155; font-weight: bold;">
-          Periode: ${pBulan} ${pTahun} ${Store.unitAktif ? `| Unit: ${Store.unitAktif.nama_unit}` : ''}
+      <div style="display: flex; align-items: center; justify-content: center; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px;">
+        <img src="assets/img/logo.png" alt="Logo" style="width: 60px; height: 60px; margin-right: 16px;">
+        <div style="text-align: center;">
+          <h1 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: #000; letter-spacing: 0.5px;">RUMAH SAKIT ISLAM KENDAL</h1>
+          <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #444;">Jl. Ar-Rahman No. 20, Kendal, Jawa Tengah</p>
+          <p style="margin: 1px 0 0 0; font-size: 0.8rem; color: #666; font-style: italic;">Telp: (0294) 123456 | Email: info@rsi-kendal.co.id</p>
         </div>
       </div>
-      <table class="print-table" style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+      
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600; text-decoration: underline;">LAPORAN CAPAIAN INDIKATOR MUTU</h2>
+        <div id="print-subtitle" style="margin-top: 6px; font-size: 0.95rem; font-weight: 500;">
+          Periode: - | Unit: -
+        </div>
+      </div>
+      
+      <table class="print-table">
         <thead>
-          <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
-            <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left; width: 40px;">No</th>
-            <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Kategori</th>
-            <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Nama Indikator</th>
-            <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Target</th>
-            <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Pencapaian</th>
-            <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Status</th>
+          <tr>
+            <th style="width: 40px; text-align: center;">No</th>
+            <th style="width: 150px; text-align: left;">Kategori</th>
+            <th style="text-align: left;">Nama Indikator</th>
+            <th style="width: 100px; text-align: center;">Target</th>
+            <th style="width: 100px; text-align: center;">Pencapaian</th>
+            <th style="width: 130px; text-align: center;">Status</th>
           </tr>
         </thead>
         <tbody id="print-table-body">
-          <!-- Populated dynamically during load -->
+          <!-- Populated dynamically -->
         </tbody>
       </table>
+      
       <div style="margin-top: 48px; display: flex; justify-content: flex-end;">
-        <div style="text-align: center; width: 250px;">
-          <div>Kendal, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-          <div style="margin-top: 8px; font-weight: bold;">Komite Mutu & Keselamatan Pasien</div>
-          <div style="margin-top: 80px; border-top: 1px solid #000; width: 100%;"></div>
+        <div style="text-align: center; width: 250px; font-size: 0.9rem;">
+          <div id="print-date">Kendal, -</div>
+          <div style="margin-top: 8px; font-weight: 600;">Komite Mutu & Keselamatan Pasien</div>
+          <div style="margin-top: 70px; font-weight: 600;">( ___________________________ )</div>
         </div>
       </div>
     </div>
@@ -237,7 +377,6 @@ export const render = async (container) => {
   // Bind export/import events
   document.getElementById('btn-export-excel').addEventListener('click', downloadExcelFile);
   document.getElementById('btn-print-pdf').addEventListener('click', () => {
-    // Copy summary rows to the print table body
     const previewBody = document.getElementById('report-summary-table-body');
     const printBody = document.getElementById('print-table-body');
     if (previewBody && printBody) {
@@ -251,12 +390,43 @@ export const render = async (container) => {
     importInput.addEventListener('change', handleImport);
   }
 
+  // Populate filter selects
+  await populateFilters();
+
+  const filterPeriode = document.getElementById('filter-periode');
+  const filterUnit = document.getElementById('filter-unit');
+
+  filterPeriode.addEventListener('change', (e) => {
+    const pId = e.target.value;
+    const period = Store.periodeList.find(p => p.id == pId);
+    Store.set('periodeAktif', period || null);
+    
+    const headerSelect = document.getElementById('header-periode-select');
+    if (headerSelect) headerSelect.value = pId;
+
+    loadData();
+    window.dispatchEvent(new CustomEvent('periodeChanged'));
+  });
+
+  filterUnit.addEventListener('change', (e) => {
+    const uId = e.target.value;
+    const unit = Store.unitList.find(u => u.id == uId);
+    Store.set('unitAktif', unit || null);
+
+    const headerSelect = document.getElementById('header-unit-select');
+    if (headerSelect) headerSelect.value = uId;
+
+    loadData();
+    window.dispatchEvent(new CustomEvent('unitChanged'));
+  });
+
   await loadData();
-  window.addEventListener('periodeChanged', loadData);
-  window.addEventListener('unitChanged', loadData);
+
+  window.addEventListener('periodeChanged', handleGlobalFilterChange);
+  window.addEventListener('unitChanged', handleGlobalFilterChange);
 };
 
 export const destroy = () => {
-  window.removeEventListener('periodeChanged', loadData);
-  window.removeEventListener('unitChanged', loadData);
+  window.removeEventListener('periodeChanged', handleGlobalFilterChange);
+  window.removeEventListener('unitChanged', handleGlobalFilterChange);
 };

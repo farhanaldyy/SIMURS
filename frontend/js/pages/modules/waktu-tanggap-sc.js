@@ -75,17 +75,112 @@ function openFormModal(data = null) {
       return;
     }
   }
+  const decTimeStr = data?.jam_ditentukan_operasi ? formatTime(data.jam_ditentukan_operasi) : '';
+  const decHour = decTimeStr.includes(':') ? decTimeStr.split(':')[0] : '';
+  const decMin = decTimeStr.includes(':') ? decTimeStr.split(':')[1] : '';
+
+  const incTimeStr = data?.jam_sayatan_pertama ? formatTime(data.jam_sayatan_pertama) : '';
+  const incHour = incTimeStr.includes(':') ? incTimeStr.split(':')[0] : '';
+  const incMin = incTimeStr.includes(':') ? incTimeStr.split(':')[1] : '';
+
   const formHTML = `
     <form id="modul-form">
-      <div class="form-row"><div class="form-group"><label class="form-label">Nama Pasien <span class="required">*</span></label><input type="text" name="nama_pasien" class="form-control" value="${data?.nama_pasien || ''}"></div><div class="form-group"><label class="form-label">No RM <span class="required">*</span></label><input type="text" name="no_rm" class="form-control" value="${data?.no_rm || ''}"></div></div>
-      <div class="form-group"><label class="form-label">Diagnosis <span class="required">*</span></label><input type="text" name="diagnosis" class="form-control" value="${data?.diagnosis || ''}"></div>
-      <div class="form-row"><div class="form-group"><label class="form-label">Jam Keputusan Operasi <span class="required">*</span></label><input type="time" name="jam_ditentukan_operasi" class="form-control" value="${data?.jam_ditentukan_operasi?.substring(0,5) || ''}"></div><div class="form-group"><label class="form-label">Jam Sayatan Pertama <span class="required">*</span></label><input type="time" name="jam_sayatan_pertama" class="form-control" value="${data?.jam_sayatan_pertama?.substring(0,5) || ''}"></div></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nama Pasien <span class="required">*</span></label>
+          <input type="text" name="nama_pasien" class="form-control" value="${data?.nama_pasien || ''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">No RM <span class="required">*</span></label>
+          <input type="text" name="no_rm" class="form-control" value="${data?.no_rm || ''}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Diagnosis <span class="required">*</span></label>
+        <input type="text" name="diagnosis" class="form-control" value="${data?.diagnosis || ''}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Jam Keputusan Operasi <span class="required">*</span></label>
+          <div style="display: flex; gap: 8px;">
+            <select id="dec_hour" class="form-control" style="flex: 1;">
+              <option value="">Jam</option>
+              ${Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => `
+                <option value="${h}" ${decHour === h ? 'selected' : ''}>${h}</option>
+              `).join('')}
+            </select>
+            <select id="dec_minute" class="form-control" style="flex: 1;">
+              <option value="">Menit</option>
+              ${Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => `
+                <option value="${m}" ${decMin === m ? 'selected' : ''}>${m}</option>
+              `).join('')}
+            </select>
+          </div>
+          <input type="hidden" name="jam_ditentukan_operasi" id="jam_ditentukan_operasi" value="${decTimeStr}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jam Sayatan Pertama <span class="required">*</span></label>
+          <div style="display: flex; gap: 8px;">
+            <select id="inc_hour" class="form-control" style="flex: 1;">
+              <option value="">Jam</option>
+              ${Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => `
+                <option value="${h}" ${incHour === h ? 'selected' : ''}>${h}</option>
+              `).join('')}
+            </select>
+            <select id="inc_minute" class="form-control" style="flex: 1;">
+              <option value="">Menit</option>
+              ${Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => `
+                <option value="${m}" ${incMin === m ? 'selected' : ''}>${m}</option>
+              `).join('')}
+            </select>
+          </div>
+          <input type="hidden" name="jam_sayatan_pertama" id="jam_sayatan_pertama" value="${incTimeStr}">
+        </div>
+      </div>
     </form>`;
+
   showModal(isEdit ? 'Edit' : 'Tambah', formHTML, { confirmText: 'Simpan', onConfirm: async () => {
-    const form = document.getElementById('modul-form'); const fd = Object.fromEntries(new FormData(form));
-    const errors = validateForm({ nama_pasien: validateRequired(fd.nama_pasien, 'Nama'), no_rm: validateRequired(fd.no_rm, 'No RM'), diagnosis: validateRequired(fd.diagnosis, 'Diagnosis'), jam_ditentukan_operasi: validateRequired(fd.jam_ditentukan_operasi, 'Jam Keputusan'), jam_sayatan_pertama: validateRequired(fd.jam_sayatan_pertama, 'Jam Sayatan') });
-    if (errors) { showFormErrors(form, errors); return; }
-    if (!isEdit) { if (Store.periodeAktif) fd.periode_id = Store.periodeAktif.id; if (Store.unitAktif) fd.unit_id = Store.unitAktif.id; else if (Store.user.unit_id) fd.unit_id = Store.user.unit_id; }
+    const form = document.getElementById('modul-form');
+    
+    // Clear custom validation states
+    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+    const decH = form.querySelector('#dec_hour').value;
+    const decM = form.querySelector('#dec_minute').value;
+    form.querySelector('#jam_ditentukan_operasi').value = (decH && decM) ? `${decH}:${decM}` : '';
+
+    const incH = form.querySelector('#inc_hour').value;
+    const incM = form.querySelector('#inc_minute').value;
+    form.querySelector('#jam_sayatan_pertama').value = (incH && incM) ? `${incH}:${incM}` : '';
+
+    const fd = Object.fromEntries(new FormData(form));
+    const errors = validateForm({
+      nama_pasien: validateRequired(fd.nama_pasien, 'Nama'),
+      no_rm: validateRequired(fd.no_rm, 'No RM'),
+      diagnosis: validateRequired(fd.diagnosis, 'Diagnosis'),
+      jam_ditentukan_operasi: validateRequired(fd.jam_ditentukan_operasi, 'Jam Keputusan'),
+      jam_sayatan_pertama: validateRequired(fd.jam_sayatan_pertama, 'Jam Sayatan')
+    });
+
+    if (errors) {
+      showFormErrors(form, errors);
+      if (errors.jam_ditentukan_operasi) {
+        form.querySelector('#dec_hour').classList.add('is-invalid');
+        form.querySelector('#dec_minute').classList.add('is-invalid');
+      }
+      if (errors.jam_sayatan_pertama) {
+        form.querySelector('#inc_hour').classList.add('is-invalid');
+        form.querySelector('#inc_minute').classList.add('is-invalid');
+      }
+      return;
+    }
+
+    if (!isEdit) {
+      if (Store.periodeAktif) fd.periode_id = Store.periodeAktif.id;
+      if (Store.unitAktif) fd.unit_id = Store.unitAktif.id;
+      else if (Store.user.unit_id) fd.unit_id = Store.user.unit_id;
+    }
+
     const res = isEdit ? await api.update(data.id, fd) : await api.create(fd);
     if (res.success) { showToast('Berhasil', 'success'); closeModal(); loadData(); } else { showToast(res.message, 'error'); }
   }});

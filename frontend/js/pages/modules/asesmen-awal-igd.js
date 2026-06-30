@@ -1,8 +1,11 @@
 import { createGenericIndicatorPage } from './generic-indicator.js';
 
-const adaBadge = (v) => v === 'ada' 
-  ? '<span class="badge badge-success">Ada</span>' 
-  : '<span class="badge badge-danger">Tidak Ada</span>';
+const adaBadge = (v) => {
+  if (!v) return '<span class="badge badge-danger">Tidak Ada</span>';
+  if (v === 'tidak ada' || v === 'tidak_ada') return '<span class="badge badge-danger">Tidak Ada</span>';
+  if (v === 'ada') return '<span class="badge badge-success">Ada</span>';
+  return `<span class="badge badge-secondary">${v}</span>`;
+}
 
 const adaOptions = [
   { value: 'ada', label: 'Ada' },
@@ -36,7 +39,6 @@ export default createGenericIndicatorPage({
     { name: 'tb', label: 'Tinggi Badan (TB)', type: 'select', options: adaOptions, required: true, row: 3 },
     { name: 'bb', label: 'Berat Badan (BB)', type: 'select', options: adaOptions, required: true, row: 3 },
     { name: 'diagnosis', label: 'Diagnosis Kerja', type: 'select', options: adaOptions, required: true, row: 4 },
-    { name: 'terapi', label: 'Rencana Terapi/Tindakan', type: 'select', options: adaOptions, required: true, row: 4 },
-    { name: 'keterangan', label: 'Keterangan', type: 'text', required: false, row: 5 }
+    { name: 'terapi', label: 'Rencana Terapi/Tindakan', type: 'select', options: adaOptions, required: true, row: 4 }
   ]
 });

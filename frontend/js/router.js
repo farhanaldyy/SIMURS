@@ -104,8 +104,8 @@ async function handleRoute(contentContainer) {
   if (hash === '#/login') {
     // login is always accessible
   } else if (role === 'petugas') {
-    // petugas can only access login and their allowed modules (specifically block dashboard and admin)
-    if (hash === '#/dashboard' || hash === '#/laporan' || isAdminRoute || !allowed.includes(hash)) {
+    // petugas can only access login, laporan, and their allowed modules (specifically block dashboard and admin)
+    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && !allowed.includes(hash))) {
       renderAccessDenied(contentContainer);
       return;
     }
