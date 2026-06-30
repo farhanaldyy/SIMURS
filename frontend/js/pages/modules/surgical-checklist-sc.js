@@ -12,6 +12,7 @@ export default createGenericIndicatorPage({
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
+    { label: 'DPJP Operator', key: 'dpjp' },
     { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
     { label: 'Sign In', key: 'sign_in', render: (r) => checkBadge(r.sign_in) },
     { label: 'Time Out', key: 'time_out', render: (r) => checkBadge(r.time_out) },
@@ -21,6 +22,7 @@ export default createGenericIndicatorPage({
   fields: [
     { name: 'nama_pasien', label: 'Nama Pasien', type: 'text', required: true, row: 1 },
     { name: 'no_rm', label: 'No RM', type: 'text', required: true, row: 1 },
+    { name: 'dpjp', label: 'DPJP Operator', type: 'text', required: true, row: 2 },
     { name: 'tanggal', label: 'Tanggal Operasi', type: 'date', required: true, row: 2 },
     { name: 'sign_in', label: 'Sign In Dilakukan?', type: 'boolean', required: true, row: 3 },
     { name: 'time_out', label: 'Time Out Dilakukan?', type: 'boolean', required: true, row: 3 },

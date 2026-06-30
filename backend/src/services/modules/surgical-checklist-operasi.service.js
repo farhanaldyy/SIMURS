@@ -1,6 +1,7 @@
 const { createGenericService } = require('./generic.service');
 
 const service = createGenericService('surgicalChecklist', {
+  defaultWhere: { jenis: 'operasi_umum' },
   beforeCreate(data) {
     return { ...data, jenis: 'operasi_umum' };
   },

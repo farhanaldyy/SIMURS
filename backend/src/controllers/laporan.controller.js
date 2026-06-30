@@ -170,8 +170,11 @@ async function importExcel(req, res, next) {
     for (const sheetName of wb.SheetNames) {
       if (sheetName === 'Ringkasan Mutu') continue;
 
-      // Find the service config matching sheet name prefix
-      const match = Object.entries(services).find(([name]) => sheetName.toLowerCase().startsWith(name.substring(0, 15).toLowerCase()));
+      // Find the service config matching sheet name exactly (up to 30 chars, matching Excel's export limit)
+      const match = Object.entries(services).find(([name]) => {
+        const exportedSheetName = name.substring(0, 30).toLowerCase();
+        return sheetName.toLowerCase().trim() === exportedSheetName.trim();
+      });
       if (!match) continue;
 
       const [name, cfg] = match;

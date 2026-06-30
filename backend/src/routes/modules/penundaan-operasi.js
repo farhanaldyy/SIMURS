@@ -18,6 +18,8 @@ router.post('/', [
   body('tanggal').isISO8601().withMessage('Tanggal tidak valid'),
   body('jadwal_jam_operasi').notEmpty().withMessage('Jadwal jam operasi wajib diisi'),
   body('jam_mulai_operasi').notEmpty().withMessage('Jam mulai operasi wajib diisi'),
+  body('batal').optional().isBoolean().withMessage('Nilai batal tidak valid'),
+  body('indikasi_medis').optional().isBoolean().withMessage('Nilai indikasi medis tidak valid'),
 ], [
   (req, res, next) => {
     if (req.body.tanggal) req.body.tanggal = new Date(req.body.tanggal);
@@ -32,6 +34,12 @@ router.post('/', [
       const d = new Date();
       d.setHours(parseInt(jam[0]), parseInt(jam[1]), 0, 0);
       req.body.jam_mulai_operasi = d;
+    }
+    if (req.body.batal !== undefined) {
+      req.body.batal = req.body.batal === true || req.body.batal === 'true';
+    }
+    if (req.body.indikasi_medis !== undefined) {
+      req.body.indikasi_medis = req.body.indikasi_medis === true || req.body.indikasi_medis === 'true';
     }
     next();
   }
@@ -51,6 +59,12 @@ router.put('/:id', [
       const d = new Date();
       d.setHours(parseInt(jam[0]), parseInt(jam[1]), 0, 0);
       req.body.jam_mulai_operasi = d;
+    }
+    if (req.body.batal !== undefined) {
+      req.body.batal = req.body.batal === true || req.body.batal === 'true';
+    }
+    if (req.body.indikasi_medis !== undefined) {
+      req.body.indikasi_medis = req.body.indikasi_medis === true || req.body.indikasi_medis === 'true';
     }
     next();
   }

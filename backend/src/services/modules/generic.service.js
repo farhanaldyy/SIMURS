@@ -48,7 +48,7 @@ function createGenericService(modelName, options = {}) {
   return {
     async getAll(where, page, limit) {
       const skip = (page - 1) * limit;
-      const queryWhere = { ...where };
+      const queryWhere = { ...where, ...options.defaultWhere };
       if (options.ignoreUnitId) {
         delete queryWhere.unit_id;
       }
@@ -146,7 +146,7 @@ function createGenericService(modelName, options = {}) {
     },
 
     async getSummary(where) {
-      const queryWhere = { ...where };
+      const queryWhere = { ...where, ...options.defaultWhere };
       if (options.ignoreUnitId) {
         delete queryWhere.unit_id;
       }

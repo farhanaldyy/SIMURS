@@ -1,6 +1,7 @@
 const { createGenericService } = require('./generic.service');
 
-const service = createGenericService('informedConsent', {
+const baseService = createGenericService('informedConsent', {
+  defaultWhere: { jenis: 'pembedahan' },
   beforeCreate(data) {
     return { ...data, jenis: 'pembedahan' };
   },
@@ -19,5 +20,23 @@ const service = createGenericService('informedConsent', {
     };
   }
 });
+
+const service = {
+  ...baseService,
+  async create(body, userId) {
+    const { also_save_anestesi, ...rest } = body;
+
+    // Create the pembedahan record
+    const record = await baseService.create(rest, userId);
+
+    // If requested, also create the anestesi record in the same table
+    if (also_save_anestesi === true || also_save_anestesi === 'true') {
+      const anestesiService = require('./informed-consent-anestesi.service');
+      await anestesiService.create(rest, userId);
+    }
+
+    return record;
+  }
+};
 
 module.exports = service;

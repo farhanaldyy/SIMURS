@@ -13,6 +13,8 @@ export default createGenericIndicatorPage({
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
+    { label: 'DPJP Bedah', key: 'dpjp' },
+    { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
     { label: 'Penandaan Dilakukan?', key: 'dilakukan', render: (r) => valBadge(r.dilakukan) },
     {
       label: 'Tidak Berlaku (N/A)?',
@@ -29,8 +31,11 @@ export default createGenericIndicatorPage({
   fields: [
     { name: 'nama_pasien', label: 'Nama Pasien', type: 'text', required: true, row: 1 },
     { name: 'no_rm', label: 'No RM', type: 'text', required: true, row: 1 },
-    { name: 'dilakukan', label: 'Apakah Lokasi Operasi Ditandai?', type: 'boolean', required: true, row: 2 },
-    { name: 'not_applicable', label: 'Tidak Berlaku (N/A) / Organ Tunggal?', type: 'boolean', required: true, row: 2 },
-    { name: 'keterangan', label: 'Keterangan/Lokasi Operasi', type: 'text', required: false, row: 3 }
+    { name: 'dpjp', label: 'DPJP Bedah', type: 'text', required: true, row: 2 },
+    { name: 'tanggal', label: 'Tanggal', type: 'date', required: true, row: 2 },
+    { name: 'diagnosis', label: 'Diagnosis', type: 'text', required: true, row: 3 },
+    { name: 'keterangan', label: 'Keterangan/Lokasi Operasi', type: 'text', required: false, row: 3 },
+    { name: 'dilakukan', label: 'Apakah Lokasi Operasi Ditandai?', type: 'boolean', required: true, row: 4 },
+    { name: 'not_applicable', label: 'Tidak Berlaku (N/A) / Organ Tunggal?', type: 'boolean', required: true, row: 4 }
   ]
 });

@@ -14,25 +14,38 @@ function hitungSelisihMenit(jam1, jam2) {
 const service = createGenericService('penundaanOperasi', {
   ignoreUnitId: true,
   beforeCreate(data) {
-    data.waktu_tunggu_menit = Math.round(hitungSelisihMenit(data.jadwal_jam_operasi, data.jam_mulai_operasi));
+    if (data.batal === true || data.batal === 'true') {
+      data.waktu_tunggu_menit = 0;
+    } else {
+      data.waktu_tunggu_menit = Math.round(hitungSelisihMenit(data.jadwal_jam_operasi, data.jam_mulai_operasi));
+    }
     return data;
   },
   beforeUpdate(data) {
-    if (data.jadwal_jam_operasi && data.jam_mulai_operasi) {
+    if (data.batal === true || data.batal === 'true') {
+      data.waktu_tunggu_menit = 0;
+    } else if (data.jadwal_jam_operasi && data.jam_mulai_operasi) {
       data.waktu_tunggu_menit = Math.round(hitungSelisihMenit(data.jadwal_jam_operasi, data.jam_mulai_operasi));
     }
     return data;
   },
   calculateSummary(data) {
     const total = data.length;
-    // Delay is defined as wait time > 30 minutes
-    const delayed = data.filter(d => d.waktu_tunggu_menit > 30).length;
+    // Delay or cancellation is counted as a delay if:
+    // (wait time > 60 minutes OR batal is true) AND indikasi_medis is false
+    const delayed = data.filter(d => {
+      const isOverOneHour = d.waktu_tunggu_menit > 60;
+      const isBatal = d.batal === true;
+      const hasIndikasiMedis = d.indikasi_medis === true;
+      return (isOverOneHour || isBatal) && !hasIndikasiMedis;
+    }).length;
+
     const persen = total > 0 ? ((delayed / total) * 100).toFixed(2) : 0;
     return {
       total,
       numerator: delayed,
       persen,
-      standar: '≤ 5%'
+      standar: '< 5%'
     };
   }
 });

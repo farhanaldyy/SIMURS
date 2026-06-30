@@ -35,6 +35,14 @@ export default createGenericIndicatorPage({
       ],
       row: 3
     },
-    { name: 'keterangan', label: 'Keterangan', type: 'text', required: false, row: 3 }
+    { name: 'keterangan', label: 'Keterangan', type: 'text', required: false, row: 3 },
+    {
+      name: 'also_save_pra_anestesi',
+      label: 'Simpan juga ke Asesmen Pra Anestesi?',
+      type: 'boolean',
+      required: false,
+      hideOnEdit: true,
+      row: 4
+    }
   ]
 });

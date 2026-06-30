@@ -195,6 +195,7 @@ export function createGenericIndicatorPage(config) {
     // Group fields by row if specified
     const rows = {};
     config.fields.forEach(f => {
+      if (isEdit && f.hideOnEdit) return;
       const rowId = f.row || 0;
       if (!rows[rowId]) rows[rowId] = [];
       rows[rowId].push(f);
@@ -297,8 +298,8 @@ export function createGenericIndicatorPage(config) {
         <div class="form-group">
           <label class="form-label">${f.label} ${f.required ? '<span class="required">*</span>' : ''}</label>
           <select name="${f.name}" class="form-control" ${f.required ? 'required' : ''}>
-            <option value="true" ${val === true ? 'selected' : ''}>Sesuai / Dilakukan / Ya</option>
-            <option value="false" ${val === false ? 'selected' : ''}>Tidak Sesuai / Tidak Dilakukan / Tidak</option>
+            <option value="true" ${val === true ? 'selected' : ''}>Iya</option>
+            <option value="false" ${val === false ? 'selected' : ''}>Tidak</option>
           </select>
         </div>
       `;

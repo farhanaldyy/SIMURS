@@ -1,6 +1,7 @@
 const { createGenericService } = require('./generic.service');
 
 const service = createGenericService('informedConsent', {
+  defaultWhere: { jenis: 'anestesi' },
   beforeCreate(data) {
     return { ...data, jenis: 'anestesi' };
   },

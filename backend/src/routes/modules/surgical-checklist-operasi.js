@@ -15,6 +15,7 @@ router.post('/', [
   body('unit_id').isInt().withMessage('Unit wajib dipilih'),
   body('nama_pasien').notEmpty().withMessage('Nama pasien wajib diisi'),
   body('no_rm').notEmpty().withMessage('No RM wajib diisi'),
+  body('dpjp').notEmpty().withMessage('DPJP wajib diisi'),
   body('tanggal').isISO8601().withMessage('Tanggal tidak valid'),
   body('sign_in').isBoolean().withMessage('Sign in tidak valid'),
   body('time_out').isBoolean().withMessage('Time out tidak valid'),
