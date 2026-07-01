@@ -36,6 +36,10 @@ const service = {
     }
 
     return record;
+  },
+  async update(id, body, userId) {
+    const { also_save_pra_anestesi, ...rest } = body;
+    return baseService.update(id, rest, userId);
   }
 };
 

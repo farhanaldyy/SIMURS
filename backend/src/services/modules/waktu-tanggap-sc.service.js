@@ -1,5 +1,24 @@
 const prisma = require('../../config/database');
 
+async function logAudit(userId, tabel, recordId, aksi, dataLama = null, dataBaru = null) {
+  if (!userId) return;
+  try {
+    await prisma.auditLog.create({
+      data: {
+        user_id: userId,
+        tabel,
+        record_id: recordId,
+        aksi,
+        data_lama: dataLama ? JSON.parse(JSON.stringify(dataLama)) : null,
+        data_baru: dataBaru ? JSON.parse(JSON.stringify(dataBaru)) : null,
+      }
+    });
+  } catch (err) {
+    console.error('Audit log error:', err);
+  }
+}
+
+
 function hitungSelisihMenit(jam1, jam2) {
   const d1 = new Date(`2000-01-01T${jam1}`);
   const d2 = new Date(`2000-01-01T${jam2}`);
@@ -27,10 +46,12 @@ async function create(body, userId) {
   if (data.unit_id) data.unit_id = parseInt(data.unit_id);
   
   data.selisih_menit = hitungSelisihMenit(body.jam_ditentukan_operasi, body.jam_sayatan_pertama);
-  return prisma.waktuTanggapSc.create({ data });
+  const record = await prisma.waktuTanggapSc.create({ data });
+  await logAudit(userId, 'waktuTanggapSc', record.id, 'create', null, record);
+  return record;
 }
 
-async function update(id, body) {
+async function update(id, body, userId) {
   const data = { ...body };
   if (data.jam_ditentukan_operasi && typeof data.jam_ditentukan_operasi === 'string') {
     data.jam_ditentukan_operasi = new Date(`1970-01-01T${data.jam_ditentukan_operasi}:00Z`);
@@ -44,11 +65,25 @@ async function update(id, body) {
   if (body.jam_ditentukan_operasi && body.jam_sayatan_pertama) {
     data.selisih_menit = hitungSelisihMenit(body.jam_ditentukan_operasi, body.jam_sayatan_pertama);
   }
-  return prisma.waktuTanggapSc.update({ where: { id }, data });
+
+  let oldRecord = null;
+  if (userId) {
+    oldRecord = await prisma.waktuTanggapSc.findUnique({ where: { id } });
+  }
+
+  const record = await prisma.waktuTanggapSc.update({ where: { id }, data });
+  await logAudit(userId, 'waktuTanggapSc', id, 'update', oldRecord, record);
+  return record;
 }
 
-async function remove(id) {
-  return prisma.waktuTanggapSc.delete({ where: { id } });
+async function remove(id, userId) {
+  let oldRecord = null;
+  if (userId) {
+    oldRecord = await prisma.waktuTanggapSc.findUnique({ where: { id } });
+  }
+  const record = await prisma.waktuTanggapSc.delete({ where: { id } });
+  await logAudit(userId, 'waktuTanggapSc', id, 'delete', oldRecord, null);
+  return record;
 }
 
 async function getSummary(where) {

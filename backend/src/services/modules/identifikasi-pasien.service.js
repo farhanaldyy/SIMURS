@@ -1,5 +1,24 @@
 const prisma = require('../../config/database');
 
+async function logAudit(userId, tabel, recordId, aksi, dataLama = null, dataBaru = null) {
+  if (!userId) return;
+  try {
+    await prisma.auditLog.create({
+      data: {
+        user_id: userId,
+        tabel,
+        record_id: recordId,
+        aksi,
+        data_lama: dataLama ? JSON.parse(JSON.stringify(dataLama)) : null,
+        data_baru: dataBaru ? JSON.parse(JSON.stringify(dataBaru)) : null,
+      }
+    });
+  } catch (err) {
+    console.error('Audit log error:', err);
+  }
+}
+
+
 async function getAll(where, page, limit) {
   const skip = (page - 1) * limit;
   const [data, total] = await Promise.all([
@@ -25,10 +44,12 @@ async function create(body, userId) {
   if (data.periode_id) data.periode_id = parseInt(data.periode_id);
   if (data.unit_id) data.unit_id = parseInt(data.unit_id);
   sanitizeIdentifikasi(data);
-  return prisma.identifikasiPasien.create({ data });
+  const record = await prisma.identifikasiPasien.create({ data });
+  await logAudit(userId, 'identifikasiPasien', record.id, 'create', null, record);
+  return record;
 }
 
-async function update(id, body) {
+async function update(id, body, userId) {
   const data = { ...body };
   if (data.tanggal && typeof data.tanggal === 'string') {
     data.tanggal = new Date(data.tanggal);
@@ -36,11 +57,25 @@ async function update(id, body) {
   if (data.periode_id) data.periode_id = parseInt(data.periode_id);
   if (data.unit_id) data.unit_id = parseInt(data.unit_id);
   sanitizeIdentifikasi(data);
-  return prisma.identifikasiPasien.update({ where: { id }, data });
+
+  let oldRecord = null;
+  if (userId) {
+    oldRecord = await prisma.identifikasiPasien.findUnique({ where: { id } });
+  }
+
+  const record = await prisma.identifikasiPasien.update({ where: { id }, data });
+  await logAudit(userId, 'identifikasiPasien', id, 'update', oldRecord, record);
+  return record;
 }
 
-async function remove(id) {
-  return prisma.identifikasiPasien.delete({ where: { id } });
+async function remove(id, userId) {
+  let oldRecord = null;
+  if (userId) {
+    oldRecord = await prisma.identifikasiPasien.findUnique({ where: { id } });
+  }
+  const record = await prisma.identifikasiPasien.delete({ where: { id } });
+  await logAudit(userId, 'identifikasiPasien', id, 'delete', oldRecord, null);
+  return record;
 }
 
 async function getSummary(where) {

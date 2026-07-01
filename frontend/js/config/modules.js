@@ -65,6 +65,7 @@ export const ADMIN_GROUP = {
   title: '⚙️ Admin',
   items: [
     { label: 'Kelola User', hash: '#/admin/users' },
+    { label: 'Kelola Unit', hash: '#/admin/units' },
     { label: 'Kelola Periode', hash: '#/admin/periode' },
     { label: 'Audit Trail', hash: '#/admin/audit-log' },
   ],

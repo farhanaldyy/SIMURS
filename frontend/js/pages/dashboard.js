@@ -1,7 +1,7 @@
 import Store from '../store.js';
 import { api } from '../api/client.js';
 
-let lowestChartInstance = null;
+let achievedChartInstance = null;
 let statusChartInstance = null;
 let currentList = [];
 
@@ -35,9 +35,9 @@ export async function render(container) {
 
     <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
       <div class="chart-container card" style="background: var(--color-bg-card); padding: 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
-        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem;">📊 Kepatuhan Indikator Rendah</h3>
+        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.1rem;">📊 Kepatuhan Indikator Tercapai</h3>
         <div class="chart-canvas-wrapper" style="height: 280px; position: relative;">
-          <canvas id="chart-lowest"></canvas>
+          <canvas id="chart-achieved"></canvas>
         </div>
       </div>
       <div class="chart-container card" style="background: var(--color-bg-card); padding: 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
@@ -187,27 +187,27 @@ async function loadDashboard() {
 }
 
 function renderCharts(list, good, bad, empty) {
-  if (lowestChartInstance) lowestChartInstance.destroy();
+  if (achievedChartInstance) achievedChartInstance.destroy();
   if (statusChartInstance) statusChartInstance.destroy();
 
-  const ctxLowest = document.getElementById('chart-lowest');
+  const ctxAchieved = document.getElementById('chart-achieved');
   const ctxStatus = document.getElementById('chart-status');
 
-  if (ctxLowest && typeof Chart !== 'undefined') {
+  if (ctxAchieved && typeof Chart !== 'undefined') {
     const sorted = [...list]
-      .filter(x => !x.isNoData && !x.name.includes('Kematian') && !x.name.includes('Kembali ICU') && !x.name.includes('Clotting') && !x.name.includes('Ketidakpatuhan'))
-      .sort((a, b) => a.hasilPercent - b.hasilPercent)
+      .filter(x => !x.isNoData && x.achieved && !x.name.includes('Kematian') && !x.name.includes('Kembali ICU') && !x.name.includes('Clotting') && !x.name.includes('Ketidakpatuhan'))
+      .sort((a, b) => b.hasilPercent - a.hasilPercent)
       .slice(0, 8);
 
-    lowestChartInstance = new Chart(ctxLowest, {
+    achievedChartInstance = new Chart(ctxAchieved, {
       type: 'bar',
       data: {
         labels: sorted.map(x => x.name.substring(0, 20) + (x.name.length > 20 ? '..' : '')),
         datasets: [{
           label: 'Kepatuhan (%)',
           data: sorted.map(x => x.hasilPercent),
-          backgroundColor: 'rgba(239, 68, 68, 0.75)',
-          borderColor: 'var(--color-danger)',
+          backgroundColor: 'rgba(16, 185, 129, 0.75)',
+          borderColor: 'var(--color-success)',
           borderWidth: 1,
           borderRadius: 4
         }]
@@ -318,7 +318,7 @@ function filterAndRenderRecapTable() {
 }
 
 export function destroy() {
-  if (lowestChartInstance) { lowestChartInstance.destroy(); lowestChartInstance = null; }
+  if (achievedChartInstance) { achievedChartInstance.destroy(); achievedChartInstance = null; }
   if (statusChartInstance) { statusChartInstance.destroy(); statusChartInstance = null; }
   window.removeEventListener('periodeChanged', loadDashboard);
   window.removeEventListener('unitChanged', loadDashboard);

@@ -251,6 +251,7 @@ export function createGenericIndicatorPage(config) {
         // Validate
         const validators = {};
         config.fields.forEach(f => {
+          if (isEdit && f.hideOnEdit) return;
           if (f.required) {
             if (f.name === 'no_rm') {
               validators[f.name] = validateNoRM(formData[f.name]);
@@ -265,6 +266,7 @@ export function createGenericIndicatorPage(config) {
 
         // Process data formats
         config.fields.forEach(f => {
+          if (isEdit && f.hideOnEdit) return;
           if (f.type === 'number') {
             formData[f.name] = formData[f.name] ? parseInt(formData[f.name]) : null;
           } else if (f.type === 'boolean') {

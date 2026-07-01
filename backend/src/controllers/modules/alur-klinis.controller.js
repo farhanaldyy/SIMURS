@@ -16,11 +16,11 @@ async function create(req, res, next) {
 }
 
 async function update(req, res, next) {
-  try { res.json({ success: true, data: await service.update(parseInt(req.params.id), req.body) }); } catch (err) { next(err); }
+  try { res.json({ success: true, data: await service.update(parseInt(req.params.id), req.body, req.user.id) }); } catch (err) { next(err); }
 }
 
 async function remove(req, res, next) {
-  try { await service.remove(parseInt(req.params.id)); res.json({ success: true, message: 'Data berhasil dihapus' }); } catch (err) { next(err); }
+  try { await service.remove(parseInt(req.params.id), req.user.id); res.json({ success: true, message: 'Data berhasil dihapus' }); } catch (err) { next(err); }
 }
 
 async function getSummary(req, res, next) {

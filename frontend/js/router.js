@@ -46,6 +46,7 @@ const routes = {
  
   // Admin Panel
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },
+  '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
   '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
 };

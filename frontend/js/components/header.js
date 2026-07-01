@@ -34,6 +34,10 @@ export function renderHeader(container) {
   loadPeriodeOptions();
   loadUnitOptions();
 
+  // Listen for changes in master lists to refresh selectors
+  window.addEventListener('updateUnitsList', loadUnitOptions);
+  window.addEventListener('updatePeriodesList', loadPeriodeOptions);
+
   // Logout handler
   document.getElementById('btn-logout').addEventListener('click', async () => {
     await logout();

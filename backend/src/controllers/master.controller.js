@@ -4,9 +4,70 @@ const bcrypt = require('bcryptjs');
 // === UNITS ===
 async function getUnits(req, res, next) {
   try {
-    const units = await prisma.unit.findMany({ where: { aktif: true }, orderBy: { nama_unit: 'asc' } });
+    const { all } = req.query;
+    const where = {};
+    if (all !== 'true') {
+      where.aktif = true;
+    }
+    const units = await prisma.unit.findMany({ where, orderBy: { nama_unit: 'asc' } });
     res.json({ success: true, data: units });
   } catch (err) { next(err); }
+}
+
+async function createUnit(req, res, next) {
+  try {
+    const { nama_unit, kode_unit } = req.body;
+    if (!nama_unit || !kode_unit) {
+      return res.status(400).json({ success: false, message: 'Nama unit dan kode unit wajib diisi' });
+    }
+    const unit = await prisma.unit.create({
+      data: {
+        nama_unit,
+        kode_unit: kode_unit.toLowerCase().trim(),
+        aktif: true
+      }
+    });
+    res.status(201).json({ success: true, data: unit });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      return res.status(400).json({ success: false, message: 'Kode unit sudah terdaftar' });
+    }
+    next(err);
+  }
+}
+
+async function updateUnit(req, res, next) {
+  try {
+    const id = parseInt(req.params.id);
+    const { nama_unit, kode_unit, aktif } = req.body;
+    const unit = await prisma.unit.update({
+      where: { id },
+      data: {
+        nama_unit,
+        kode_unit: kode_unit ? kode_unit.toLowerCase().trim() : undefined,
+        aktif: aktif !== undefined ? (aktif === 'true' || aktif === true) : undefined
+      }
+    });
+    res.json({ success: true, data: unit });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      return res.status(400).json({ success: false, message: 'Kode unit sudah terdaftar' });
+    }
+    next(err);
+  }
+}
+
+async function deleteUnit(req, res, next) {
+  try {
+    const id = parseInt(req.params.id);
+    await prisma.unit.delete({ where: { id } });
+    res.json({ success: true, message: 'Unit berhasil dihapus' });
+  } catch (err) {
+    if (err.code === 'P2003') {
+      return res.status(400).json({ success: false, message: 'Unit tidak dapat dihapus karena data unit ini masih digunakan di modul lain' });
+    }
+    next(err);
+  }
 }
 
 // === PERIODE ===
@@ -119,4 +180,4 @@ async function deleteUser(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getUnits, getPeriode, createPeriode, closePeriode, getUsers, createUser, updateUser, getAuditLogs, deleteUser };
+module.exports = { getUnits, createUnit, updateUnit, deleteUnit, getPeriode, createPeriode, closePeriode, getUsers, createUser, updateUser, getAuditLogs, deleteUser };

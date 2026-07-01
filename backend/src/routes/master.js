@@ -9,6 +9,9 @@ router.use(verifyToken);
 
 // Units
 router.get('/units', mc.getUnits);
+router.post('/units', checkRole('admin'), mc.createUnit);
+router.put('/units/:id', checkRole('admin'), mc.updateUnit);
+router.delete('/units/:id', checkRole('admin'), mc.deleteUnit);
 
 // Periode
 router.get('/periode', mc.getPeriode);

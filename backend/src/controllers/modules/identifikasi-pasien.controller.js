@@ -20,14 +20,14 @@ async function create(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const data = await service.update(parseInt(req.params.id), req.body);
+    const data = await service.update(parseInt(req.params.id), req.body, req.user.id);
     res.json({ success: true, data });
   } catch (err) { next(err); }
 }
 
 async function remove(req, res, next) {
   try {
-    await service.remove(parseInt(req.params.id));
+    await service.remove(parseInt(req.params.id), req.user.id);
     res.json({ success: true, message: 'Data berhasil dihapus' });
   } catch (err) { next(err); }
 }
