@@ -13,6 +13,8 @@ export default createGenericIndicatorPage({
   subtitle: 'Kepatuhan waktu visit dokter spesialis pada pasien rawat inap',
   endpoint: '/visit-dokter',
   metricType: 'compliance',
+  numeratorLabel: 'PATUH (N1)',
+  numerator2Label: 'PATUH (N2)',
   modalWidth: '700px',
   columns: [
     { label: 'Nama DPJP', key: 'nama_dpjp' },

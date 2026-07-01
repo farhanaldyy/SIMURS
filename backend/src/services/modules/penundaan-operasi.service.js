@@ -1,4 +1,5 @@
 const { createGenericService } = require('./generic.service');
+const prisma = require('../../config/database');
 
 function hitungSelisihMenit(jam1, jam2) {
   const j1 = typeof jam1 === 'string' ? jam1 : jam1.toTimeString().split(' ')[0];
@@ -11,7 +12,7 @@ function hitungSelisihMenit(jam1, jam2) {
   return diff;
 }
 
-const service = createGenericService('penundaanOperasi', {
+const baseService = createGenericService('penundaanOperasi', {
   ignoreUnitId: true,
   beforeCreate(data) {
     if (data.batal === true || data.batal === 'true') {
@@ -29,25 +30,83 @@ const service = createGenericService('penundaanOperasi', {
     }
     return data;
   },
-  calculateSummary(data) {
+  async calculateSummary(data, where) {
     const total = data.length;
-    // Delay or cancellation is counted as a delay if:
-    // (wait time > 60 minutes OR batal is true) AND indikasi_medis is false
-    const delayed = data.filter(d => {
-      const isOverOneHour = d.waktu_tunggu_menit > 60;
+    
+    // Find summary parameter for the period
+    const summary = await prisma.periodePenundaanSummary.findUnique({
+      where: { periode_id: where.periode_id }
+    });
+    const threshold = summary ? summary.standar_menit : 60;
+
+    // Compliance (PATUH N) is: not cancelled AND (wait time <= threshold OR hasIndikasiMedis)
+    const compliant = data.filter(d => {
       const isBatal = d.batal === true;
+      const isWithinThreshold = d.waktu_tunggu_menit <= threshold;
       const hasIndikasiMedis = d.indikasi_medis === true;
-      return (isOverOneHour || isBatal) && !hasIndikasiMedis;
+      return !isBatal && (isWithinThreshold || hasIndikasiMedis);
     }).length;
 
-    const persen = total > 0 ? ((delayed / total) * 100).toFixed(2) : 0;
+    const persen = total > 0 ? ((compliant / total) * 100).toFixed(2) : 100;
     return {
       total,
-      numerator: delayed,
+      numerator: compliant,
       persen,
-      standar: '< 5%'
+      standar: '≥ 95%'
     };
   }
 });
+
+const service = {
+  ...baseService,
+  async getAll(where, page, limit) {
+    const res = await baseService.getAll(where, page, limit);
+    
+    // Find the standard threshold for the period
+    const pId = where.periode_id ? parseInt(where.periode_id) : null;
+    let threshold = 60;
+    if (pId) {
+      const summary = await prisma.periodePenundaanSummary.findUnique({
+        where: { periode_id: pId }
+      });
+      if (summary) threshold = summary.standar_menit;
+    }
+
+    res.data = res.data.map(d => {
+      const isBatal = d.batal === true;
+      const isWithinThreshold = d.waktu_tunggu_menit <= threshold;
+      const hasIndikasiMedis = d.indikasi_medis === true;
+      const isPatuh = !isBatal && (isWithinThreshold || hasIndikasiMedis);
+      return {
+        ...d,
+        standar_menit: threshold,
+        patuh: isPatuh
+      };
+    });
+
+    return res;
+  },
+
+  async getSummaryData(periodeId) {
+    let summary = await prisma.periodePenundaanSummary.findUnique({
+      where: { periode_id: parseInt(periodeId) }
+    });
+    if (!summary) {
+      summary = { periode_id: parseInt(periodeId), standar_menit: 60 };
+    }
+    return summary;
+  },
+
+  async upsertSummaryData(periodeId, body) {
+    const pId = parseInt(periodeId);
+    const standarMenit = parseInt(body.standar_menit || 60);
+
+    return prisma.periodePenundaanSummary.upsert({
+      where: { periode_id: pId },
+      update: { standar_menit: standarMenit },
+      create: { periode_id: pId, standar_menit: standarMenit }
+    });
+  }
+};
 
 module.exports = service;

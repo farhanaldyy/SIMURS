@@ -5,6 +5,7 @@ import { renderTable } from '../../components/table.js';
 import { renderPagination } from '../../components/pagination.js';
 import { showModal, closeModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
+import { renderBadge } from '../../components/indicator-badge.js';
 import { validateRequired, showFormErrors, validateForm } from '../../utils/validator.js';
 import { formatDate, formatTime } from '../../utils/formatter.js';
 
@@ -65,6 +66,7 @@ function renderSummary() {
     <div class="summary-item"><div class="summary-value">${byJenis.KTD || 0}</div><div class="summary-label">KTD</div></div>
     <div class="summary-item"><div class="summary-value">${byJenis.KNC || 0}</div><div class="summary-label">KNC</div></div>
     <div class="summary-item"><div class="summary-value">${byJenis.Sentinel || 0}</div><div class="summary-label">Sentinel</div></div>
+    <div class="summary-item">${renderBadge(s.persen || 0, 100)}<div class="summary-label" style="margin-top:8px">Standar: ${s.standar}</div></div>
   `;
 }
 

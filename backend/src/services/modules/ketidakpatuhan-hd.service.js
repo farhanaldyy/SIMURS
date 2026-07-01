@@ -13,7 +13,7 @@ const baseService = createGenericService('ketidakpatuhanHd', {
 
     const totalPasien = summary ? summary.total_pasien_hd : 0;
     const denominator = totalPasien * 8; // 2 times/week * 4 weeks
-    const persen = denominator > 0 ? ((totalMissed / denominator) * 100).toFixed(2) : 0;
+    const persen = denominator > 0 ? (100 - (totalMissed / denominator) * 100).toFixed(2) : 100;
 
     return {
       total: totalMissed,

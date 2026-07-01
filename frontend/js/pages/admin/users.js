@@ -173,9 +173,9 @@ function openUserModal(user = null) {
       // Client-side validations
       const validations = {
         nama: validateRequired(formData.nama, 'Nama Lengkap'),
-        username: validateRequired(formData.username, 'Username'),
       };
       if (!isEdit) {
+        validations.username = validateRequired(formData.username, 'Username');
         validations.password = validateRequired(formData.password, 'Password') || (formData.password.length < 6 ? 'Password minimal 6 karakter' : null);
       } else if (formData.password && formData.password.length < 6) {
         validations.password = 'Password minimal 6 karakter';

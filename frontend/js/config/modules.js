@@ -15,7 +15,6 @@ export const NAV_GROUPS = [
       { label: 'Identifikasi Pasien', hash: '#/identifikasi-pasien' },
       { label: 'Reaksi Transfusi', hash: '#/reaksi-transfusi' },
       { label: 'Gelang Identitas', hash: '#/gelang-identitas' },
-      { label: 'Serah Terima Pasien', hash: '#/serah-terima-pasien' },
     ],
   },
   {
@@ -36,6 +35,7 @@ export const NAV_GROUPS = [
       { label: 'Angka Kematian IGD', hash: '#/angka-kematian-igd' },
       { label: 'Asesmen Awal IGD', hash: '#/asesmen-awal-igd' },
       { label: 'Pasien Tertahan IGD', hash: '#/pasien-tertahan-igd' },
+      { label: 'Serah Terima Pasien', hash: '#/serah-terima-pasien' },
     ],
   },
   {

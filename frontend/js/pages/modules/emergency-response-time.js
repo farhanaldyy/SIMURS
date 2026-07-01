@@ -6,6 +6,7 @@ export default createGenericIndicatorPage({
   subtitle: 'Waktu tanggap pelayanan dokter spesialis/umum di IGD',
   endpoint: '/emergency-response-time',
   metricType: 'average',
+  numeratorLabel: 'Patuh (N)',
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },

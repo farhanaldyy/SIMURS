@@ -12,6 +12,8 @@ router.get('/summary', ctrl.getSummary);
 router.get('/summary-data', ctrl.getSummaryData);
 router.post('/summary-data', [
   body('periode_id').isInt().withMessage('Periode wajib dipilih'),
+  body('total_pasien_hd').optional().isInt({ min: 0 }).withMessage('Total pasien HD harus berupa angka positif'),
+  body('total_avgraft_avf').optional().isInt({ min: 0 }).withMessage('Jumlah pasien dengan Avgraft/AVF harus berupa angka positif'),
 ], validate, ctrl.upsertSummaryData);
 
 router.post('/', [

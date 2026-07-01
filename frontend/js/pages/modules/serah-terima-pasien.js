@@ -16,13 +16,14 @@ export default createGenericIndicatorPage({
   metricType: 'compliance',
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
-    { label: 'Akun (SBAR)', key: 'akun', render: (r) => ses(r.akun) },
+    { label: 'No RM', key: 'no_rm' },
+    { label: 'SBAR', key: 'akun', render: (r) => ses(r.akun) },
     { label: 'Keluhan', key: 'keluhan', render: (r) => ses(r.keluhan) },
     { label: 'TTV', key: 'ttv', render: (r) => ses(r.ttv) },
-    { label: 'Hasil Penunjang', key: 'penunjang', render: (r) => ses(r.penunjang) },
-    { label: 'Konsul Dokter', key: 'konsul', render: (r) => ses(r.konsul) },
+    { label: 'Penunjang', key: 'penunjang', render: (r) => ses(r.penunjang) },
+    { label: 'Konsul', key: 'konsul', render: (r) => ses(r.konsul) },
     { label: 'Tindakan', key: 'tindakan', render: (r) => ses(r.tindakan) },
-    { label: 'Obat-obatan', key: 'obat', render: (r) => ses(r.obat) }
+    { label: 'Obat', key: 'obat', render: (r) => ses(r.obat) }
   ],
   rowClass: (r) => {
     const ok = ['akun', 'keluhan', 'ttv', 'penunjang', 'konsul', 'tindakan', 'obat'].every(f => r[f] === 'Sesuai');

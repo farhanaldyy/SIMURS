@@ -68,7 +68,7 @@ const services = {
   'Angka Kematian Ranap': { service: require('../services/modules/angka-kematian-ranap.service'), category: 'Rawat Inap', extraWhere: { lokasi: 'ranap' } },
   'Double Check High Alert': { service: require('../services/modules/double-check-high-alert.service'), category: 'Rawat Inap' },
   'Visit Dokter Spesialis': { service: require('../services/modules/visit-dokter.service'), category: 'Rawat Inap' },
-  'Kembali ICU < 24 Jam': { service: require('../services/modules/kembali-icu.service'), category: 'Rawat Inap' },
+  'Kembali ICU < 72 Jam': { service: require('../services/modules/kembali-icu.service'), category: 'Rawat Inap' },
   'Alur Klinis': { service: require('../services/modules/alur-klinis.service'), category: 'Rawat Inap' },
   
   'Waktu Tanggap SC': { service: require('../services/modules/waktu-tanggap-sc.service'), category: 'IGD' },

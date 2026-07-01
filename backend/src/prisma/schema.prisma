@@ -326,6 +326,7 @@ model SerahTerimaPasien {
   periode_id  Int
   unit_id     Int
   nama_pasien String     @db.VarChar(100)
+  no_rm       String     @db.VarChar(20)
   akun        SesuaiEnum2
   keluhan     SesuaiEnum2
   ttv         SesuaiEnum2
@@ -383,6 +384,15 @@ model PeriodeHdSummary {
   updated_at      DateTime @updatedAt
 
   @@map("periode_hd_summary")
+}
+
+model PeriodePenundaanSummary {
+  id              Int      @id @default(autoincrement())
+  periode_id      Int      @unique
+  standar_menit   Int      @default(60)
+  updated_at      DateTime @updatedAt
+
+  @@map("periode_penundaan_summary")
 }
 
 model InsidenClotting {

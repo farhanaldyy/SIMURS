@@ -44,7 +44,8 @@ async function getSummary(where) {
   const total = data.length;
   const byJenis = {};
   data.forEach(d => { byJenis[d.jenis_insiden] = (byJenis[d.jenis_insiden] || 0) + 1; });
-  return { total, byJenis, standar: '0%' };
+  const persen = total === 0 ? 100 : 0;
+  return { total, byJenis, persen, standar: '0%' };
 }
 
 module.exports = { getAll, create, update, remove, getSummary };

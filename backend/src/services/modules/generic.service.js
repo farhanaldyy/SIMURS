@@ -5,10 +5,25 @@ function coerceTypes(data) {
     const val = data[key];
     if (typeof val === 'string') {
       const trimmed = val.trim();
+      let finalVal = trimmed;
+
+      // Coerce space-separated enum values to underscored ones for Prisma
+      if (trimmed === 'tidak dilakukan') {
+        finalVal = 'tidak_dilakukan';
+      } else if (trimmed === 'tidak ada peluang') {
+        finalVal = 'tidak_ada_peluang';
+      } else if (trimmed === 'tidak sesuai') {
+        finalVal = 'tidak_sesuai';
+      } else if (trimmed === 'Tidak Sesuai') {
+        finalVal = 'Tidak_Sesuai';
+      } else if (trimmed === 'tidak ada') {
+        finalVal = 'tidak_ada';
+      }
+
       // Coerce booleans
-      if (trimmed === 'true') {
+      if (finalVal === 'true') {
         data[key] = true;
-      } else if (trimmed === 'false') {
+      } else if (finalVal === 'false') {
         data[key] = false;
       }
       // Coerce integers
@@ -23,16 +38,19 @@ function coerceTypes(data) {
         key === 'kematian_lebih_48jam' ||
         key === 'darah_masuk_kolf'
       ) {
-        if (trimmed !== '') {
-          data[key] = parseInt(trimmed, 10);
+        if (finalVal !== '') {
+          data[key] = parseInt(finalVal, 10);
         }
       }
       // Coerce dates and times
-      else if (key.startsWith('tanggal') && trimmed !== '') {
-        data[key] = new Date(trimmed);
+      else if (key.startsWith('tanggal') && finalVal !== '') {
+        data[key] = new Date(finalVal);
       }
-      else if (key.startsWith('jam') && key !== 'jam_mulai_selesai' && trimmed !== '') {
-        data[key] = new Date(`1970-01-01T${trimmed}${trimmed.split(':').length === 2 ? ':00' : ''}Z`);
+      else if (key.startsWith('jam') && key !== 'jam_mulai_selesai' && finalVal !== '') {
+        data[key] = new Date(`1970-01-01T${finalVal}${finalVal.split(':').length === 2 ? ':00' : ''}Z`);
+      }
+      else {
+        data[key] = finalVal;
       }
     }
   }

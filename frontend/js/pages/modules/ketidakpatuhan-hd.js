@@ -8,7 +8,8 @@ export default createGenericIndicatorPage({
   metricType: 'compliance',
   hasSummaryData: true,
   summaryDataFields: [
-    { name: 'total_pasien_hd', label: 'Total Pasien HD Bulan Ini', type: 'number' }
+    { name: 'total_pasien_hd', label: 'Total Pasien HD Bulan Ini', type: 'number' },
+    { name: 'total_avgraft_avf', label: 'Jumlah Pasien dengan Avgraft/AVF', type: 'number' }
   ],
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },

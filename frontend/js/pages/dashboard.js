@@ -118,23 +118,41 @@ async function loadDashboard() {
     let achieved = false;
     let hasilPercent = s.persen;
     let hasilText = `${s.persen || 0}%`;
-    let isNoData = s.total === 0;
+    const isNegativeIndicator = name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan') || name === 'Insiden Keselamatan';
+    let isNoData = s.total === 0 && !isNegativeIndicator;
 
-    if (s.rataRata !== undefined) {
+    if (name === 'Insiden Keselamatan') {
+      hasilPercent = s.total === 0 ? 100 : 0;
+      hasilText = `${s.total} Kasus`;
+      achieved = s.total === 0;
+    } else if (s.rataRata !== undefined) {
       hasilPercent = s.rataRata;
       hasilText = `${s.rataRata}`;
       const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
+      const rVal = parseFloat(s.rataRata);
       if (s.standar.includes('≤')) {
-        achieved = s.rataRata <= targetVal;
+        achieved = rVal <= targetVal;
       } else {
-        achieved = s.rataRata >= targetVal;
+        achieved = rVal >= targetVal;
       }
-    } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting')) {
+    } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
       hasilPercent = s.total === 0 ? 100 : 0;
       hasilText = `${s.total} Kasus`;
       achieved = s.total === 0;
     } else {
-      achieved = parseFloat(s.persen) >= parseFloat(s.standar);
+      const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
+      const currentVal = parseFloat(s.persen || 0);
+      if (s.standar.includes('<')) {
+        achieved = currentVal < targetVal;
+      } else if (s.standar.includes('≤')) {
+        achieved = currentVal <= targetVal;
+      } else if (s.standar.includes('≥')) {
+        achieved = currentVal >= targetVal;
+      } else if (s.standar.includes('>')) {
+        achieved = currentVal > targetVal;
+      } else {
+        achieved = currentVal >= targetVal;
+      }
     }
 
     if (isNoData) {
@@ -177,7 +195,7 @@ function renderCharts(list, good, bad, empty) {
 
   if (ctxLowest && typeof Chart !== 'undefined') {
     const sorted = [...list]
-      .filter(x => !x.isNoData && !x.name.includes('Kematian') && !x.name.includes('Kembali ICU') && !x.name.includes('Clotting'))
+      .filter(x => !x.isNoData && !x.name.includes('Kematian') && !x.name.includes('Kembali ICU') && !x.name.includes('Clotting') && !x.name.includes('Ketidakpatuhan'))
       .sort((a, b) => a.hasilPercent - b.hasilPercent)
       .slice(0, 8);
 

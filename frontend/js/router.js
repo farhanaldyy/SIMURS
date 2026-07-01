@@ -19,7 +19,7 @@ const routes = {
   '#/angka-kematian-ranap':       { module: () => import('./pages/modules/angka-kematian-ranap.js'), title: 'Angka Kematian Ranap' },
   '#/double-check-high-alert':    { module: () => import('./pages/modules/double-check-high-alert.js'), title: 'Double Check High Alert' },
   '#/visit-dokter':               { module: () => import('./pages/modules/visit-dokter.js'), title: 'Visit Dokter Spesialis' },
-  '#/kembali-icu':                { module: () => import('./pages/modules/kembali-icu.js'), title: 'Kembali ICU < 24 Jam' },
+  '#/kembali-icu':                { module: () => import('./pages/modules/kembali-icu.js'), title: 'Kembali ICU < 72 Jam' },
   '#/alur-klinis':               { module: () => import('./pages/modules/alur-klinis.js'), title: 'Alur Klinis (Clinical Pathway)' },
   
   // IGD

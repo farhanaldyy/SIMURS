@@ -2,7 +2,7 @@ import { createGenericIndicatorPage } from './generic-indicator.js';
 
 export default createGenericIndicatorPage({
   title: 'Kembali ICU',
-  subtitle: 'Pencatatan pasien yang kembali ke ICU < 24 jam sejak keluar',
+  subtitle: 'Pencatatan pasien yang kembali ke ICU < 72 jam sejak keluar',
   endpoint: '/kembali-icu',
   ignoreUnit: true,
   metricType: 'count',

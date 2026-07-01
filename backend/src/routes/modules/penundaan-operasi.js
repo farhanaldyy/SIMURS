@@ -9,6 +9,11 @@ router.use(verifyToken);
 
 router.get('/', ctrl.getAll);
 router.get('/summary', ctrl.getSummary);
+router.get('/summary-data', ctrl.getSummaryData);
+router.post('/summary-data', [
+  body('periode_id').isInt().withMessage('Periode ID wajib disertakan'),
+  body('standar_menit').isInt().withMessage('Batas waktu penundaan wajib berupa angka integer'),
+], validate, ctrl.upsertSummaryData);
 
 router.post('/', [
   body('periode_id').isInt().withMessage('Periode wajib dipilih'),

@@ -98,25 +98,44 @@ export function createGenericIndicatorPage(config) {
 
     let targetMetric = `${s.persen || 0}%`;
     let labelMetric = 'Kepatuhan';
-    let numeratorText = 'Patuh (N)';
-    let denominatorText = 'Denominator (D)';
+    let numeratorText = config.numeratorLabel || 'Patuh (N)';
+    let denominatorText = config.denominatorLabel || 'Denominator (D)';
+    let numerator2Text = config.numerator2Label || null;
 
     if (config.metricType === 'average') {
       targetMetric = s.rataRata || 0;
       labelMetric = 'Rata-rata';
-      numeratorText = 'Total';
+      numeratorText = config.numeratorLabel || 'Total';
     } else if (config.metricType === 'count') {
       targetMetric = s.total || 0;
       labelMetric = 'Jumlah Kejadian';
     }
 
+    let numeratorValueText = s.numerator;
+    if (s.numerator !== undefined && s.persen1 !== undefined) {
+      numeratorValueText = `${s.numerator} (${s.persen1}%)`;
+    }
+
+    let numerator2HTML = '';
+    if (numerator2Text && s.numerator2 !== undefined) {
+      let numerator2ValueText = s.numerator2;
+      if (s.persen2 !== undefined) {
+        numerator2ValueText = `${s.numerator2} (${s.persen2}%)`;
+      }
+      numerator2HTML = `<div class="summary-item"><div class="summary-value">${numerator2ValueText}</div><div class="summary-label">${numerator2Text}</div></div>`;
+    }
+
     container.innerHTML = `
       <div class="summary-item"><div class="summary-value">${s.total || 0}</div><div class="summary-label">Total Data</div></div>
-      ${config.metricType !== 'count' && s.numerator !== undefined ? `<div class="summary-item"><div class="summary-value">${s.numerator}</div><div class="summary-label">${numeratorText}</div></div>` : ''}
+      ${config.metricType !== 'count' && s.numerator !== undefined ? `<div class="summary-item"><div class="summary-value">${numeratorValueText}</div><div class="summary-label">${numeratorText}</div></div>` : ''}
+      ${numerator2HTML}
       ${config.metricType === 'compliance' && s.denominator !== undefined ? `<div class="summary-item"><div class="summary-value">${s.denominator}</div><div class="summary-label">${denominatorText}</div></div>` : ''}
       <div class="summary-item"><div class="summary-value">${targetMetric}</div><div class="summary-label">${labelMetric}</div></div>
       <div class="summary-item">
-        ${renderBadge(s.persen || 0, parseFloat(s.standar) || 100)}
+        ${config.metricType === 'count'
+          ? `<span class="badge ${(s.total || 0) === 0 ? 'badge-success' : 'badge-danger'}">${(s.total || 0) === 0 ? '✓ Tercapai' : '✕ Tidak Tercapai'}</span>`
+          : renderBadge(config.metricType === 'average' ? (s.rataRata || 0) : (s.persen || 0), s.standar || '100')
+        }
         <div class="summary-label" style="margin-top:8px">Standar: ${s.standar}</div>
       </div>
     `;

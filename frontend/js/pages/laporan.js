@@ -54,7 +54,7 @@ const serviceToHash = {
   'Angka Kematian Ranap': '#/angka-kematian-ranap',
   'Double Check High Alert': '#/double-check-high-alert',
   'Visit Dokter Spesialis': '#/visit-dokter',
-  'Kembali ICU < 24 Jam': '#/kembali-icu',
+  'Kembali ICU < 72 Jam': '#/kembali-icu',
   'Alur Klinis': '#/alur-klinis',
   'Waktu Tanggap SC': '#/waktu-tanggap-sc',
   'Emergency Response Time': '#/emergency-response-time',
@@ -106,19 +106,35 @@ function renderReportTable() {
     let achieved = false;
     let hasil = `${s.persen || 0}%`;
 
-    if (s.rataRata !== undefined) {
+    if (name === 'Insiden Keselamatan') {
+      hasil = `${s.total} Kasus`;
+      achieved = s.total === 0;
+    } else if (s.rataRata !== undefined) {
       hasil = `${s.rataRata}`;
       const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
+      const rVal = parseFloat(s.rataRata);
       if (s.standar.includes('≤')) {
-        achieved = s.rataRata <= targetVal;
+        achieved = rVal <= targetVal;
       } else {
-        achieved = s.rataRata >= targetVal;
+        achieved = rVal >= targetVal;
       }
-    } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting')) {
+    } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
       hasil = `${s.total} Kasus`;
       achieved = s.total === 0;
     } else {
-      achieved = parseFloat(s.persen) >= parseFloat(s.standar);
+      const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
+      const currentVal = parseFloat(s.persen || 0);
+      if (s.standar.includes('<')) {
+        achieved = currentVal < targetVal;
+      } else if (s.standar.includes('≤')) {
+        achieved = currentVal <= targetVal;
+      } else if (s.standar.includes('≥')) {
+        achieved = currentVal >= targetVal;
+      } else if (s.standar.includes('>')) {
+        achieved = currentVal > targetVal;
+      } else {
+        achieved = currentVal >= targetVal;
+      }
     }
 
     const badge = achieved 
@@ -335,7 +351,7 @@ export const render = async (container) => {
       <div style="display: flex; align-items: center; justify-content: center; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px;">
         <img src="assets/img/logo.png" alt="Logo" style="width: 60px; height: 60px; margin-right: 16px;">
         <div style="text-align: center;">
-          <h1 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: #000; letter-spacing: 0.5px;">RUMAH SAKIT ISLAM KENDAL</h1>
+          <h1 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: #000; letter-spacing: 0.5px;">RUMAH SAKIT ISLAM KARAWANG</h1>
           <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #444;">Jl. Ar-Rahman No. 20, Kendal, Jawa Tengah</p>
           <p style="margin: 1px 0 0 0; font-size: 0.8rem; color: #666; font-style: italic;">Telp: (0294) 123456 | Email: info@rsi-kendal.co.id</p>
         </div>

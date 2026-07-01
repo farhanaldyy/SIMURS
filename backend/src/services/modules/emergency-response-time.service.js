@@ -28,8 +28,10 @@ const service = createGenericService('emergencyResponseTime', {
     const total = data.length;
     const totalMenit = data.reduce((acc, curr) => acc + parseFloat(curr.respon_time_menit), 0);
     const avg = total > 0 ? (totalMenit / total).toFixed(2) : 0;
+    const patuh = data.filter(d => parseFloat(d.respon_time_menit) <= 5).length;
     return {
       total,
+      numerator: patuh,
       rataRata: avg,
       persen: avg <= 5 && total > 0 ? 100 : 0, // for badge/metric
       standar: '≤ 5 menit'

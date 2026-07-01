@@ -5,7 +5,7 @@ export default createGenericIndicatorPage({
   title: 'Angka Kematian IGD',
   subtitle: 'Pencatatan kasus kematian pasien < 8 jam di IGD',
   endpoint: '/angka-kematian-igd',
-  metricType: 'compliance',
+  metricType: 'count',
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
@@ -15,19 +15,6 @@ export default createGenericIndicatorPage({
     { label: 'Jam Wafat', key: 'jam_keluar', render: (r) => new Date(r.jam_keluar).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
     { label: 'Keterangan', key: 'keterangan' }
   ],
-  rowClass: (r) => {
-    // Flag if death is under 8 hours (non-compliant)
-    const m = new Date(r.tanggal_masuk);
-    const jm = new Date(r.jam_masuk);
-    m.setHours(jm.getHours(), jm.getMinutes(), 0, 0);
-
-    const k = new Date(r.tanggal_keluar);
-    const jk = new Date(r.jam_keluar);
-    k.setHours(jk.getHours(), jk.getMinutes(), 0, 0);
-
-    const diffHours = (k - m) / 3600000;
-    return diffHours < 8 ? 'row-danger' : '';
-  },
   beforeSubmit(formData) {
     const form = document.getElementById('modul-form');
     if (!form) return;

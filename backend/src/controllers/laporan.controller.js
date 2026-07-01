@@ -13,7 +13,7 @@ const services = {
   'Angka Kematian Ranap': { service: require('../services/modules/angka-kematian-ranap.service'), table: 'angkaKematian', category: 'Rawat Inap', extraWhere: { lokasi: 'ranap' } },
   'Double Check High Alert': { service: require('../services/modules/double-check-high-alert.service'), table: 'doubleCheckHighAlert', category: 'Rawat Inap' },
   'Visit Dokter Spesialis': { service: require('../services/modules/visit-dokter.service'), table: 'visitDokter', category: 'Rawat Inap' },
-  'Kembali ICU < 24 Jam': { service: require('../services/modules/kembali-icu.service'), table: 'kembaliIcu', category: 'Rawat Inap' },
+  'Kembali ICU < 72 Jam': { service: require('../services/modules/kembali-icu.service'), table: 'kembaliIcu', category: 'Rawat Inap' },
   'Alur Klinis': { service: require('../services/modules/alur-klinis.service'), table: 'alurKlinis', category: 'Rawat Inap' },
   
   'Waktu Tanggap SC': { service: require('../services/modules/waktu-tanggap-sc.service'), table: 'waktuTanggapSc', category: 'IGD' },
@@ -71,7 +71,7 @@ async function exportExcel(req, res, next) {
       
       let hasil = `${sum.persen || 0}%`;
       if (sum.rataRata !== undefined) hasil = sum.rataRata;
-      else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting')) {
+      else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name === 'Insiden Keselamatan') {
         hasil = sum.total;
       }
 
