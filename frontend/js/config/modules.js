@@ -57,6 +57,7 @@ export const NAV_GROUPS = [
       { label: 'Surgical Safety Checklist SC', hash: '#/surgical-checklist-sc' },
       { label: 'Surgical Safety Checklist Op', hash: '#/surgical-checklist-operasi' },
       { label: 'Penandaan Lokasi Operasi', hash: '#/penandaan-lokasi-operasi' },
+      { label: 'Standar Minimal Mutu Kamar Operasi', hash: '#/mutu-kamar-operasi' },
     ],
   },
 ];

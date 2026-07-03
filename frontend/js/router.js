@@ -43,6 +43,7 @@ const routes = {
   '#/surgical-checklist-sc':      { module: () => import('./pages/modules/surgical-checklist-sc.js'), title: 'Surgical Safety Checklist SC' },
   '#/surgical-checklist-operasi': { module: () => import('./pages/modules/surgical-checklist-operasi.js'), title: 'Surgical Safety Checklist Operasi' },
   '#/penandaan-lokasi-operasi':   { module: () => import('./pages/modules/penandaan-lokasi-operasi.js'), title: 'Penandaan Lokasi Operasi' },
+  '#/mutu-kamar-operasi':          { module: () => import('./pages/modules/mutu-kamar-operasi.js'), title: 'Standar Minimal Mutu Kamar Operasi' },
  
   // Admin Panel
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },

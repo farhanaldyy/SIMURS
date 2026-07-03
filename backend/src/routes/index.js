@@ -42,5 +42,6 @@ router.use('/asesmen-pra-anestesi', require('./modules/asesmen-pra-anestesi'));
 router.use('/surgical-checklist-sc', require('./modules/surgical-checklist-sc'));
 router.use('/surgical-checklist-operasi', require('./modules/surgical-checklist-operasi'));
 router.use('/penandaan-lokasi-operasi', require('./modules/penandaan-lokasi-operasi'));
+router.use('/mutu-kamar-operasi', require('./modules/mutu-kamar-operasi'));
 
 module.exports = router;

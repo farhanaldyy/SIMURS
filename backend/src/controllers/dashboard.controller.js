@@ -39,6 +39,7 @@ async function getSummary(req, res, next) {
       prisma.asesmenPraOperasi.count({ where }),
       prisma.surgicalChecklist.count({ where }),
       prisma.penandaanLokasiOperasi.count({ where: { periode_id: where.periode_id } }),
+      prisma.mutuKamarOperasi.count({ where: { periode_id: where.periode_id } }),
     ]);
 
     res.json({
@@ -51,6 +52,7 @@ async function getSummary(req, res, next) {
           gelangIdentitas, serahTerima, kembaliIcu, ketidakpatuhanHd,
           insidenClotting, insidenJarum, penundaanOperasi,
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
+          mutuKamarOperasi
         },
       },
     });
@@ -89,6 +91,10 @@ const services = {
   'Surgical Safety Checklist SC': { service: require('../services/modules/surgical-checklist-sc.service'), category: 'Operasi & Anestesi', extraWhere: { jenis: 'sc' } },
   'Surgical Safety Checklist Op': { service: require('../services/modules/surgical-checklist-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { jenis: 'operasi_umum' } },
   'Penandaan Lokasi Operasi': { service: require('../services/modules/penandaan-lokasi-operasi.service'), category: 'Operasi & Anestesi' },
+  'Kejadian Kematian di Meja Operasi': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'kematian_meja_operasi' } },
+  'Kejadian Operasi Salah Sisi': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_sisi' } },
+  'Kejadian Operasi Salah Orang': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_orang' } },
+  'Kejadian Operasi Salah Prosedur / Tindakan': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_prosedur' } },
 };
 
 async function getIndicatorSummaries(req, res, next) {

@@ -71,7 +71,11 @@ const serviceToHash = {
   'Asesmen Pra Anestesi': '#/asesmen-pra-anestesi',
   'Surgical Safety Checklist SC': '#/surgical-checklist-sc',
   'Surgical Safety Checklist Op': '#/surgical-checklist-operasi',
-  'Penandaan Lokasi Operasi': '#/penandaan-lokasi-operasi'
+  'Penandaan Lokasi Operasi': '#/penandaan-lokasi-operasi',
+  'Kejadian Kematian di Meja Operasi': '#/mutu-kamar-operasi',
+  'Kejadian Operasi Salah Sisi': '#/mutu-kamar-operasi',
+  'Kejadian Operasi Salah Orang': '#/mutu-kamar-operasi',
+  'Kejadian Operasi Salah Prosedur / Tindakan': '#/mutu-kamar-operasi'
 };
 
 function renderReportTable() {
@@ -118,7 +122,7 @@ function renderReportTable() {
       } else {
         achieved = rVal >= targetVal;
       }
-    } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
+    } else if ((name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
       hasil = `${s.total} Kasus`;
       achieved = s.total === 0;
     } else {

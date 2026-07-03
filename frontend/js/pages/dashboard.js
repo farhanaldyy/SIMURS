@@ -118,7 +118,7 @@ async function loadDashboard() {
     let achieved = false;
     let hasilPercent = s.persen;
     let hasilText = `${s.persen || 0}%`;
-    const isNegativeIndicator = name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan') || name === 'Insiden Keselamatan';
+    const isNegativeIndicator = (name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan') || name === 'Insiden Keselamatan';
     let isNoData = s.total === 0 && !isNegativeIndicator;
 
     if (name === 'Insiden Keselamatan') {
@@ -135,7 +135,7 @@ async function loadDashboard() {
       } else {
         achieved = rVal >= targetVal;
       }
-    } else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
+    } else if ((name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
       hasilPercent = s.total === 0 ? 100 : 0;
       hasilText = `${s.total} Kasus`;
       achieved = s.total === 0;

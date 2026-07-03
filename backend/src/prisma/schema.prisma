@@ -625,3 +625,19 @@ enum JenisSurgical {
   sc
   operasi_umum
 }
+
+model MutuKamarOperasi {
+  id              Int      @id @default(autoincrement())
+  periode_id      Int
+  tipe            String   @db.VarChar(50) // 'kematian_meja_operasi', 'salah_sisi', 'salah_orang', 'salah_prosedur'
+  total_kejadian  Int      @default(0)
+  total_operasi   Int      @default(0)
+  created_by      Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@unique([periode_id, tipe])
+  @@index([periode_id])
+  @@map("mutu_kamar_operasi")
+}
+
