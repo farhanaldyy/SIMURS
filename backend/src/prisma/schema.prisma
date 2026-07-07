@@ -24,6 +24,7 @@ model User {
   giziSisaMakanans        GiziSisaMakanan[]
   giziKesalahanDiets      GiziKesalahanDiet[]
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
+  kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
 
   @@map("users")
 }
@@ -40,6 +41,7 @@ model Unit {
   giziSisaMakanans        GiziSisaMakanan[]
   giziKesalahanDiets      GiziKesalahanDiet[]
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
+  kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
 
   @@map("units")
 }
@@ -54,6 +56,7 @@ model Periode {
   giziSisaMakanans        GiziSisaMakanan[]
   giziKesalahanDiets      GiziKesalahanDiet[]
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
+  kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -735,4 +738,57 @@ model GiziIdentifikasiPasien {
   @@index([periode_id])
   @@index([unit_id])
   @@map("gizi_identifikasi_pasien")
+}
+
+model KepatuhanKebersihanTangan {
+  id          Int                      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  tanggal     DateTime                 @db.Date
+  profesi     ProfesiEnum
+  momen_1     Boolean                  @default(false)
+  momen_2     Boolean                  @default(false)
+  momen_3     Boolean                  @default(false)
+  momen_4     Boolean                  @default(false)
+  momen_5     Boolean                  @default(false)
+  tindakan    TindakanKebersihanTangan
+  gloves      Boolean                  @default(false)
+  tindakan_id Int?
+  created_by  Int
+  created_at  DateTime                 @default(now())
+  updated_at  DateTime                 @updatedAt
+
+  periode        Periode         @relation(fields: [periode_id], references: [id])
+  unit           Unit            @relation(fields: [unit_id], references: [id])
+  user           User            @relation(fields: [created_by], references: [id])
+  masterTindakan MasterTindakan? @relation(fields: [tindakan_id], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("kepatuhan_kebersihan_tangan")
+}
+
+enum ProfesiEnum {
+  dokter
+  perawat
+  bidan
+  nakes_lain
+}
+
+enum TindakanKebersihanTangan {
+  hr
+  hw
+  hr_hw
+  missed
+}
+
+model MasterTindakan {
+  id                         Int                         @id @default(autoincrement())
+  nama                       String                      @db.VarChar(100)
+  nilai                      Float                       @default(0)
+  created_at                 DateTime                    @default(now())
+  updated_at                 DateTime                    @updatedAt
+  kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
+
+  @@map("master_tindakan")
 }

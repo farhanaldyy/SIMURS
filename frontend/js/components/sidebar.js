@@ -19,6 +19,9 @@ export function renderSidebar(container) {
       return role !== 'petugas';
     }
     if (item.hash === '#/laporan') return true;
+    if (item.hash === '#/master-tindakan') {
+      return role === 'admin' || role === 'komite' || role === 'pic_mutu';
+    }
     if (role === 'admin' || role === 'komite') return true;
     return allowed.includes(item.hash);
   };

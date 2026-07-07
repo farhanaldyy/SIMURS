@@ -13,6 +13,7 @@ const routes = {
   '#/identifikasi-pasien':        { module: () => import('./pages/modules/identifikasi-pasien.js'), title: 'Identifikasi Pasien' },
   '#/reaksi-transfusi':           { module: () => import('./pages/modules/reaksi-transfusi.js'), title: 'Reaksi Transfusi' },
   '#/gelang-identitas':           { module: () => import('./pages/modules/gelang-identitas.js'), title: 'Gelang Identitas' },
+  '#/kepatuhan-kebersihan-tangan': { module: () => import('./pages/modules/kepatuhan-kebersihan-tangan.js'), title: 'Kepatuhan Kebersihan Tangan' },
   '#/serah-terima-pasien':        { module: () => import('./pages/modules/serah-terima-pasien.js'), title: 'Serah Terima Pasien' },
   
   // Rawat Inap
@@ -56,6 +57,7 @@ const routes = {
   '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
   '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
+  '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },
 };
 
 let currentPage = null;
@@ -118,8 +120,8 @@ async function handleRoute(contentContainer) {
       return;
     }
   } else if (role === 'pic_mutu') {
-    // pic_mutu can access dashboard, laporan, and their allowed modules
-    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan';
+    // pic_mutu can access dashboard, laporan, master-tindakan, and their allowed modules
+    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/master-tindakan';
     if (!isGeneralRoute && !allowed.includes(hash)) {
       renderAccessDenied(contentContainer);
       return;

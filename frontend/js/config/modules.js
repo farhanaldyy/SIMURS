@@ -15,6 +15,7 @@ export const NAV_GROUPS = [
       { label: 'Identifikasi Pasien', hash: '#/identifikasi-pasien' },
       { label: 'Reaksi Transfusi', hash: '#/reaksi-transfusi' },
       { label: 'Gelang Identitas', hash: '#/gelang-identitas' },
+      { label: 'Kepatuhan Kebersihan Tangan', hash: '#/kepatuhan-kebersihan-tangan' },
     ],
   },
   {
@@ -67,6 +68,12 @@ export const NAV_GROUPS = [
       { label: 'Sisa Makanan Pasien', hash: '#/gizi-sisa-makanan' },
       { label: 'Akurasi Pemberian Diet', hash: '#/gizi-kesalahan-diet' },
       { label: 'Identifikasi Pasien SIMRS', hash: '#/gizi-identifikasi-pasien' },
+    ],
+  },
+  {
+    title: '⚙️ Master Data',
+    items: [
+      { label: 'Master Tindakan', hash: '#/master-tindakan' }
     ],
   },
 ];

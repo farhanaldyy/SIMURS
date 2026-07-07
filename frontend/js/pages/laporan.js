@@ -51,6 +51,7 @@ const serviceToHash = {
   'Reaksi Transfusi': '#/reaksi-transfusi',
   'Gelang Identitas': '#/gelang-identitas',
   'Serah Terima Pasien': '#/serah-terima-pasien',
+  'Kepatuhan Kebersihan Tangan': '#/kepatuhan-kebersihan-tangan',
   'Angka Kematian Ranap': '#/angka-kematian-ranap',
   'Double Check High Alert': '#/double-check-high-alert',
   'Visit Dokter Spesialis': '#/visit-dokter',

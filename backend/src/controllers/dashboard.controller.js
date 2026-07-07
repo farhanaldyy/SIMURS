@@ -16,7 +16,7 @@ async function getSummary(req, res, next) {
       insidenClotting, insidenJarum, penundaanOperasi,
       informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
       mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
-      giziKesalahanDiet, giziIdentifikasiPasien
+      giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -46,6 +46,7 @@ async function getSummary(req, res, next) {
       prisma.giziSisaMakanan.count({ where }),
       prisma.giziKesalahanDiet.count({ where }),
       prisma.giziIdentifikasiPasien.count({ where }),
+      prisma.kepatuhanKebersihanTangan.count({ where }),
     ]);
 
     res.json({
@@ -59,7 +60,7 @@ async function getSummary(req, res, next) {
           insidenClotting, insidenJarum, penundaanOperasi,
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
           mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
-          giziKesalahanDiet, giziIdentifikasiPasien
+          giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan
         },
       },
     });
@@ -73,6 +74,7 @@ const services = {
   'Reaksi Transfusi': { service: require('../services/modules/reaksi-transfusi.service'), category: 'Keselamatan Pasien' },
   'Gelang Identitas': { service: require('../services/modules/gelang-identitas.service'), category: 'Keselamatan Pasien' },
   'Serah Terima Pasien': { service: require('../services/modules/serah-terima-pasien.service'), category: 'Keselamatan Pasien' },
+  'Kepatuhan Kebersihan Tangan': { service: require('../services/modules/kepatuhan-kebersihan-tangan.service'), category: 'Keselamatan Pasien' },
   
   'Angka Kematian Ranap': { service: require('../services/modules/angka-kematian-ranap.service'), category: 'Rawat Inap', extraWhere: { lokasi: 'ranap' } },
   'Double Check High Alert': { service: require('../services/modules/double-check-high-alert.service'), category: 'Rawat Inap' },

@@ -5,6 +5,7 @@ router.use('/auth', require('./auth'));
 
 // Master data
 router.use('/', require('./master'));
+router.use('/master-tindakan', require('./modules/master-tindakan'));
 
 // Dashboard
 router.use('/dashboard', require('./dashboard'));
@@ -49,5 +50,6 @@ router.use('/gizi-waktu-makanan', require('./modules/gizi-waktu-makanan'));
 router.use('/gizi-sisa-makanan', require('./modules/gizi-sisa-makanan'));
 router.use('/gizi-kesalahan-diet', require('./modules/gizi-kesalahan-diet'));
 router.use('/gizi-identifikasi-pasien', require('./modules/gizi-identifikasi-pasien'));
+router.use('/kepatuhan-kebersihan-tangan', require('./modules/kepatuhan-kebersihan-tangan'));
 
 module.exports = router;
