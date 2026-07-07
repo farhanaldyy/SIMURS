@@ -44,4 +44,10 @@ router.use('/surgical-checklist-operasi', require('./modules/surgical-checklist-
 router.use('/penandaan-lokasi-operasi', require('./modules/penandaan-lokasi-operasi'));
 router.use('/mutu-kamar-operasi', require('./modules/mutu-kamar-operasi'));
 
+// Gizi modules
+router.use('/gizi-waktu-makanan', require('./modules/gizi-waktu-makanan'));
+router.use('/gizi-sisa-makanan', require('./modules/gizi-sisa-makanan'));
+router.use('/gizi-kesalahan-diet', require('./modules/gizi-kesalahan-diet'));
+router.use('/gizi-identifikasi-pasien', require('./modules/gizi-identifikasi-pasien'));
+
 module.exports = router;

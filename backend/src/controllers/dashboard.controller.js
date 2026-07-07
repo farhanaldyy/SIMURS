@@ -14,7 +14,9 @@ async function getSummary(req, res, next) {
       visitDokter, ert, asesmenIgd, pasienTertahan,
       gelangIdentitas, serahTerima, kembaliIcu, ketidakpatuhanHd,
       insidenClotting, insidenJarum, penundaanOperasi,
-      informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi
+      informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
+      mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
+      giziKesalahanDiet, giziIdentifikasiPasien
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -40,6 +42,10 @@ async function getSummary(req, res, next) {
       prisma.surgicalChecklist.count({ where }),
       prisma.penandaanLokasiOperasi.count({ where: { periode_id: where.periode_id } }),
       prisma.mutuKamarOperasi.count({ where: { periode_id: where.periode_id } }),
+      prisma.giziWaktuMakanan.count({ where }),
+      prisma.giziSisaMakanan.count({ where }),
+      prisma.giziKesalahanDiet.count({ where }),
+      prisma.giziIdentifikasiPasien.count({ where }),
     ]);
 
     res.json({
@@ -52,7 +58,8 @@ async function getSummary(req, res, next) {
           gelangIdentitas, serahTerima, kembaliIcu, ketidakpatuhanHd,
           insidenClotting, insidenJarum, penundaanOperasi,
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
-          mutuKamarOperasi
+          mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
+          giziKesalahanDiet, giziIdentifikasiPasien
         },
       },
     });
@@ -95,6 +102,12 @@ const services = {
   'Kejadian Operasi Salah Sisi': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_sisi' } },
   'Kejadian Operasi Salah Orang': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_orang' } },
   'Kejadian Operasi Salah Prosedur / Tindakan': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_prosedur' } },
+
+  // Gizi
+  'Ketepatan Waktu Makanan': { service: require('../services/modules/gizi-waktu-makanan.service'), category: 'Gizi' },
+  'Sisa Makanan Pasien': { service: require('../services/modules/gizi-sisa-makanan.service'), category: 'Gizi' },
+  'Akurasi Pemberian Diet': { service: require('../services/modules/gizi-kesalahan-diet.service'), category: 'Gizi' },
+  'Identifikasi Pasien SIMRS': { service: require('../services/modules/gizi-identifikasi-pasien.service'), category: 'Gizi' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

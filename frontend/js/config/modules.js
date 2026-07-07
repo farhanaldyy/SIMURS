@@ -60,6 +60,15 @@ export const NAV_GROUPS = [
       { label: 'Standar Minimal Mutu Kamar Operasi', hash: '#/mutu-kamar-operasi' },
     ],
   },
+  {
+    title: '🥗 Gizi',
+    items: [
+      { label: 'Ketepatan Waktu Makanan', hash: '#/gizi-waktu-makanan' },
+      { label: 'Sisa Makanan Pasien', hash: '#/gizi-sisa-makanan' },
+      { label: 'Akurasi Pemberian Diet', hash: '#/gizi-kesalahan-diet' },
+      { label: 'Identifikasi Pasien SIMRS', hash: '#/gizi-identifikasi-pasien' },
+    ],
+  },
 ];
 
 export const ADMIN_GROUP = {

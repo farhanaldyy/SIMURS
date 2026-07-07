@@ -8,18 +8,22 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  nama          String    @db.VarChar(100)
-  username      String    @unique @db.VarChar(50)
-  password_hash String    @db.VarChar(255)
-  role          UserRole  @default(petugas)
-  unit_id       Int?
-  aktif           Boolean   @default(true)
-  allowed_modules String?   @db.Text
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  id              Int      @id @default(autoincrement())
+  nama            String   @db.VarChar(100)
+  username        String   @unique @db.VarChar(50)
+  password_hash   String   @db.VarChar(255)
+  role            UserRole @default(petugas)
+  unit_id         Int?
+  aktif           Boolean  @default(true)
+  allowed_modules String?  @db.Text
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-  unit            Unit?     @relation(fields: [unit_id], references: [id])
+  unit                    Unit?                    @relation(fields: [unit_id], references: [id])
+  giziWaktuMakanans       GiziWaktuMakanan[]
+  giziSisaMakanans        GiziSisaMakanan[]
+  giziKesalahanDiets      GiziKesalahanDiet[]
+  giziIdentifikasiPasiens GiziIdentifikasiPasien[]
 
   @@map("users")
 }
@@ -31,17 +35,25 @@ model Unit {
   aktif      Boolean  @default(true)
   created_at DateTime @default(now())
 
-  users      User[]
+  users                   User[]
+  giziWaktuMakanans       GiziWaktuMakanan[]
+  giziSisaMakanans        GiziSisaMakanan[]
+  giziKesalahanDiets      GiziKesalahanDiet[]
+  giziIdentifikasiPasiens GiziIdentifikasiPasien[]
 
   @@map("units")
 }
 
 model Periode {
-  id         Int           @id @default(autoincrement())
-  bulan      Int           @db.TinyInt
-  tahun      Int           @db.SmallInt
-  status     PeriodeStatus @default(open)
-  created_at DateTime      @default(now())
+  id                      Int                      @id @default(autoincrement())
+  bulan                   Int                      @db.TinyInt
+  tahun                   Int                      @db.SmallInt
+  status                  PeriodeStatus            @default(open)
+  created_at              DateTime                 @default(now())
+  giziWaktuMakanans       GiziWaktuMakanan[]
+  giziSisaMakanans        GiziSisaMakanan[]
+  giziKesalahanDiets      GiziKesalahanDiet[]
+  giziIdentifikasiPasiens GiziIdentifikasiPasien[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -65,19 +77,19 @@ model AuditLog {
 // === INDIKATOR TABLES ===
 
 model RisikoJatuh {
-  id              Int         @id @default(autoincrement())
-  periode_id      Int
-  unit_id         Int
-  nama_pasien     String      @db.VarChar(100)
-  usia            Int         @db.TinyInt
-  no_rm           String      @db.VarChar(20)
-  asesmen_awal    DilakukanEnum
-  asesmen_ulang   DilakukanEnum
-  intervensi      DilakukanEnum
-  edukasi         DilakukanEnum
-  created_by      Int
-  created_at      DateTime    @default(now())
-  updated_at      DateTime    @updatedAt
+  id            Int           @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  nama_pasien   String        @db.VarChar(100)
+  usia          Int           @db.TinyInt
+  no_rm         String        @db.VarChar(20)
+  asesmen_awal  DilakukanEnum
+  asesmen_ulang DilakukanEnum
+  intervensi    DilakukanEnum
+  edukasi       DilakukanEnum
+  created_by    Int
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -85,18 +97,18 @@ model RisikoJatuh {
 }
 
 model InsidenKeselamatan {
-  id                Int           @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
   periode_id        Int
   unit_id           Int
-  tanggal_kejadian  DateTime      @db.Date
-  jam_kejadian      DateTime      @db.Time(0)
-  nama_pasien       String        @db.VarChar(100)
-  no_rm             String        @db.VarChar(20)
-  deskripsi_insiden String        @db.Text
+  tanggal_kejadian  DateTime     @db.Date
+  jam_kejadian      DateTime     @db.Time(0)
+  nama_pasien       String       @db.VarChar(100)
+  no_rm             String       @db.VarChar(20)
+  deskripsi_insiden String       @db.Text
   jenis_insiden     JenisInsiden
   created_by        Int
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -123,20 +135,20 @@ model ReaksiTransfusi {
 }
 
 model AngkaKematian {
-  id             Int      @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   periode_id     Int
   unit_id        Int
   lokasi         LokasiKematian
-  nama_pasien    String   @db.VarChar(100)
-  no_rm          String   @db.VarChar(20)
-  tanggal_masuk  DateTime @db.Date
-  jam_masuk      DateTime @db.Time(0)
-  tanggal_keluar DateTime @db.Date
-  jam_keluar     DateTime @db.Time(0)
-  keterangan     String?  @db.VarChar(200)
+  nama_pasien    String         @db.VarChar(100)
+  no_rm          String         @db.VarChar(20)
+  tanggal_masuk  DateTime       @db.Date
+  jam_masuk      DateTime       @db.Time(0)
+  tanggal_keluar DateTime       @db.Date
+  jam_keluar     DateTime       @db.Time(0)
+  keterangan     String?        @db.VarChar(200)
   created_by     Int
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -144,19 +156,19 @@ model AngkaKematian {
 }
 
 model DoubleCheckHighAlert {
-  id             Int      @id @default(autoincrement())
-  periode_id     Int
-  unit_id        Int
-  nama_pasien    String   @db.VarChar(100)
-  no_rm          String   @db.VarChar(20)
-  diagnosis      String   @db.VarChar(255)
-  nama_obat      String   @db.VarChar(100)
-  nama_penyerah  String   @db.VarChar(100)
-  nama_penerima  String   @db.VarChar(100)
-  keterangan     String?  @db.VarChar(200)
-  created_by     Int
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  nama_pasien   String   @db.VarChar(100)
+  no_rm         String   @db.VarChar(20)
+  diagnosis     String   @db.VarChar(255)
+  nama_obat     String   @db.VarChar(100)
+  nama_penyerah String   @db.VarChar(100)
+  nama_penerima String   @db.VarChar(100)
+  keterangan    String?  @db.VarChar(200)
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -164,18 +176,18 @@ model DoubleCheckHighAlert {
 }
 
 model WaktuTanggapSc {
-  id                      Int      @id @default(autoincrement())
-  periode_id              Int
-  unit_id                 Int
-  nama_pasien             String   @db.VarChar(100)
-  no_rm                   String   @db.VarChar(20)
-  diagnosis               String   @db.VarChar(255)
-  jam_ditentukan_operasi  DateTime @db.Time(0)
-  jam_sayatan_pertama     DateTime @db.Time(0)
-  selisih_menit           Int      @db.SmallInt
-  created_by              Int
-  created_at              DateTime @default(now())
-  updated_at              DateTime @updatedAt
+  id                     Int      @id @default(autoincrement())
+  periode_id             Int
+  unit_id                Int
+  nama_pasien            String   @db.VarChar(100)
+  no_rm                  String   @db.VarChar(20)
+  diagnosis              String   @db.VarChar(255)
+  jam_ditentukan_operasi DateTime @db.Time(0)
+  jam_sayatan_pertama    DateTime @db.Time(0)
+  selisih_menit          Int      @db.SmallInt
+  created_by             Int
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -183,19 +195,19 @@ model WaktuTanggapSc {
 }
 
 model IdentifikasiPasien {
-  id                    Int                @id @default(autoincrement())
-  periode_id            Int
-  unit_id               Int
-  tanggal               DateTime           @db.Date
-  nama_pasien           String             @db.VarChar(100)
-  no_rm                 String             @db.VarChar(20)
-  pemberian_obat        IdentifikasiEnum
-  nutrisi_ngt           IdentifikasiEnum
-  pemberian_darah       IdentifikasiEnum
-  tindakan_keperawatan  IdentifikasiEnum
-  created_by            Int
-  created_at            DateTime           @default(now())
-  updated_at            DateTime           @updatedAt
+  id                   Int              @id @default(autoincrement())
+  periode_id           Int
+  unit_id              Int
+  tanggal              DateTime         @db.Date
+  nama_pasien          String           @db.VarChar(100)
+  no_rm                String           @db.VarChar(20)
+  pemberian_obat       IdentifikasiEnum
+  nutrisi_ngt          IdentifikasiEnum
+  pemberian_darah      IdentifikasiEnum
+  tindakan_keperawatan IdentifikasiEnum
+  created_by           Int
+  created_at           DateTime         @default(now())
+  updated_at           DateTime         @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -203,20 +215,20 @@ model IdentifikasiPasien {
 }
 
 model AlurKlinis {
-  id          Int            @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   periode_id  Int
   unit_id     Int
-  nama_pasien String         @db.VarChar(100)
-  no_rm       String         @db.VarChar(20)
-  diagnosis   String         @db.VarChar(255)
-  ruangan     String         @db.VarChar(50)
-  bulan       String         @db.VarChar(20)
+  nama_pasien String     @db.VarChar(100)
+  no_rm       String     @db.VarChar(20)
+  diagnosis   String     @db.VarChar(255)
+  ruangan     String     @db.VarChar(50)
+  bulan       String     @db.VarChar(20)
   los         SesuaiEnum
   penunjang   SesuaiEnum
   obat        SesuaiEnum
   created_by  Int
-  created_at  DateTime       @default(now())
-  updated_at  DateTime       @updatedAt
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -224,18 +236,18 @@ model AlurKlinis {
 }
 
 model VisitDokter {
-  id               Int            @id @default(autoincrement())
-  periode_id       Int
-  unit_id          Int
-  nama_dpjp        String         @db.VarChar(100)
-  nama_pasien      String         @db.VarChar(100)
-  no_rm            String         @db.VarChar(20)
+  id                Int           @id @default(autoincrement())
+  periode_id        Int
+  unit_id           Int
+  nama_dpjp         String        @db.VarChar(100)
+  nama_pasien       String        @db.VarChar(100)
+  no_rm             String        @db.VarChar(20)
   jam_mulai_selesai String        @db.VarChar(20)
-  jam_visit        DateTime       @db.Time(0)
-  kategori_visit   KategoriVisit
-  created_by       Int
-  created_at       DateTime       @default(now())
-  updated_at       DateTime       @updatedAt
+  jam_visit         DateTime      @db.Time(0)
+  kategori_visit    KategoriVisit
+  created_by        Int
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -243,18 +255,18 @@ model VisitDokter {
 }
 
 model EmergencyResponseTime {
-  id                   Int      @id @default(autoincrement())
-  periode_id           Int
-  unit_id              Int
-  nama_pasien          String   @db.VarChar(100)
-  no_rm                String   @db.VarChar(20)
-  jam_datang           DateTime @db.Time(0)
-  jam_dilayani_dokter  DateTime @db.Time(0)
-  respon_time_menit    Decimal  @db.Decimal(5, 2)
-  triase               Triase
-  created_by           Int
-  created_at           DateTime @default(now())
-  updated_at           DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  nama_pasien         String   @db.VarChar(100)
+  no_rm               String   @db.VarChar(20)
+  jam_datang          DateTime @db.Time(0)
+  jam_dilayani_dokter DateTime @db.Time(0)
+  respon_time_menit   Decimal  @db.Decimal(5, 2)
+  triase              Triase
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -302,19 +314,19 @@ model PasienTertahanIgd {
 }
 
 model GelangIdentitas {
-  id               Int            @id @default(autoincrement())
+  id               Int           @id @default(autoincrement())
   periode_id       Int
   unit_id          Int
-  nama_pasien      String         @db.VarChar(100)
-  no_rm            String         @db.VarChar(20)
+  nama_pasien      String        @db.VarChar(100)
+  no_rm            String        @db.VarChar(20)
   gelang_identitas DilakukanEnum
   alergi           DilakukanEnum
   fall_risk        DilakukanEnum
   dnr              DilakukanEnum
-  keterangan       String?        @db.VarChar(200)
+  keterangan       String?       @db.VarChar(200)
   created_by       Int
-  created_at       DateTime       @default(now())
-  updated_at       DateTime       @updatedAt
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -322,11 +334,11 @@ model GelangIdentitas {
 }
 
 model SerahTerimaPasien {
-  id          Int        @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   periode_id  Int
   unit_id     Int
-  nama_pasien String     @db.VarChar(100)
-  no_rm       String     @db.VarChar(20)
+  nama_pasien String      @db.VarChar(100)
+  no_rm       String      @db.VarChar(20)
   akun        SesuaiEnum2
   keluhan     SesuaiEnum2
   ttv         SesuaiEnum2
@@ -334,10 +346,10 @@ model SerahTerimaPasien {
   konsul      SesuaiEnum2
   tindakan    SesuaiEnum2
   obat        SesuaiEnum2
-  keterangan  String?    @db.VarChar(200)
+  keterangan  String?     @db.VarChar(200)
   created_by  Int
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -361,36 +373,36 @@ model KembaliIcu {
 }
 
 model KetidakpatuhanHd {
-  id                    Int      @id @default(autoincrement())
-  periode_id            Int
-  nama_pasien           String   @db.VarChar(100)
-  no_rm                 String   @db.VarChar(20)
-  jadwal_hd_per_minggu  String   @db.VarChar(50)
-  hari_tidak_datang     String   @db.VarChar(30)
-  alasan                String?  @db.Text
-  created_by            Int
-  created_at            DateTime @default(now())
-  updated_at            DateTime @updatedAt
+  id                   Int      @id @default(autoincrement())
+  periode_id           Int
+  nama_pasien          String   @db.VarChar(100)
+  no_rm                String   @db.VarChar(20)
+  jadwal_hd_per_minggu String   @db.VarChar(50)
+  hari_tidak_datang    String   @db.VarChar(30)
+  alasan               String?  @db.Text
+  created_by           Int
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
 
   @@index([periode_id])
   @@map("ketidakpatuhan_hd")
 }
 
 model PeriodeHdSummary {
-  id              Int      @id @default(autoincrement())
-  periode_id      Int      @unique
-  total_pasien_hd Int      @default(0)
-  total_avgraft_avf Int    @default(0)
-  updated_at      DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  periode_id        Int      @unique
+  total_pasien_hd   Int      @default(0)
+  total_avgraft_avf Int      @default(0)
+  updated_at        DateTime @updatedAt
 
   @@map("periode_hd_summary")
 }
 
 model PeriodePenundaanSummary {
-  id              Int      @id @default(autoincrement())
-  periode_id      Int      @unique
-  standar_menit   Int      @default(60)
-  updated_at      DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  periode_id    Int      @unique
+  standar_menit Int      @default(60)
+  updated_at    DateTime @updatedAt
 
   @@map("periode_penundaan_summary")
 }
@@ -428,48 +440,48 @@ model InsidenJarumVena {
 }
 
 model PeriodeJarumVenaSummary {
-  id                      Int      @id @default(autoincrement())
-  periode_id              Int      @unique
-  total_pemasangan_bulan  Int      @default(0)
-  updated_at              DateTime @updatedAt
+  id                     Int      @id @default(autoincrement())
+  periode_id             Int      @unique
+  total_pemasangan_bulan Int      @default(0)
+  updated_at             DateTime @updatedAt
 
   @@map("periode_jarum_vena_summary")
 }
 
 model PenundaanOperasi {
-  id                  Int      @id @default(autoincrement())
-  periode_id          Int
-  tanggal             DateTime @db.Date
-  nama_pasien         String   @db.VarChar(100)
-  no_rm               String   @db.VarChar(20)
-  dpjp                String   @db.VarChar(100)
-  jadwal_jam_operasi  DateTime @db.Time(0)
-  jam_mulai_operasi   DateTime @db.Time(0)
-  waktu_tunggu_menit  Int
-  batal               Boolean  @default(false)
-  indikasi_medis      Boolean  @default(false)
-  created_by          Int
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  periode_id         Int
+  tanggal            DateTime @db.Date
+  nama_pasien        String   @db.VarChar(100)
+  no_rm              String   @db.VarChar(20)
+  dpjp               String   @db.VarChar(100)
+  jadwal_jam_operasi DateTime @db.Time(0)
+  jam_mulai_operasi  DateTime @db.Time(0)
+  waktu_tunggu_menit Int
+  batal              Boolean  @default(false)
+  indikasi_medis     Boolean  @default(false)
+  created_by         Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
 
   @@index([periode_id])
   @@map("penundaan_operasi")
 }
 
 model InformedConsent {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   periode_id  Int
   unit_id     Int
   jenis       JenisConsent
-  tanggal     DateTime @db.Date
-  nama_pasien String   @db.VarChar(100)
-  no_rm       String   @db.VarChar(20)
-  dpjp        String   @db.VarChar(100)
+  tanggal     DateTime     @db.Date
+  nama_pasien String       @db.VarChar(100)
+  no_rm       String       @db.VarChar(20)
+  dpjp        String       @db.VarChar(100)
   diisi       Boolean
-  keterangan  String?  @db.VarChar(200)
+  keterangan  String?      @db.VarChar(200)
   created_by  Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -477,19 +489,19 @@ model InformedConsent {
 }
 
 model AsesmenPraOperasi {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   periode_id  Int
   unit_id     Int
   jenis       JenisAsesmen
-  tanggal     DateTime @db.Date
-  nama_pasien String   @db.VarChar(100)
-  no_rm       String   @db.VarChar(20)
-  dpjp        String   @db.VarChar(100)
+  tanggal     DateTime     @db.Date
+  nama_pasien String       @db.VarChar(100)
+  no_rm       String       @db.VarChar(20)
+  dpjp        String       @db.VarChar(100)
   diisi       Boolean
-  keterangan  String?  @db.VarChar(200)
+  keterangan  String?      @db.VarChar(200)
   created_by  Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -497,21 +509,21 @@ model AsesmenPraOperasi {
 }
 
 model SurgicalChecklist {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   periode_id  Int
   unit_id     Int
   jenis       JenisSurgical
-  tanggal     DateTime @db.Date
-  nama_pasien String   @db.VarChar(100)
-  no_rm       String   @db.VarChar(20)
-  dpjp        String   @db.VarChar(100)
+  tanggal     DateTime      @db.Date
+  nama_pasien String        @db.VarChar(100)
+  no_rm       String        @db.VarChar(20)
+  dpjp        String        @db.VarChar(100)
   sign_in     Boolean
   time_out    Boolean
   sign_out    Boolean
-  keterangan  String?  @db.VarChar(200)
+  keterangan  String?       @db.VarChar(200)
   created_by  Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
 
   @@index([periode_id])
   @@index([unit_id])
@@ -519,19 +531,19 @@ model SurgicalChecklist {
 }
 
 model PenandaanLokasiOperasi {
-  id              Int      @id @default(autoincrement())
-  periode_id      Int
-  tanggal         DateTime @db.Date
-  nama_pasien     String   @db.VarChar(100)
-  no_rm           String   @db.VarChar(20)
-  diagnosis       String   @db.VarChar(255)
-  dpjp            String   @db.VarChar(100)
-  dilakukan       Boolean
-  not_applicable  Boolean  @default(false)
-  keterangan      String?  @db.VarChar(200)
-  created_by      Int
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  periode_id     Int
+  tanggal        DateTime @db.Date
+  nama_pasien    String   @db.VarChar(100)
+  no_rm          String   @db.VarChar(20)
+  diagnosis      String   @db.VarChar(255)
+  dpjp           String   @db.VarChar(100)
+  dilakukan      Boolean
+  not_applicable Boolean  @default(false)
+  keterangan     String?  @db.VarChar(200)
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
   @@index([periode_id])
   @@map("penandaan_lokasi_operasi")
@@ -627,17 +639,100 @@ enum JenisSurgical {
 }
 
 model MutuKamarOperasi {
-  id              Int      @id @default(autoincrement())
-  periode_id      Int
-  tipe            String   @db.VarChar(50) // 'kematian_meja_operasi', 'salah_sisi', 'salah_orang', 'salah_prosedur'
-  total_kejadian  Int      @default(0)
-  total_operasi   Int      @default(0)
-  created_by      Int
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  periode_id     Int
+  tipe           String   @db.VarChar(50) // 'kematian_meja_operasi', 'salah_sisi', 'salah_orang', 'salah_prosedur'
+  total_kejadian Int      @default(0)
+  total_operasi  Int      @default(0)
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
   @@unique([periode_id, tipe])
   @@index([periode_id])
   @@map("mutu_kamar_operasi")
 }
 
+model GiziWaktuMakanan {
+  id                 Int      @id @default(autoincrement())
+  periode_id         Int
+  unit_id            Int
+  tanggal            DateTime @db.Date
+  jumlah_tepat_waktu Int
+  jumlah_porsi       Int
+  persentase         Int
+  created_by         Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("gizi_waktu_makanan")
+}
+
+model GiziSisaMakanan {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int
+  unit_id      Int
+  tanggal      DateTime @db.Date
+  jumlah_sisa  Int
+  jumlah_porsi Int
+  persentase   Int
+  created_by   Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("gizi_sisa_makanan")
+}
+
+model GiziKesalahanDiet {
+  id                 Int      @id @default(autoincrement())
+  periode_id         Int
+  unit_id            Int
+  tanggal            DateTime @db.Date
+  jumlah_tidak_salah Int
+  jumlah_porsi       Int
+  persentase         Int
+  created_by         Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("gizi_kesalahan_diet")
+}
+
+model GiziIdentifikasiPasien {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  tanggal             DateTime @db.Date
+  jumlah_sesuai       Int
+  jumlah_pasien_ranap Int
+  persentase          Int
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("gizi_identifikasi_pasien")
+}

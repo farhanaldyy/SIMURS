@@ -44,6 +44,12 @@ const routes = {
   '#/surgical-checklist-operasi': { module: () => import('./pages/modules/surgical-checklist-operasi.js'), title: 'Surgical Safety Checklist Operasi' },
   '#/penandaan-lokasi-operasi':   { module: () => import('./pages/modules/penandaan-lokasi-operasi.js'), title: 'Penandaan Lokasi Operasi' },
   '#/mutu-kamar-operasi':          { module: () => import('./pages/modules/mutu-kamar-operasi.js'), title: 'Standar Minimal Mutu Kamar Operasi' },
+
+  // Gizi
+  '#/gizi-waktu-makanan':         { module: () => import('./pages/modules/gizi-waktu-makanan.js'), title: 'Ketepatan Waktu Pemberian Makanan' },
+  '#/gizi-sisa-makanan':          { module: () => import('./pages/modules/gizi-sisa-makanan.js'), title: 'Sisa Makanan Yang Tidak Termakan' },
+  '#/gizi-kesalahan-diet':         { module: () => import('./pages/modules/gizi-kesalahan-diet.js'), title: 'Tidak Adanya Kesalahan Pemberian Diet' },
+  '#/gizi-identifikasi-pasien':   { module: () => import('./pages/modules/gizi-identifikasi-pasien.js'), title: 'Kepatuhan Identifikasi Pasien (SIMRS)' },
  
   // Admin Panel
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },

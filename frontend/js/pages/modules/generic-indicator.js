@@ -96,6 +96,11 @@ export function createGenericIndicatorPage(config) {
     const container = document.getElementById('summary-container');
     if (!container) return;
 
+    if (config.calculateSummaryHTML) {
+      container.innerHTML = config.calculateSummaryHTML(s);
+      return;
+    }
+
     let targetMetric = `${s.persen || 0}%`;
     let labelMetric = 'Kepatuhan';
     let numeratorText = config.numeratorLabel || 'Patuh (N)';

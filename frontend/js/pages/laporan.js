@@ -75,7 +75,13 @@ const serviceToHash = {
   'Kejadian Kematian di Meja Operasi': '#/mutu-kamar-operasi',
   'Kejadian Operasi Salah Sisi': '#/mutu-kamar-operasi',
   'Kejadian Operasi Salah Orang': '#/mutu-kamar-operasi',
-  'Kejadian Operasi Salah Prosedur / Tindakan': '#/mutu-kamar-operasi'
+  'Kejadian Operasi Salah Prosedur / Tindakan': '#/mutu-kamar-operasi',
+
+  // Gizi
+  'Ketepatan Waktu Makanan': '#/gizi-waktu-makanan',
+  'Sisa Makanan Pasien': '#/gizi-sisa-makanan',
+  'Akurasi Pemberian Diet': '#/gizi-kesalahan-diet',
+  'Identifikasi Pasien SIMRS': '#/gizi-identifikasi-pasien'
 };
 
 function renderReportTable() {
