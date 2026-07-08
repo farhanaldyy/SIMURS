@@ -2,9 +2,9 @@
 ## Sistem Informasi Mutu Rumah Sakit (SIMURS)
 ### Versi Vanilla JS
 
-**Versi:** 1.0.0  
-**Tanggal:** Juni 2026  
-**Status:** Draft  
+**Versi:** 1.1.0  
+**Tanggal:** Juli 2026  
+**Status:** Updated  
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### 1.1 Latar Belakang
 
-Pencatatan data indikator mutu rumah sakit saat ini dilakukan secara manual menggunakan file Excel (.xlsx) dengan 27 sheet berbeda, mencakup indikator keselamatan pasien, klinis, IGD, HD, dan operasi. Proses ini rentan kesalahan input, tidak memiliki validasi otomatis, sulit diakses banyak pengguna secara bersamaan, dan menyulitkan pelaporan agregat bulanan.
+Pencatatan data indikator mutu rumah sakit saat ini dilakukan secara manual menggunakan file Excel (.xlsx) dengan 34 sheet berbeda, mencakup indikator keselamatan pasien, klinis, IGD, HD, operasi, dan gizi. Proses ini rentan kesalahan input, tidak memiliki validasi otomatis, sulit diakses banyak pengguna secara bersamaan, dan menyulitkan pelaporan agregat bulanan.
 
 ### 1.2 Tujuan Produk
 
@@ -117,28 +117,7 @@ simurs/
 │       │   ├── dashboard.js         # getSummary
 │       │   └── modules/
 │       │       ├── risiko-jatuh.js
-│       │       ├── insiden-keselamatan.js
-│       │       ├── reaksi-transfusi.js
-│       │       ├── angka-kematian.js
-│       │       ├── double-check-high-alert.js
-│       │       ├── waktu-tanggap-sc.js
-│       │       ├── identifikasi-pasien.js
-│       │       ├── alur-klinis.js
-│       │       ├── visit-dokter.js
-│       │       ├── emergency-response-time.js
-│       │       ├── asesmen-awal-igd.js
-│       │       ├── pasien-tertahan-igd.js
-│       │       ├── gelang-identitas.js
-│       │       ├── serah-terima-pasien.js
-│       │       ├── kembali-icu.js
-│       │       ├── ketidakpatuhan-hd.js
-│       │       ├── insiden-clotting.js
-│       │       ├── insiden-jarum-vena.js
-│       │       ├── penundaan-operasi.js
-│       │       ├── informed-consent.js
-│       │       ├── asesmen-pra-operasi.js
-│       │       ├── surgical-checklist.js
-│       │       └── penandaan-lokasi-operasi.js
+│       │       └── ... (34 file, satu per modul)
 │       │
 │       ├── components/
 │       │   ├── sidebar.js           # Render sidebar + navigasi aktif
@@ -154,11 +133,12 @@ simurs/
 │       │   ├── dashboard.js         # Halaman dashboard
 │       │   ├── admin/
 │       │   │   ├── users.js
-│       │   │   └── periode.js
+│       │   │   ├── units.js
+│       │   │   ├── periode.js
+│       │   │   └── audit-log.js
 │       │   └── modules/
 │       │       ├── risiko-jatuh.js  # Halaman list + form modul ini
-│       │       ├── insiden-keselamatan.js
-│       │       └── ... (27 file, satu per modul)
+│       │       └── ... (35 file, termasuk generic-indicator.js)
 │       │
 │       └── utils/
 │           ├── validator.js         # validateRequired, validateTime, validateNoRM, dll
@@ -184,7 +164,7 @@ simurs/
 │   │   │   ├── laporan.js
 │   │   │   └── modules/
 │   │   │       ├── risiko-jatuh.js
-│   │   │       └── ... (27 file)
+│   │   │       └── ... (35 file, termasuk master-tindakan.js)
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.js
 │   │   │   ├── master.controller.js
@@ -192,13 +172,13 @@ simurs/
 │   │   │   ├── laporan.controller.js
 │   │   │   └── modules/
 │   │   │       ├── risiko-jatuh.controller.js
-│   │   │       └── ... (27 file)
+│   │   │       └── ... (35 file, termasuk master-tindakan.controller.js)
 │   │   ├── services/
 │   │   │   ├── auth.service.js
 │   │   │   ├── laporan.service.js
 │   │   │   └── modules/
 │   │   │       ├── risiko-jatuh.service.js
-│   │   │       └── ... (27 file)
+│   │   │       └── ... (35 service, termasuk master-tindakan.service.js)
 │   │   └── prisma/
 │   │       └── schema.prisma
 │   └── package.json
@@ -220,13 +200,16 @@ File `js/router.js` menangani navigasi tanpa reload halaman:
 ```javascript
 // Contoh implementasi router.js
 const routes = {
-  '#/login':              'pages/login.js',
-  '#/dashboard':          'pages/dashboard.js',
-  '#/risiko-jatuh':       'pages/modules/risiko-jatuh.js',
-  '#/insiden-keselamatan':'pages/modules/insiden-keselamatan.js',
-  // ... semua 27 modul
-  '#/admin/users':        'pages/admin/users.js',
-  '#/admin/periode':      'pages/admin/periode.js',
+  '#/login':                      { module: () => import('./pages/login.js'), title: 'Login' },
+  '#/dashboard':                  { module: () => import('./pages/dashboard.js'), title: 'Dashboard' },
+  '#/risiko-jatuh':               { module: () => import('./pages/modules/risiko-jatuh.js'), title: 'Risiko Jatuh' },
+  '#/insiden-keselamatan':        { module: () => import('./pages/modules/insiden-keselamatan.js'), title: 'Insiden Keselamatan Pasien' },
+  // ... semua 34 modul
+  '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },
+  '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
+  '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
+  '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
+  '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },
 };
 
 // Setiap page module harus export fungsi: render() dan destroy()
@@ -317,13 +300,13 @@ async function handleSubmit(e) { /* validasi + api call + reload */ }
 
 ```sql
 -- Master Data
-users (id, nama, username, password_hash, role ENUM('admin','pic_mutu','komite','petugas'), unit_id, aktif BOOLEAN, created_at)
+users (id, nama, username, password_hash, role ENUM('admin','pic_mutu','komite','petugas'), unit_id, allowed_modules TEXT, aktif BOOLEAN, created_at)
 units (id, nama_unit, kode_unit, aktif BOOLEAN)
 periode (id, bulan TINYINT, tahun SMALLINT, status ENUM('open','closed'), created_at)
 audit_log (id, user_id, tabel, record_id, aksi ENUM('create','update','delete'), data_lama JSON, data_baru JSON, created_at)
 ```
 
-### 5.2 Tabel Indikator (27 Sheet)
+### 5.2 Tabel Indikator (34 Sheet)
 
 ```sql
 -- Sheet 1: Risiko Jatuh
@@ -537,7 +520,15 @@ penundaan_operasi (
   tanggal DATE, nama_pasien VARCHAR(100), no_rm VARCHAR(20), dpjp VARCHAR(100),
   jadwal_jam_operasi TIME, jam_mulai_operasi TIME,
   waktu_tunggu_menit INT,   -- dihitung otomatis
-  created_by INT, created_at DATETIME
+  batal BOOLEAN DEFAULT FALSE,
+  indikasi_medis BOOLEAN DEFAULT FALSE,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+periode_penundaan_summary (
+  id, periode_id,
+  standar_menit INT DEFAULT 60,
+  updated_at DATETIME
 )
 
 -- Sheet 21 & 26: Informed Consent (Pembedahan & Anestesi)
@@ -576,6 +567,93 @@ penandaan_lokasi_operasi (
   dilakukan BOOLEAN, not_applicable BOOLEAN,
   keterangan VARCHAR(200),
   created_by INT, created_at DATETIME
+)
+
+-- Standar Kamar Operasi Mutu
+mutu_kamar_operasi (
+  id, periode_id,
+  tipe VARCHAR(50), -- 'kematian_meja_operasi', 'salah_sisi', 'salah_orang', 'salah_prosedur'
+  total_kejadian INT DEFAULT 0,
+  total_operasi INT DEFAULT 0,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+-- Gizi: Ketepatan Waktu Pemberian Makanan
+gizi_waktu_makanan (
+  id, periode_id, unit_id,
+  tanggal DATE,
+  jumlah_tepat_waktu INT,
+  jumlah_porsi INT,
+  persentase INT,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+-- Gizi: Sisa Makanan Yang Tidak Termakan
+gizi_sisa_makanan (
+  id, periode_id, unit_id,
+  tanggal DATE,
+  jumlah_sisa INT,
+  jumlah_porsi INT,
+  persentase INT,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+-- Gizi: Tidak Adanya Kesalahan Pemberian Diet
+gizi_kesalahan_diet (
+  id, periode_id, unit_id,
+  tanggal DATE,
+  jumlah_tidak_salah INT,
+  jumlah_porsi INT,
+  persentase INT,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+-- Gizi: Kepatuhan Identifikasi Pasien
+gizi_identifikasi_pasien (
+  id, periode_id, unit_id,
+  tanggal DATE,
+  jumlah_sesuai INT,
+  jumlah_pasien_ranap INT,
+  persentase INT,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+-- Kepatuhan Kebersihan Tangan
+kepatuhan_kebersihan_tangan (
+  id, periode_id, unit_id,
+  tanggal DATE,
+  profesi ENUM('dokter', 'perawat', 'bidan', 'nakes_lain'),
+  momen_1 BOOLEAN DEFAULT FALSE,
+  momen_2 BOOLEAN DEFAULT FALSE,
+  momen_3 BOOLEAN DEFAULT FALSE,
+  momen_4 BOOLEAN DEFAULT FALSE,
+  momen_5 BOOLEAN DEFAULT FALSE,
+  tindakan ENUM('hr', 'hw', 'hr_hw', 'missed'),
+  gloves BOOLEAN DEFAULT FALSE,
+  tindakan_id INT, -- FK ke master_tindakan
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
+
+-- Master Tindakan (untuk link ke Hand Hygiene)
+master_tindakan (
+  id, nama VARCHAR(100), nilai DOUBLE DEFAULT 0,
+  created_at DATETIME, updated_at DATETIME
+)
+
+-- Kepatuhan Penggunaan APD
+kepatuhan_apd (
+  id, periode_id, unit_id,
+  tanggal DATE, nama_pasien VARCHAR(100),
+  tindakan VARCHAR(255), profesi VARCHAR(100),
+  penutup_kepala BOOLEAN DEFAULT FALSE,
+  face_shield BOOLEAN DEFAULT FALSE,
+  masker BOOLEAN DEFAULT FALSE,
+  apron BOOLEAN DEFAULT FALSE,
+  coverall BOOLEAN DEFAULT FALSE,
+  sarung_tangan BOOLEAN DEFAULT FALSE,
+  cover_shoes BOOLEAN DEFAULT FALSE,
+  created_by INT, created_at DATETIME, updated_at DATETIME
+)
 ```
 
 ### 5.3 Sinkronisasi Enum Prisma dan Database
@@ -609,7 +687,7 @@ POST   /api/users                      (Admin)
 PUT    /api/users/:id                  (Admin)
 ```
 
-### 6.3 Indikator (pola seragam untuk semua 27 modul)
+### 6.3 Indikator (pola seragam untuk semua 34 modul)
 ```
 GET    /api/:modul?periode_id=&unit_id=&page=&limit=
 POST   /api/:modul
@@ -618,7 +696,7 @@ DELETE /api/:modul/:id
 GET    /api/:modul/summary?periode_id=&unit_id=
 ```
 
-Nama `:modul`: `risiko-jatuh`, `insiden-keselamatan`, `reaksi-transfusi`, `angka-kematian-ranap`, `double-check-high-alert`, `waktu-tanggap-sc`, `identifikasi-pasien`, `alur-klinis`, `visit-dokter`, `emergency-response-time`, `asesmen-awal-igd`, `pasien-tertahan-igd`, `gelang-identitas`, `serah-terima-pasien`, `kembali-icu`, `ketidakpatuhan-hd`, `insiden-clotting`, `insiden-jarum-vena`, `penundaan-operasi`, `informed-consent-pembedahan`, `asesmen-pra-bedah`, `surgical-checklist-sc`, `surgical-checklist-operasi`, `penandaan-lokasi-operasi`, `informed-consent-anestesi`, `asesmen-pra-anestesi`, `angka-kematian-igd`
+Nama `:modul`: `risiko-jatuh`, `insiden-keselamatan`, `reaksi-transfusi`, `angka-kematian-ranap`, `double-check-high-alert`, `waktu-tanggap-sc`, `identifikasi-pasien`, `alur-klinis`, `visit-dokter`, `emergency-response-time`, `asesmen-awal-igd`, `pasien-tertahan-igd`, `gelang-identitas`, `serah-terima-pasien`, `kembali-icu`, `ketidakpatuhan-hd`, `insiden-clotting`, `insiden-jarum-vena`, `penundaan-operasi`, `informed-consent-pembedahan`, `asesmen-pra-bedah`, `surgical-checklist-sc`, `surgical-checklist-operasi`, `penandaan-lokasi-operasi`, `informed-consent-anestesi`, `asesmen-pra-anestesi`, `angka-kematian-igd`, `mutu-kamar-operasi`, `gizi-waktu-makanan`, `gizi-sisa-makanan`, `gizi-kesalahan-diet`, `gizi-identifikasi-pasien`, `kepatuhan-kebersihan-tangan`, `kepatuhan-apd`
 
 ### 6.4 Dashboard & Laporan
 ```
@@ -665,7 +743,7 @@ Token JWT disimpan di `localStorage`. Setiap request API otomatis menyertakan he
 | Kelola user & periode | ❌ | ❌ | ❌ | ✅ |
 | Tutup periode | ❌ | ❌ | ❌ | ✅ |
 
-### 7.2 Daftar Modul Indikator (27 Sheet)
+### 7.2 Daftar Modul Indikator (34 Sheet)
 
 | No | Nama Modul | Rumus Nilai | Standar |
 |---|---|---|---|
@@ -688,7 +766,7 @@ Token JWT disimpan di `localStorage`. Setiap request API otomatis menyertakan he
 | 17 | Ketidakpatuhan Pasien HD | Jumlah tidak hadir / (total_pasien × 2 × minggu) × 100% | - |
 | 18 | Insiden Clotting Durante | Jumlah insiden | - |
 | 19 | Insiden Jarum Vena Fistula | Jumlah insiden / total pemasangan × 100% | 0% |
-| 20 | Penundaan Operasi Elektif | Jumlah penundaan / total operasi × 100% | ≤ 5% |
+| 20 | Penundaan Operasi Elektif | (Total - Batal - Terlambat Tanpa Medis) / Total × 100% (dengan threshold periodik) | ≥ 95% |
 | 21 | Informed Consent Pembedahan | Diisi / total × 100% | 100% |
 | 22 | Asesmen Pra Bedah | Diisi / total × 100% | 100% |
 | 23 | Surgical Checklist SC | Lengkap (3/3) / total × 100% | 100% |
@@ -696,6 +774,13 @@ Token JWT disimpan di `localStorage`. Setiap request API otomatis menyertakan he
 | 25 | Penandaan Lokasi Operasi | Dilakukan / (total - N/A) × 100% | 100% |
 | 26 | Informed Consent Anestesi | Diisi / total × 100% | 100% |
 | 27 | Asesmen Pra Anestesi | Diisi / total × 100% | 100% |
+| 28 | Kepatuhan Kebersihan Tangan | (HR + HW + HR/HW) / total observations × 100% | ≥ 85% |
+| 29 | Kepatuhan Penggunaan APD | Total PPE digunakan / Total PPE check opportunities × 100% | 100% |
+| 30 | Standar Minimal Mutu Kamar Operasi | (Total Operasi - Total Kejadian) / Total Operasi × 100% | 100% |
+| 31 | Ketepatan Waktu Makanan (Gizi) | Tepat waktu / total porsi × 100% | > 90% |
+| 32 | Sisa Makanan Pasien (Gizi) | Porsi sisa / total porsi × 100% | ≤ 20% |
+| 33 | Akurasi Pemberian Diet (Gizi) | Tidak ada kesalahan / total porsi × 100% | 100% |
+| 34 | Identifikasi Pasien SIMRS (Gizi) | Sesuai identitas / total pasien ranap × 100% | 100% |
 
 ### 7.3 Validasi Form (di `utils/validator.js`)
 
@@ -714,7 +799,7 @@ validateEnum(value, options, fieldLabel)  // harus salah satu dari options
 
 Terdiri dari:
 - **Baris kartu ringkasan:** total modul ✅ hijau / ⚠️ kuning / ❌ merah dalam periode
-- **Tabel rekap:** semua 27 indikator, kolom: Nama Indikator | Nilai | Threshold | Status
+- **Tabel rekap:** semua 34 indikator, kolom: Nama Indikator | Nilai | Threshold | Status
 - **Bar chart:** 10 indikator dengan nilai terendah (menggunakan Chart.js)
 - **Filter:** dropdown bulan, tahun, unit (jika role komite/admin)
 
@@ -743,49 +828,64 @@ Terdiri dari:
 ### 8.2 Grup Navigasi Sidebar
 
 ```
-📊 Dashboard
+📊 Dashboard & Laporan
+  - Dashboard
+  - Cetak Laporan
 ─────────────────────
 🛡️ Keselamatan Pasien
   - Risiko Jatuh
-  - Insiden Keselamatan
-  - Reaksi Transfusi
+  - Insiden Keselamatan Pasien
   - Identifikasi Pasien
+  - Reaksi Transfusi
   - Gelang Identitas
-  - Serah Terima Pasien
+  - Kepatuhan Kebersihan Tangan
+  - Kepatuhan Penggunaan APD
 ─────────────────────
 🏥 Rawat Inap
   - Angka Kematian Ranap
   - Double Check High Alert
-  - Waktu Tanggap SC
-  - Alur Klinis
   - Visit Dokter Spesialis
-  - Kembali ke ICU
+  - Kembali ke ICU < 72 Jam
+  - Alur Klinis (Clinical Pathway)
 ─────────────────────
 🚨 IGD
+  - Waktu Tanggap SC Emergency
   - Emergency Response Time
   - Angka Kematian IGD
   - Asesmen Awal IGD
   - Pasien Tertahan IGD
+  - Serah Terima Pasien
 ─────────────────────
 💉 Hemodialisa
   - Ketidakpatuhan Pasien HD
-  - Insiden Clotting Durante
+  - Insiden Clotting Durante HD
   - Insiden Jarum Vena Fistula
 ─────────────────────
 🔪 Operasi & Anestesi
-  - Penundaan Operasi Elektif
+  - Penundaan Operasi Elektif (Threshold periodik)
   - Informed Consent Pembedahan
-  - Asesmen Pra Bedah
-  - Surgical Checklist SC
-  - Surgical Checklist Operasi
-  - Penandaan Lokasi Operasi
   - Informed Consent Anestesi
+  - Asesmen Pra Bedah
   - Asesmen Pra Anestesi
+  - Surgical Safety Checklist SC
+  - Surgical Safety Checklist Operasi
+  - Penandaan Lokasi Operasi
+  - Standar Minimal Mutu Kamar Operasi
+─────────────────────
+🥗 Gizi
+  - Ketepatan Waktu Pemberian Makanan
+  - Sisa Makanan Yang Tidak Termakan
+  - Tidak Adanya Kesalahan Pemberian Diet
+  - Kepatuhan Identifikasi Pasien (SIMRS)
+─────────────────────
+⚙️ Master Data (PIC/Admin)
+  - Master Tindakan
 ─────────────────────
 ⚙️ Admin (hanya Admin)
   - Kelola User
+  - Kelola Unit
   - Kelola Periode
-  - Audit Log
+  - Audit Trail
 ```
 
 ### 8.3 Desain Sistem (CSS Variables)

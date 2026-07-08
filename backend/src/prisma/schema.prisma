@@ -827,3 +827,55 @@ model KepatuhanApd {
   @@index([unit_id])
   @@map("kepatuhan_apd")
 }
+
+model MasterPoliklinik {
+  id                     Int                     @id @default(autoincrement())
+  nama                   String                  @db.VarChar(100)
+  aktif                  Boolean                 @default(true)
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
+  waktuTungguPolikliniks WaktuTungguPoliklinik[]
+
+  @@map("master_poliklinik")
+}
+
+model WaktuTungguPoliklinik {
+  id            Int              @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  tanggal       DateTime         @db.Date
+  poli_id       Int
+  jumlah_pasien Int
+  waktu_tunggu  Float
+  created_by    Int
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
+
+  poliklinik    MasterPoliklinik @relation(fields: [poli_id], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@index([poli_id])
+  @@map("waktu_tunggu_poliklinik")
+}
+
+model WaktuTungguOperasi {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  tanggal             DateTime @db.Date
+  no_rm               String   @db.VarChar(20)
+  nama_pasien         String   @db.VarChar(100)
+  diagnosa            String   @db.VarChar(255)
+  tanggal_penjadwalan DateTime @db.Date
+  tanggal_operasi     DateTime @db.Date
+  waktu_tunggu        Int
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("waktu_tunggu_operasi")
+}
+

@@ -72,9 +72,17 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '🚶 Rawat Jalan',
+    items: [
+      { label: 'Waktu Tunggu Poliklinik', hash: '#/waktu-tunggu-poliklinik' },
+      { label: 'Waktu Tunggu Operasi Elektif', hash: '#/waktu-tunggu-operasi-elektif' },
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
-      { label: 'Master Tindakan', hash: '#/master-tindakan' }
+      { label: 'Master Tindakan', hash: '#/master-tindakan' },
+      { label: 'Master Poliklinik', hash: '#/master-poliklinik' }
     ],
   },
 ];

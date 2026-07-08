@@ -59,6 +59,9 @@ const routes = {
   '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
   '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },
+  '#/master-poliklinik':          { module: () => import('./pages/modules/master-poliklinik.js'), title: 'Master Poliklinik' },
+  '#/waktu-tunggu-poliklinik':    { module: () => import('./pages/modules/waktu-tunggu-poliklinik.js'), title: 'Waktu Tunggu Poliklinik' },
+  '#/waktu-tunggu-operasi-elektif': { module: () => import('./pages/modules/waktu-tunggu-operasi.js'), title: 'Waktu Tunggu Operasi Elektif' },
 };
 
 let currentPage = null;

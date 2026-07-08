@@ -6,6 +6,11 @@ router.use('/auth', require('./auth'));
 // Master data
 router.use('/', require('./master'));
 router.use('/master-tindakan', require('./modules/master-tindakan'));
+router.use('/master-poliklinik', require('./modules/master-poliklinik'));
+
+// Rawat Jalan / Outpatient modules
+router.use('/waktu-tunggu-poliklinik', require('./modules/waktu-tunggu-poliklinik'));
+router.use('/waktu-tunggu-operasi', require('./modules/waktu-tunggu-operasi'));
 
 // Dashboard
 router.use('/dashboard', require('./dashboard'));

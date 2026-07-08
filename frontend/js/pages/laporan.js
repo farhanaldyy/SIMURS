@@ -83,7 +83,11 @@ const serviceToHash = {
   'Ketepatan Waktu Makanan': '#/gizi-waktu-makanan',
   'Sisa Makanan Pasien': '#/gizi-sisa-makanan',
   'Akurasi Pemberian Diet': '#/gizi-kesalahan-diet',
-  'Identifikasi Pasien SIMRS': '#/gizi-identifikasi-pasien'
+  'Identifikasi Pasien SIMRS': '#/gizi-identifikasi-pasien',
+
+  // Rawat Jalan
+  'Waktu Tunggu Poliklinik': '#/waktu-tunggu-poliklinik',
+  'Waktu Tunggu Operasi Elektif': '#/waktu-tunggu-operasi-elektif'
 };
 
 function renderReportTable() {

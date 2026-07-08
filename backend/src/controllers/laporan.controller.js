@@ -46,6 +46,10 @@ const services = {
   'Sisa Makanan Pasien': { service: require('../services/modules/gizi-sisa-makanan.service'), table: 'giziSisaMakanan', category: 'Gizi' },
   'Akurasi Pemberian Diet': { service: require('../services/modules/gizi-kesalahan-diet.service'), table: 'giziKesalahanDiet', category: 'Gizi' },
   'Identifikasi Pasien SIMRS': { service: require('../services/modules/gizi-identifikasi-pasien.service'), table: 'giziIdentifikasiPasien', category: 'Gizi' },
+
+  // Rawat Jalan
+  'Waktu Tunggu Poliklinik': { service: require('../services/modules/waktu-tunggu-poliklinik.service'), table: 'waktuTungguPoliklinik', category: 'Rawat Jalan' },
+  'Waktu Tunggu Operasi Elektif': { service: require('../services/modules/waktu-tunggu-operasi.service'), table: 'waktuTungguOperasi', category: 'Rawat Jalan' },
 };
 
 async function exportExcel(req, res, next) {
@@ -117,10 +121,12 @@ async function exportExcel(req, res, next) {
         if (r.usia) flat['Usia'] = r.usia;
         if (r.dpjp) flat['DPJP'] = r.dpjp;
         if (r.tanggal) flat['Tanggal'] = new Date(r.tanggal).toLocaleDateString('id-ID');
+        if (r.tanggal_penjadwalan) flat['Tanggal Penjadwalan'] = new Date(r.tanggal_penjadwalan).toLocaleDateString('id-ID');
+        if (r.tanggal_operasi) flat['Tanggal Operasi'] = new Date(r.tanggal_operasi).toLocaleDateString('id-ID');
         
         // Add model-specific fields
         for (const key in r) {
-          if (['id', 'periode_id', 'unit_id', 'created_by', 'created_at', 'updated_at', 'nama_pasien', 'no_rm', 'usia', 'dpjp', 'tanggal', 'lokasi', 'jenis'].includes(key)) {
+          if (['id', 'periode_id', 'unit_id', 'created_by', 'created_at', 'updated_at', 'nama_pasien', 'no_rm', 'usia', 'dpjp', 'tanggal', 'lokasi', 'jenis', 'tanggal_penjadwalan', 'tanggal_operasi'].includes(key)) {
             continue;
           }
           

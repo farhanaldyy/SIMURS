@@ -16,7 +16,8 @@ async function getSummary(req, res, next) {
       insidenClotting, insidenJarum, penundaanOperasi,
       informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
       mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
-      giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd
+      giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
+      waktuTungguPoliklinik, waktuTungguOperasi
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -48,6 +49,8 @@ async function getSummary(req, res, next) {
       prisma.giziIdentifikasiPasien.count({ where }),
       prisma.kepatuhanKebersihanTangan.count({ where }),
       prisma.kepatuhanApd.count({ where }),
+      prisma.waktuTungguPoliklinik.count({ where }),
+      prisma.waktuTungguOperasi.count({ where }),
     ]);
 
     res.json({
@@ -61,7 +64,8 @@ async function getSummary(req, res, next) {
           insidenClotting, insidenJarum, penundaanOperasi,
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
           mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
-          giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd
+          giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
+          waktuTungguPoliklinik, waktuTungguOperasi
         },
       },
     });
@@ -112,6 +116,10 @@ const services = {
   'Sisa Makanan Pasien': { service: require('../services/modules/gizi-sisa-makanan.service'), category: 'Gizi' },
   'Akurasi Pemberian Diet': { service: require('../services/modules/gizi-kesalahan-diet.service'), category: 'Gizi' },
   'Identifikasi Pasien SIMRS': { service: require('../services/modules/gizi-identifikasi-pasien.service'), category: 'Gizi' },
+
+  // Rawat Jalan
+  'Waktu Tunggu Poliklinik': { service: require('../services/modules/waktu-tunggu-poliklinik.service'), category: 'Rawat Jalan' },
+  'Waktu Tunggu Operasi Elektif': { service: require('../services/modules/waktu-tunggu-operasi.service'), category: 'Rawat Jalan' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

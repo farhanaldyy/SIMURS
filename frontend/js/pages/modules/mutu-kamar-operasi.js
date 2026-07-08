@@ -138,7 +138,7 @@ function renderTableBody(type) {
   const rows = typeRecords.map(r => {
     const result = calculateResult(r.total_kejadian, r.total_operasi);
     const isTargetAchieved = result === '100.00%';
-    const canDelete = Store.isAdmin() || Store.isPicMutu();
+    const canDelete = Store.canDelete();
 
     return `
       <tr>

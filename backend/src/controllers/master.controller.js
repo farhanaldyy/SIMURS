@@ -22,8 +22,8 @@ async function createUnit(req, res, next) {
     }
     const unit = await prisma.unit.create({
       data: {
-        nama_unit,
-        kode_unit: kode_unit.toLowerCase().trim(),
+        nama_unit: nama_unit.toUpperCase().trim(),
+        kode_unit: kode_unit.toUpperCase().trim(),
         aktif: true
       }
     });
@@ -43,8 +43,8 @@ async function updateUnit(req, res, next) {
     const unit = await prisma.unit.update({
       where: { id },
       data: {
-        nama_unit,
-        kode_unit: kode_unit ? kode_unit.toLowerCase().trim() : undefined,
+        nama_unit: nama_unit ? nama_unit.toUpperCase().trim() : undefined,
+        kode_unit: kode_unit ? kode_unit.toUpperCase().trim() : undefined,
         aktif: aktif !== undefined ? (aktif === 'true' || aktif === true) : undefined
       }
     });

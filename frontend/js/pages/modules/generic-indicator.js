@@ -273,7 +273,7 @@ export function createGenericIndicatorPage(config) {
         config.fields.forEach(f => {
           if (isEdit && f.hideOnEdit) return;
           if (f.type === 'number') {
-            formData[f.name] = formData[f.name] ? parseInt(formData[f.name]) : null;
+            formData[f.name] = formData[f.name] ? parseFloat(formData[f.name]) : null;
           } else if (f.type === 'boolean') {
             formData[f.name] = formData[f.name] === 'true';
           }
@@ -347,7 +347,7 @@ export function createGenericIndicatorPage(config) {
       return `
         <div class="form-group">
           <label class="form-label">${f.label} ${f.required ? '<span class="required">*</span>' : ''}</label>
-          <input type="${f.type}" name="${f.name}" class="form-control" value="${inputVal}" ${f.required ? 'required' : ''} ${f.type === 'number' ? 'min="0"' : ''}>
+          <input type="${f.type}" name="${f.name}" class="form-control" value="${inputVal}" ${f.required ? 'required' : ''} ${f.type === 'number' ? 'min="0" step="any"' : ''}>
         </div>
       `;
     }

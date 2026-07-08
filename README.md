@@ -1,6 +1,6 @@
 # SIMURS — Sistem Informasi Mutu Rumah Sakit
 
-SIMURS (Sistem Informasi Mutu Rumah Sakit) adalah aplikasi berbasis web yang dirancang untuk pencatatan, pemantauan, dan pelaporan 27 indikator mutu pelayanan rumah sakit secara real-time. Aplikasi ini membantu komite mutu dan staf rumah sakit dalam mengevaluasi kepatuhan standar pelayanan medis secara efisien dan transparan.
+SIMURS (Sistem Informasi Mutu Rumah Sakit) adalah aplikasi berbasis web yang dirancang untuk pencatatan, pemantauan, dan pelaporan 34 indikator mutu pelayanan rumah sakit secara real-time. Aplikasi ini membantu komite mutu dan staf rumah sakit dalam mengevaluasi kepatuhan standar pelayanan medis secara efisien dan transparan.
 
 ---
 
@@ -27,13 +27,14 @@ graph TD
 * **Top 8 Masalah**: Grafik 8 indikator dengan tingkat kepatuhan terendah untuk prioritas perbaikan mutu.
 * **Tabel Rekapitulasi Capaian**: Menampilkan detail rumus, target, pembilang (numerator), penyebut (denominator), hasil persentase, dan status ketercapaian secara dinamis dengan filter real-time.
 
-### 2. 27 Modul Indikator Mutu Pelayanan
-Modul pencatatan data yang dikelompokkan ke dalam 5 kategori pelayanan utama:
-* **🛡️ Keselamatan Pasien**: Risiko Jatuh, Insiden Keselamatan, Identifikasi Pasien, Reaksi Transfusi, Gelang Identitas, Serah Terima Pasien.
+### 2. 34 Modul Indikator Mutu Pelayanan
+Modul pencatatan data yang dikelompokkan ke dalam 6 kategori pelayanan utama:
+* **🛡️ Keselamatan Pasien**: Risiko Jatuh, Insiden Keselamatan, Identifikasi Pasien, Reaksi Transfusi, Gelang Identitas, Kepatuhan Kebersihan Tangan, Kepatuhan Penggunaan APD.
 * **🏥 Rawat Inap**: Angka Kematian Ranap, Double Check High Alert, Visit Dokter Spesialis, Kembali ICU, Alur Klinis.
-* **🚨 IGD**: Waktu Tanggap SC, Emergency Response Time, Angka Kematian IGD, Asesmen Awal IGD, Pasien Tertahan IGD.
+* **🚨 IGD**: Waktu Tanggap SC, Emergency Response Time, Angka Kematian IGD, Asesmen Awal IGD, Pasien Tertahan IGD, Serah Terima Pasien.
 * **💉 Hemodialisa**: Ketidakpatuhan Pasien HD, Insiden Clotting HD, Insiden Jarum Vena HD.
-* **🔪 Operasi & Anestesi**: Penundaan Operasi Elektif, Informed Consent Bedah, Informed Consent Anestesi, Asesmen Pra Bedah, Asesmen Pra Anestesi, Surgical Safety Checklist SC, Surgical Safety Checklist Op, Penandaan Lokasi Operasi.
+* **🔪 Operasi & Anestesi**: Penundaan Operasi Elektif, Informed Consent Bedah, Informed Consent Anestesi, Asesmen Pra Bedah, Asesmen Pra Anestesi, Surgical Safety Checklist SC, Surgical Safety Checklist Op, Penandaan Lokasi Operasi, Standar Minimal Mutu Kamar Operasi.
+* **🥗 Gizi**: Ketepatan Waktu Makanan, Sisa Makanan Pasien, Akurasi Pemberian Diet, Identifikasi Pasien SIMRS.
 
 ### 3. Autentikasi & Hak Akses Granular (Granular RBAC)
 * **Admin & Komite Mutu**: Akses penuh ke seluruh menu, kelola pengguna, kelola periode, audit trail, serta semua modul indikator.
@@ -176,7 +177,7 @@ Aplikasi kini berjalan dan dapat diakses di browser Anda:
 
 ## Panduan Pengembang (Developer Guide)
 
-Untuk menambahkan modul indikator mutu ke-28 dan seterusnya:
+Untuk menambahkan modul indikator mutu ke-35 dan seterusnya:
 1. **Definisikan Model di Database**: Buka [schema.prisma](backend/src/prisma/schema.prisma), tambahkan skema tabel indikator baru lengkap dengan relasi ke `Periode`, `Unit`, dan `User`.
 2. **Push Skema & Generate Client**: Jalankan `npx prisma db push`.
 3. **Buat File Tampilan Frontend**: Buat berkas baru di `frontend/js/pages/modules/[nama-indikator].js`. Anda bisa menyalin dan mengadaptasi implementasi dari [risiko-jatuh.js](frontend/js/pages/modules/risiko-jatuh.js) atau [generic-indicator.js](frontend/js/pages/modules/generic-indicator.js).
