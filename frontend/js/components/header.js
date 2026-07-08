@@ -9,6 +9,13 @@ export function renderHeader(container) {
   container.innerHTML = `
     <div class="header" id="header">
       <div class="header-left">
+        <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Toggle Sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
         <h2 class="header-title" id="page-title">Dashboard</h2>
       </div>
       <div class="header-right">

@@ -51,5 +51,6 @@ router.use('/gizi-sisa-makanan', require('./modules/gizi-sisa-makanan'));
 router.use('/gizi-kesalahan-diet', require('./modules/gizi-kesalahan-diet'));
 router.use('/gizi-identifikasi-pasien', require('./modules/gizi-identifikasi-pasien'));
 router.use('/kepatuhan-kebersihan-tangan', require('./modules/kepatuhan-kebersihan-tangan'));
+router.use('/kepatuhan-apd', require('./modules/kepatuhan-apd'));
 
 module.exports = router;

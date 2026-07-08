@@ -25,6 +25,7 @@ model User {
   giziKesalahanDiets      GiziKesalahanDiet[]
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
+  kepatuhanApds           KepatuhanApd[]
 
   @@map("users")
 }
@@ -42,6 +43,7 @@ model Unit {
   giziKesalahanDiets      GiziKesalahanDiet[]
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
+  kepatuhanApds           KepatuhanApd[]
 
   @@map("units")
 }
@@ -57,6 +59,7 @@ model Periode {
   giziKesalahanDiets      GiziKesalahanDiet[]
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
+  kepatuhanApds           KepatuhanApd[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -791,4 +794,36 @@ model MasterTindakan {
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
 
   @@map("master_tindakan")
+}
+
+model KepatuhanApd {
+  id             Int      @id @default(autoincrement())
+  periode_id     Int
+  unit_id        Int
+  tanggal        DateTime @db.Date
+  nama_pasien    String   @db.VarChar(100)
+  tindakan       String   @db.VarChar(255)
+  profesi        String   @db.VarChar(100)
+  
+  // PPE items (Ya = true, Tidak = false)
+  penutup_kepala Boolean  @default(false)
+  face_shield    Boolean  @default(false)
+  masker         Boolean  @default(false)
+  apron          Boolean  @default(false)
+  coverall       Boolean  @default(false)
+  sarung_tangan  Boolean  @default(false)
+  cover_shoes    Boolean  @default(false)
+  
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  // Relations
+  periode        Periode  @relation(fields: [periode_id], references: [id])
+  unit           Unit     @relation(fields: [unit_id], references: [id])
+  user           User     @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("kepatuhan_apd")
 }

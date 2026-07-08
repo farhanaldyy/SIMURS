@@ -14,6 +14,7 @@ const routes = {
   '#/reaksi-transfusi':           { module: () => import('./pages/modules/reaksi-transfusi.js'), title: 'Reaksi Transfusi' },
   '#/gelang-identitas':           { module: () => import('./pages/modules/gelang-identitas.js'), title: 'Gelang Identitas' },
   '#/kepatuhan-kebersihan-tangan': { module: () => import('./pages/modules/kepatuhan-kebersihan-tangan.js'), title: 'Kepatuhan Kebersihan Tangan' },
+  '#/kepatuhan-apd':              { module: () => import('./pages/modules/kepatuhan-apd.js'), title: 'Kepatuhan Penggunaan APD' },
   '#/serah-terima-pasien':        { module: () => import('./pages/modules/serah-terima-pasien.js'), title: 'Serah Terima Pasien' },
   
   // Rawat Inap

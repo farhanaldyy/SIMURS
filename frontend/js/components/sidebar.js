@@ -38,6 +38,10 @@ export function renderSidebar(container) {
   const groupsHTML = groups
     .filter(g => g.items.length > 0)
     .map(group => {
+      const spaceIndex = group.title.indexOf(' ');
+      const icon = spaceIndex !== -1 ? group.title.substring(0, spaceIndex) : '📁';
+      const label = spaceIndex !== -1 ? group.title.substring(spaceIndex + 1) : group.title;
+
       const itemsHTML = group.items.map(item => {
         const active = currentHash === item.hash ? 'active' : '';
         return `<li class="nav-item"><a href="${item.hash}" class="${active}">${item.label}</a></li>`;
@@ -45,8 +49,15 @@ export function renderSidebar(container) {
 
       return `
         <div class="nav-group">
-          <div class="nav-group-title">${group.title} <span class="chevron">▼</span></div>
-          <ul class="nav-items">${itemsHTML}</ul>
+          <div class="nav-group-title" title="${label}">
+            <span class="nav-group-icon">${icon}</span>
+            <span class="nav-group-text">${label}</span>
+            <span class="chevron">▼</span>
+          </div>
+          <ul class="nav-items">
+            <li class="nav-items-header">${label}</li>
+            ${itemsHTML}
+          </ul>
         </div>
       `;
     }).join('');
@@ -67,7 +78,10 @@ export function renderSidebar(container) {
   // Toggle groups
   container.querySelectorAll('.nav-group-title').forEach(title => {
     title.addEventListener('click', () => {
-      title.parentElement.classList.toggle('collapsed');
+      const isSidebarCollapsed = document.querySelector('.app-shell')?.classList.contains('sidebar-collapsed');
+      if (!isSidebarCollapsed) {
+        title.parentElement.classList.toggle('collapsed');
+      }
     });
   });
 }

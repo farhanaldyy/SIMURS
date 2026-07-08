@@ -35,11 +35,28 @@ const pageObj = createGenericIndicatorPage({
     { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) },
     { label: 'Profesi', key: 'profesi', render: (r) => profesiLabels[r.profesi] || r.profesi },
     { label: 'Tindakan', key: 'masterTindakan', render: (r) => r.masterTindakan?.nama || '<span style="color:var(--color-muted)">-</span>' },
-    { label: 'bef-pat.', key: 'momen_1', render: (r) => r.momen_1 ? '<span class="badge badge-success">✓</span>' : '<span style="color:var(--color-muted)">-</span>' },
-    { label: 'bef-asept.', key: 'momen_2', render: (r) => r.momen_2 ? '<span class="badge badge-success">✓</span>' : '<span style="color:var(--color-muted)">-</span>' },
-    { label: 'aft-b.f.', key: 'momen_3', render: (r) => r.momen_3 ? '<span class="badge badge-success">✓</span>' : '<span style="color:var(--color-muted)">-</span>' },
-    { label: 'aft-pat.', key: 'momen_4', render: (r) => r.momen_4 ? '<span class="badge badge-success">✓</span>' : '<span style="color:var(--color-muted)">-</span>' },
-    { label: 'aft-p.surr.', key: 'momen_5', render: (r) => r.momen_5 ? '<span class="badge badge-success">✓</span>' : '<span style="color:var(--color-muted)">-</span>' },
+    {
+      label: 'Momen WHO',
+      render: (r) => {
+        const moments = [
+          { name: 'momen_1', label: 'Sebelum Menyentuh Pasien', abbr: 'M1' },
+          { name: 'momen_2', label: 'Sebelum Tindakan Aseptik', abbr: 'M2' },
+          { name: 'momen_3', label: 'Setelah Terkena Cairan Tubuh', abbr: 'M3' },
+          { name: 'momen_4', label: 'Setelah Menyentuh Pasien', abbr: 'M4' },
+          { name: 'momen_5', label: 'Setelah Menyentuh Lingkungan Pasien', abbr: 'M5' }
+        ];
+
+        const badgesHTML = moments.map(m => {
+          const isDone = r[m.name];
+          const badgeClass = isDone ? 'badge-success' : 'badge-secondary';
+          const labelVal = isDone ? 'Dilakukan' : 'Tidak Dilakukan';
+          const opacity = isDone ? '1' : '0.4';
+          return `<span class="badge ${badgeClass}" style="font-size: 0.75rem; padding: 3px 6px; cursor: help; min-width: 28px; text-align: center; opacity: ${opacity};" title="${m.label}: ${labelVal}">${m.abbr}</span>`;
+        }).join('');
+
+        return `<div style="display: flex; gap: 4px; flex-wrap: nowrap; justify-content: start;">${badgesHTML}</div>`;
+      }
+    },
     { label: 'Action', key: 'tindakan', render: (r) => tindakanLabels[r.tindakan] || r.tindakan },
     { label: 'Gloves', key: 'gloves', render: (r) => r.gloves ? '<span class="badge badge-info">✓</span>' : '<span style="color:var(--color-muted)">-</span>' },
     { 

@@ -16,6 +16,7 @@ export const NAV_GROUPS = [
       { label: 'Reaksi Transfusi', hash: '#/reaksi-transfusi' },
       { label: 'Gelang Identitas', hash: '#/gelang-identitas' },
       { label: 'Kepatuhan Kebersihan Tangan', hash: '#/kepatuhan-kebersihan-tangan' },
+      { label: 'Kepatuhan Penggunaan APD', hash: '#/kepatuhan-apd' },
     ],
   },
   {
