@@ -85,6 +85,16 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '♿ Rehabilitasi Medis',
+    items: [
+      { label: 'Drop Out Pasien', hash: '#/rehab-drop-out' },
+      { label: 'Kesalahan Tindakan', hash: '#/rehab-kesalahan-tindakan' },
+      { label: 'Waktu Tunggu Pelayanan', hash: '#/rehab-waktu-tunggu' },
+      { label: 'Kepatuhan Identitas', hash: '#/rehab-kepatuhan-identitas' },
+      { label: 'Kepuasan Pasien', hash: '#/rehab-kepuasan-pasien' },
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

@@ -50,6 +50,13 @@ const services = {
   // Rawat Jalan
   'Waktu Tunggu Poliklinik': { service: require('../services/modules/waktu-tunggu-poliklinik.service'), table: 'waktuTungguPoliklinik', category: 'Rawat Jalan' },
   'Waktu Tunggu Operasi Elektif': { service: require('../services/modules/waktu-tunggu-operasi.service'), table: 'waktuTungguOperasi', category: 'Rawat Jalan' },
+
+  // Rehabilitasi Medis
+  'Kejadian drop out pasien terhadap pelayanan rehabilitasi medik yang direncanakan': { service: require('../services/modules/rehab-drop-out.service'), table: 'rehabPasienDropOut', category: 'Rehabilitasi Medis' },
+  'Tidak adanya kejadian kesalahan tindakan rehabilitasi medik': { service: require('../services/modules/rehab-kesalahan-tindakan.service'), table: 'rehabKesalahanTindakan', category: 'Rehabilitasi Medis' },
+  'Waktu tunggu pelayanan rawat jalan rehabilitasi medik': { service: require('../services/modules/rehab-waktu-tunggu.service'), table: 'rehabWaktuTunggu', category: 'Rehabilitasi Medis' },
+  'Kepatuhan identitas pasien': { service: require('../services/modules/rehab-kepatuhan-identitas.service'), table: 'rehabKepatuhanIdentitas', category: 'Rehabilitasi Medis' },
+  'Kepuasan pasien dengan pelayanan rehabilitasi medik': { service: require('../services/modules/rehab-kepuasan-pasien.service'), table: 'rehabKepuasanPasien', category: 'Rehabilitasi Medis' },
 };
 
 async function exportExcel(req, res, next) {

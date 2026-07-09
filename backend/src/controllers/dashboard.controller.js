@@ -52,6 +52,11 @@ async function getSummary(req, res, next) {
       prisma.waktuTungguPoliklinik.count({ where }),
       prisma.waktuTungguOperasi.count({ where }),
       prisma.mutuRekamMedis.count({ where: { periode_id: where.periode_id } }),
+      prisma.rehabPasienDropOut.count({ where }),
+      prisma.rehabKesalahanTindakan.count({ where }),
+      prisma.rehabWaktuTunggu.count({ where }),
+      prisma.rehabKepatuhanIdentitas.count({ where }),
+      prisma.rehabKepuasanPasien.count({ where }),
     ]);
 
     res.json({
@@ -66,7 +71,8 @@ async function getSummary(req, res, next) {
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
           mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
           giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
-          waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis
+          waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
+          rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien
         },
       },
     });
@@ -128,6 +134,13 @@ const services = {
   'Pemberian Informasi Antrian Online': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'antrian_online' } },
   'Ketepatan Coding Rawat Inap & Rawat Jalan': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'ketepatan_coding' } },
   'Antrian Mobile JKN': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'mobile_jkn' } },
+
+  // Rehabilitasi Medis
+  'Kejadian drop out pasien terhadap pelayanan rehabilitasi medik yang direncanakan': { service: require('../services/modules/rehab-drop-out.service'), category: 'Rehabilitasi Medis' },
+  'Tidak adanya kejadian kesalahan tindakan rehabilitasi medik': { service: require('../services/modules/rehab-kesalahan-tindakan.service'), category: 'Rehabilitasi Medis' },
+  'Waktu tunggu pelayanan rawat jalan rehabilitasi medik': { service: require('../services/modules/rehab-waktu-tunggu.service'), category: 'Rehabilitasi Medis' },
+  'Kepatuhan identitas pasien': { service: require('../services/modules/rehab-kepatuhan-identitas.service'), category: 'Rehabilitasi Medis' },
+  'Kepuasan pasien dengan pelayanan rehabilitasi medik': { service: require('../services/modules/rehab-kepuasan-pasien.service'), category: 'Rehabilitasi Medis' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

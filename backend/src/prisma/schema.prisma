@@ -26,6 +26,11 @@ model User {
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
   kepatuhanApds           KepatuhanApd[]
+  rehabPasienDropOuts     RehabPasienDropOut[]
+  rehabKesalahanTindakans RehabKesalahanTindakan[]
+  rehabWaktuTunggus       RehabWaktuTunggu[]
+  rehabKepatuhanIdentitass RehabKepatuhanIdentitas[]
+  rehabKepuasanPasiens    RehabKepuasanPasien[]
 
   @@map("users")
 }
@@ -44,6 +49,11 @@ model Unit {
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
   kepatuhanApds           KepatuhanApd[]
+  rehabPasienDropOuts     RehabPasienDropOut[]
+  rehabKesalahanTindakans RehabKesalahanTindakan[]
+  rehabWaktuTunggus       RehabWaktuTunggu[]
+  rehabKepatuhanIdentitass RehabKepatuhanIdentitas[]
+  rehabKepuasanPasiens    RehabKepuasanPasien[]
 
   @@map("units")
 }
@@ -60,6 +70,11 @@ model Periode {
   giziIdentifikasiPasiens GiziIdentifikasiPasien[]
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
   kepatuhanApds           KepatuhanApd[]
+  rehabPasienDropOuts     RehabPasienDropOut[]
+  rehabKesalahanTindakans RehabKesalahanTindakan[]
+  rehabWaktuTunggus       RehabWaktuTunggu[]
+  rehabKepatuhanIdentitass RehabKepatuhanIdentitas[]
+  rehabKepuasanPasiens    RehabKepuasanPasien[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -909,6 +924,115 @@ model MutuRekamMedis {
 
   @@index([periode_id])
   @@map("mutu_rekam_medis")
+}
+
+model RehabPasienDropOut {
+  id               Int      @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  tanggal          DateTime @db.Date
+  jumlah_pasien    Int
+  jumlah_drop_out  Int
+  hasil            Float
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("rehab_pasien_drop_out")
+}
+
+model RehabKesalahanTindakan {
+  id               Int      @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  tanggal          DateTime @db.Date
+  jumlah_pasien    Int
+  jumlah_kesalahan Int
+  hasil            Float
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("rehab_kesalahan_tindakan")
+}
+
+model RehabWaktuTunggu {
+  id                      Int      @id @default(autoincrement())
+  periode_id              Int
+  unit_id                 Int
+  tanggal                 DateTime @db.Date
+  jumlah_pasien           Int
+  waktu_tunggu_gt_60      Int
+  waktu_tunggu_lt_60      Int
+  total_waktu_tunggu      Int
+  rata_rata_waktu_tunggu  Float
+  hasil                   Float
+  created_by              Int
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("rehab_waktu_tunggu")
+}
+
+model RehabKepatuhanIdentitas {
+  id                   Int      @id @default(autoincrement())
+  periode_id           Int
+  unit_id              Int
+  tanggal              DateTime @db.Date
+  jumlah_pasien        Int
+  jumlah_ketidakpatuhan Int
+  hasil                Float
+  created_by           Int
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("rehab_kepatuhan_identitas")
+}
+
+model RehabKepuasanPasien {
+  id               Int      @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  tanggal          DateTime @db.Date
+  nama_pasien      String   @db.VarChar(100)
+  nilai_maksimal   Int
+  hasil_kuisioner  Int
+  total            Float
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("rehab_kepuasan_pasien")
 }
 
 

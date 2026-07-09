@@ -61,4 +61,11 @@ router.use('/kepatuhan-apd', require('./modules/kepatuhan-apd'));
 // Rekam Medis
 router.use('/mutu-rekam-medis', require('./modules/mutu-rekam-medis'));
 
+// Rehabilitasi Medis
+router.use('/rehab-drop-out', require('./modules/rehab-drop-out'));
+router.use('/rehab-kesalahan-tindakan', require('./modules/rehab-kesalahan-tindakan'));
+router.use('/rehab-waktu-tunggu', require('./modules/rehab-waktu-tunggu'));
+router.use('/rehab-kepatuhan-identitas', require('./modules/rehab-kepatuhan-identitas'));
+router.use('/rehab-kepuasan-pasien', require('./modules/rehab-kepuasan-pasien'));
+
 module.exports = router;

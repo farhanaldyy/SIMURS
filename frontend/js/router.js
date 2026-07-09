@@ -63,6 +63,13 @@ const routes = {
   '#/waktu-tunggu-poliklinik':    { module: () => import('./pages/modules/waktu-tunggu-poliklinik.js'), title: 'Waktu Tunggu Poliklinik' },
   '#/waktu-tunggu-operasi-elektif': { module: () => import('./pages/modules/waktu-tunggu-operasi.js'), title: 'Waktu Tunggu Operasi Elektif' },
   '#/mutu-rekam-medis':           { module: () => import('./pages/modules/mutu-rekam-medis.js'), title: 'Standar Minimal Mutu Rekam Medis' },
+  
+  // Rehabilitasi Medis
+  '#/rehab-drop-out':             { module: () => import('./pages/modules/rehab-drop-out.js'), title: 'Drop Out Pasien' },
+  '#/rehab-kesalahan-tindakan':   { module: () => import('./pages/modules/rehab-kesalahan-tindakan.js'), title: 'Tidak Adanya Kesalahan Tindakan' },
+  '#/rehab-waktu-tunggu':        { module: () => import('./pages/modules/rehab-waktu-tunggu.js'), title: 'Waktu Tunggu Pelayanan Rehab' },
+  '#/rehab-kepatuhan-identitas':  { module: () => import('./pages/modules/rehab-kepatuhan-identitas.js'), title: 'Kepatuhan Identitas Pasien' },
+  '#/rehab-kepuasan-pasien':      { module: () => import('./pages/modules/rehab-kepuasan-pasien.js'), title: 'Kepuasan Pasien Rehab' },
 };
 
 let currentPage = null;
