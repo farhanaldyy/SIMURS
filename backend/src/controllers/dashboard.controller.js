@@ -51,6 +51,7 @@ async function getSummary(req, res, next) {
       prisma.kepatuhanApd.count({ where }),
       prisma.waktuTungguPoliklinik.count({ where }),
       prisma.waktuTungguOperasi.count({ where }),
+      prisma.mutuRekamMedis.count({ where: { periode_id: where.periode_id } }),
     ]);
 
     res.json({
@@ -65,7 +66,7 @@ async function getSummary(req, res, next) {
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
           mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
           giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
-          waktuTungguPoliklinik, waktuTungguOperasi
+          waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis
         },
       },
     });
@@ -120,6 +121,13 @@ const services = {
   // Rawat Jalan
   'Waktu Tunggu Poliklinik': { service: require('../services/modules/waktu-tunggu-poliklinik.service'), category: 'Rawat Jalan' },
   'Waktu Tunggu Operasi Elektif': { service: require('../services/modules/waktu-tunggu-operasi.service'), category: 'Rawat Jalan' },
+
+  // Rekam Medis
+  'Kelengkapan Dokumen Rekam Medis Pasien Ranap': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'kelengkapan_ranap' } },
+  'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'pengembalian_rm' } },
+  'Pemberian Informasi Antrian Online': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'antrian_online' } },
+  'Ketepatan Coding Rawat Inap & Rawat Jalan': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'ketepatan_coding' } },
+  'Antrian Mobile JKN': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'mobile_jkn' } },
 };
 
 async function getIndicatorSummaries(req, res, next) {

@@ -79,6 +79,12 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '📁 Rekam Medis',
+    items: [
+      { label: 'Standar Minimal Mutu Rekam Medis', hash: '#/mutu-rekam-medis' },
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

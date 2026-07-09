@@ -117,6 +117,49 @@ textarea.form-control {
   gap: var(--space-md);
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-wrapper .form-control {
+  padding-right: 42px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  outline: none;
+}
+
+.toggle-password-btn:hover {
+  color: var(--color-primary);
+}
+
+.toggle-password-btn .eye-off-icon {
+  display: none;
+}
+
+.password-wrapper.show-password .toggle-password-btn .eye-icon {
+  display: none;
+}
+
+.password-wrapper.show-password .toggle-password-btn .eye-off-icon {
+  display: block;
+}
+
 /* ===== TABLES ===== */
 .table-wrapper {
   background: var(--color-bg-card);

@@ -33,7 +33,6 @@ async function main() {
   await prisma.surgicalChecklist.deleteMany();
   await prisma.penandaanLokasiOperasi.deleteMany();
   await prisma.kepatuhanKebersihanTangan.deleteMany();
-  await prisma.masterTindakan.deleteMany();
 
   // Delete users and units
   await prisma.user.deleteMany();

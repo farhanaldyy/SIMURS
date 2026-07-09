@@ -58,4 +58,7 @@ router.use('/gizi-identifikasi-pasien', require('./modules/gizi-identifikasi-pas
 router.use('/kepatuhan-kebersihan-tangan', require('./modules/kepatuhan-kebersihan-tangan'));
 router.use('/kepatuhan-apd', require('./modules/kepatuhan-apd'));
 
+// Rekam Medis
+router.use('/mutu-rekam-medis', require('./modules/mutu-rekam-medis'));
+
 module.exports = router;

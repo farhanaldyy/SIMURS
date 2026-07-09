@@ -879,3 +879,36 @@ model WaktuTungguOperasi {
   @@map("waktu_tunggu_operasi")
 }
 
+model MutuRekamMedis {
+  id                      Int      @id @default(autoincrement())
+  periode_id              Int      @unique
+  
+  kelengkapan_ranap_num   Int      @default(0)
+  kelengkapan_ranap_den   Int      @default(0)
+  kelengkapan_ranap_pct   Float    @default(0)
+  
+  pengembalian_num        Int      @default(0)
+  pengembalian_den        Int      @default(0)
+  pengembalian_pct        Float    @default(0)
+  
+  antrian_online_num      Int      @default(0)
+  antrian_online_den      Int      @default(0)
+  antrian_online_pct      Float    @default(0)
+  
+  coding_num              Int      @default(0)
+  coding_den              Int      @default(0)
+  coding_pct              Float    @default(0)
+  
+  mobile_jkn_num          Int      @default(0)
+  mobile_jkn_den          Int      @default(0)
+  mobile_jkn_pct          Float    @default(0)
+
+  created_by              Int
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("mutu_rekam_medis")
+}
+
+

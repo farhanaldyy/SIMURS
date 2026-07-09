@@ -62,6 +62,7 @@ const routes = {
   '#/master-poliklinik':          { module: () => import('./pages/modules/master-poliklinik.js'), title: 'Master Poliklinik' },
   '#/waktu-tunggu-poliklinik':    { module: () => import('./pages/modules/waktu-tunggu-poliklinik.js'), title: 'Waktu Tunggu Poliklinik' },
   '#/waktu-tunggu-operasi-elektif': { module: () => import('./pages/modules/waktu-tunggu-operasi.js'), title: 'Waktu Tunggu Operasi Elektif' },
+  '#/mutu-rekam-medis':           { module: () => import('./pages/modules/mutu-rekam-medis.js'), title: 'Standar Minimal Mutu Rekam Medis' },
 };
 
 let currentPage = null;
