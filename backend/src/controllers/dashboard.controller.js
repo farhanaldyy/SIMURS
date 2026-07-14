@@ -17,7 +17,9 @@ async function getSummary(req, res, next) {
       informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
       mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
       giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
-      waktuTungguPoliklinik, waktuTungguOperasi
+      waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
+      rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
+      laundryKetepatanLinen, laundryLinenHilang
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -57,6 +59,8 @@ async function getSummary(req, res, next) {
       prisma.rehabWaktuTunggu.count({ where }),
       prisma.rehabKepatuhanIdentitas.count({ where }),
       prisma.rehabKepuasanPasien.count({ where }),
+      prisma.laundryKetepatanLinen.count({ where }),
+      prisma.laundryLinenHilang.count({ where }),
     ]);
 
     res.json({
@@ -72,7 +76,8 @@ async function getSummary(req, res, next) {
           mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
           giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
           waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
-          rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien
+          rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
+          laundryKetepatanLinen, laundryLinenHilang
         },
       },
     });
@@ -141,6 +146,10 @@ const services = {
   'Waktu tunggu pelayanan rawat jalan rehabilitasi medik': { service: require('../services/modules/rehab-waktu-tunggu.service'), category: 'Rehabilitasi Medis' },
   'Kepatuhan identitas pasien': { service: require('../services/modules/rehab-kepatuhan-identitas.service'), category: 'Rehabilitasi Medis' },
   'Kepuasan pasien dengan pelayanan rehabilitasi medik': { service: require('../services/modules/rehab-kepuasan-pasien.service'), category: 'Rehabilitasi Medis' },
+
+  // Laundry
+  'Ketepatan Waktu Penyediaan Linen Bersih': { service: require('../services/modules/laundry-ketepatan-linen.service'), category: 'Laundry' },
+  'Tidak Adanya Kejadian Linen Hilang': { service: require('../services/modules/laundry-linen-hilang.service'), category: 'Laundry' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

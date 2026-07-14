@@ -66,10 +66,14 @@ const routes = {
   
   // Rehabilitasi Medis
   '#/rehab-drop-out':             { module: () => import('./pages/modules/rehab-drop-out.js'), title: 'Drop Out Pasien' },
-  '#/rehab-kesalahan-tindakan':   { module: () => import('./pages/modules/rehab-kesalahan-tindakan.js'), title: 'Tidak Adanya Kesalahan Tindakan' },
+  '#/rehab-kesalahan-tindakan':   { module: () => import('./pages/modules/rehab-kesalahan-tindakan.js'), title: 'Tidak Adanya Kejadian Kesalahan Tindakan' },
   '#/rehab-waktu-tunggu':        { module: () => import('./pages/modules/rehab-waktu-tunggu.js'), title: 'Waktu Tunggu Pelayanan Rehab' },
   '#/rehab-kepatuhan-identitas':  { module: () => import('./pages/modules/rehab-kepatuhan-identitas.js'), title: 'Kepatuhan Identitas Pasien' },
   '#/rehab-kepuasan-pasien':      { module: () => import('./pages/modules/rehab-kepuasan-pasien.js'), title: 'Kepuasan Pasien Rehab' },
+
+  // Laundry
+  '#/laundry-ketepatan-linen':    { module: () => import('./pages/modules/laundry-ketepatan-linen.js'), title: 'Ketepatan Waktu Penyediaan Linen Bersih' },
+  '#/laundry-linen-hilang':       { module: () => import('./pages/modules/laundry-linen-hilang.js'), title: 'Tidak Adanya Kejadian Linen Hilang' },
 };
 
 let currentPage = null;

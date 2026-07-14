@@ -68,4 +68,8 @@ router.use('/rehab-waktu-tunggu', require('./modules/rehab-waktu-tunggu'));
 router.use('/rehab-kepatuhan-identitas', require('./modules/rehab-kepatuhan-identitas'));
 router.use('/rehab-kepuasan-pasien', require('./modules/rehab-kepuasan-pasien'));
 
+// Laundry modules
+router.use('/laundry-ketepatan-linen', require('./modules/laundry-ketepatan-linen'));
+router.use('/laundry-linen-hilang', require('./modules/laundry-linen-hilang'));
+
 module.exports = router;

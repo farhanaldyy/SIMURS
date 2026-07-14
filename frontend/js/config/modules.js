@@ -95,6 +95,13 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '🧺 Laundry',
+    items: [
+      { label: 'Ketepatan Waktu Linen', hash: '#/laundry-ketepatan-linen' },
+      { label: 'Kejadian Linen Hilang', hash: '#/laundry-linen-hilang' },
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

@@ -31,6 +31,8 @@ model User {
   rehabWaktuTunggus       RehabWaktuTunggu[]
   rehabKepatuhanIdentitass RehabKepatuhanIdentitas[]
   rehabKepuasanPasiens    RehabKepuasanPasien[]
+  laundryKetepatanLinens  LaundryKetepatanLinen[]
+  laundryLinenHilangs     LaundryLinenHilang[]
 
   @@map("users")
 }
@@ -54,6 +56,8 @@ model Unit {
   rehabWaktuTunggus       RehabWaktuTunggu[]
   rehabKepatuhanIdentitass RehabKepatuhanIdentitas[]
   rehabKepuasanPasiens    RehabKepuasanPasien[]
+  laundryKetepatanLinens  LaundryKetepatanLinen[]
+  laundryLinenHilangs     LaundryLinenHilang[]
 
   @@map("units")
 }
@@ -75,6 +79,8 @@ model Periode {
   rehabWaktuTunggus       RehabWaktuTunggu[]
   rehabKepatuhanIdentitass RehabKepatuhanIdentitas[]
   rehabKepuasanPasiens    RehabKepuasanPasien[]
+  laundryKetepatanLinens  LaundryKetepatanLinen[]
+  laundryLinenHilangs     LaundryLinenHilang[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -1034,5 +1040,49 @@ model RehabKepuasanPasien {
   @@index([unit_id])
   @@map("rehab_kepuasan_pasien")
 }
+
+model LaundryKetepatanLinen {
+  id            Int      @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  tanggal       DateTime @db.Date
+  jam_jadwal    DateTime @db.Time(0)
+  ruangan       String   @db.VarChar(100)
+  jam_ganti     DateTime @db.Time(0)
+  tepat_waktu   Boolean
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laundry_ketepatan_linen")
+}
+
+model LaundryLinenHilang {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  tanggal             DateTime @db.Date
+  ruangan             String   @db.VarChar(100)
+  jumlah_diambil      Int
+  jumlah_dikembalikan Int
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laundry_linen_hilang")
+}
+
 
 

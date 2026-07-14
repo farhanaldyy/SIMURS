@@ -87,7 +87,11 @@ const serviceToHash = {
 
   // Rawat Jalan
   'Waktu Tunggu Poliklinik': '#/waktu-tunggu-poliklinik',
-  'Waktu Tunggu Operasi Elektif': '#/waktu-tunggu-operasi-elektif'
+  'Waktu Tunggu Operasi Elektif': '#/waktu-tunggu-operasi-elektif',
+
+  // Laundry
+  'Ketepatan Waktu Penyediaan Linen Bersih': '#/laundry-ketepatan-linen',
+  'Tidak Adanya Kejadian Linen Hilang': '#/laundry-linen-hilang'
 };
 
 function renderReportTable() {
