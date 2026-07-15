@@ -74,6 +74,14 @@ const routes = {
   // Laundry
   '#/laundry-ketepatan-linen':    { module: () => import('./pages/modules/laundry-ketepatan-linen.js'), title: 'Ketepatan Waktu Penyediaan Linen Bersih' },
   '#/laundry-linen-hilang':       { module: () => import('./pages/modules/laundry-linen-hilang.js'), title: 'Tidak Adanya Kejadian Linen Hilang' },
+
+  // Radiologi
+  '#/radiologi-jadwal-dokter':              { module: () => import('./pages/modules/radiologi-jadwal-dokter.js'), title: 'Jadwal Dokter Radiologi' },
+  '#/radiologi-thorax-sesuai-jadwal':       { module: () => import('./pages/modules/radiologi-thorax-sesuai-jadwal.js'), title: 'Waktu Tunggu Thorax Sesuai Jadwal' },
+  '#/radiologi-thorax-luar-jadwal':         { module: () => import('./pages/modules/radiologi-thorax-luar-jadwal.js'), title: 'Waktu Tunggu Thorax Diluar Jadwal' },
+  '#/radiologi-foto-ulang':                 { module: () => import('./pages/modules/radiologi-foto-ulang.js'), title: 'Kejadian Foto Ulang Pasien' },
+  '#/radiologi-info-tindakan':              { module: () => import('./pages/modules/radiologi-info-tindakan.js'), title: 'Kelengkapan Info Tindakan' },
+  '#/radiologi-identifikasi-pasien':        { module: () => import('./pages/modules/radiologi-identifikasi-pasien.js'), title: 'Kepatuhan Identifikasi Pasien' },
 };
 
 let currentPage = null;

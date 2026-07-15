@@ -19,7 +19,9 @@ async function getSummary(req, res, next) {
       giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
       waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
       rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
-      laundryKetepatanLinen, laundryLinenHilang
+      laundryKetepatanLinen, laundryLinenHilang,
+      radiologiJadwalDokter, radiologiThoraxSesuaiJadwal, radiologiThoraxLuarJadwal,
+      radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -61,6 +63,12 @@ async function getSummary(req, res, next) {
       prisma.rehabKepuasanPasien.count({ where }),
       prisma.laundryKetepatanLinen.count({ where }),
       prisma.laundryLinenHilang.count({ where }),
+      prisma.radiologiJadwalDokter.count({ where }),
+      prisma.radiologiThoraxSesuaiJadwal.count({ where }),
+      prisma.radiologiThoraxLuarJadwal.count({ where }),
+      prisma.radiologiFotoUlang.count({ where }),
+      prisma.radiologiInfoTindakan.count({ where }),
+      prisma.radiologiIdentifikasiPasien.count({ where }),
     ]);
 
     res.json({
@@ -77,7 +85,9 @@ async function getSummary(req, res, next) {
           giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
           waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
           rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
-          laundryKetepatanLinen, laundryLinenHilang
+          laundryKetepatanLinen, laundryLinenHilang,
+          radiologiJadwalDokter, radiologiThoraxSesuaiJadwal, radiologiThoraxLuarJadwal,
+          radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien
         },
       },
     });
@@ -122,34 +132,41 @@ const services = {
   'Kejadian Operasi Salah Sisi': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_sisi' } },
   'Kejadian Operasi Salah Orang': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_orang' } },
   'Kejadian Operasi Salah Prosedur / Tindakan': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_prosedur' } },
-
+  
   // Gizi
   'Ketepatan Waktu Makanan': { service: require('../services/modules/gizi-waktu-makanan.service'), category: 'Gizi' },
   'Sisa Makanan Pasien': { service: require('../services/modules/gizi-sisa-makanan.service'), category: 'Gizi' },
   'Akurasi Pemberian Diet': { service: require('../services/modules/gizi-kesalahan-diet.service'), category: 'Gizi' },
   'Identifikasi Pasien SIMRS': { service: require('../services/modules/gizi-identifikasi-pasien.service'), category: 'Gizi' },
-
+  
   // Rawat Jalan
   'Waktu Tunggu Poliklinik': { service: require('../services/modules/waktu-tunggu-poliklinik.service'), category: 'Rawat Jalan' },
   'Waktu Tunggu Operasi Elektif': { service: require('../services/modules/waktu-tunggu-operasi.service'), category: 'Rawat Jalan' },
-
+  
   // Rekam Medis
   'Kelengkapan Dokumen Rekam Medis Pasien Ranap': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'kelengkapan_ranap' } },
   'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'pengembalian_rm' } },
   'Pemberian Informasi Antrian Online': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'antrian_online' } },
   'Ketepatan Coding Rawat Inap & Rawat Jalan': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'ketepatan_coding' } },
   'Antrian Mobile JKN': { service: require('../services/modules/mutu-rekam-medis.service'), category: 'Rekam Medis', extraWhere: { tipe: 'mobile_jkn' } },
-
+  
   // Rehabilitasi Medis
   'Kejadian drop out pasien terhadap pelayanan rehabilitasi medik yang direncanakan': { service: require('../services/modules/rehab-drop-out.service'), category: 'Rehabilitasi Medis' },
   'Tidak adanya kejadian kesalahan tindakan rehabilitasi medik': { service: require('../services/modules/rehab-kesalahan-tindakan.service'), category: 'Rehabilitasi Medis' },
   'Waktu tunggu pelayanan rawat jalan rehabilitasi medik': { service: require('../services/modules/rehab-waktu-tunggu.service'), category: 'Rehabilitasi Medis' },
   'Kepatuhan identitas pasien': { service: require('../services/modules/rehab-kepatuhan-identitas.service'), category: 'Rehabilitasi Medis' },
   'Kepuasan pasien dengan pelayanan rehabilitasi medik': { service: require('../services/modules/rehab-kepuasan-pasien.service'), category: 'Rehabilitasi Medis' },
-
+  
   // Laundry
   'Ketepatan Waktu Penyediaan Linen Bersih': { service: require('../services/modules/laundry-ketepatan-linen.service'), category: 'Laundry' },
   'Tidak Adanya Kejadian Linen Hilang': { service: require('../services/modules/laundry-linen-hilang.service'), category: 'Laundry' },
+
+  // Radiologi
+  'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': { service: require('../services/modules/radiologi-thorax-sesuai-jadwal.service'), category: 'Radiologi' },
+  'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': { service: require('../services/modules/radiologi-thorax-luar-jadwal.service'), category: 'Radiologi' },
+  'Kejadian Foto Ulang Pasien': { service: require('../services/modules/radiologi-foto-ulang.service'), category: 'Radiologi' },
+  'Kelengkapan pengisian form pemberian info tindakan radiologi': { service: require('../services/modules/radiologi-info-tindakan.service'), category: 'Radiologi' },
+  'Kepatuhan Identifikasi Pasien (Radiologi)': { service: require('../services/modules/radiologi-identifikasi-pasien.service'), category: 'Radiologi' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

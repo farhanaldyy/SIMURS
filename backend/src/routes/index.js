@@ -72,4 +72,12 @@ router.use('/rehab-kepuasan-pasien', require('./modules/rehab-kepuasan-pasien'))
 router.use('/laundry-ketepatan-linen', require('./modules/laundry-ketepatan-linen'));
 router.use('/laundry-linen-hilang', require('./modules/laundry-linen-hilang'));
 
+// Radiologi modules
+router.use('/radiologi-jadwal-dokter', require('./modules/radiologi-jadwal-dokter'));
+router.use('/radiologi-thorax-sesuai-jadwal', require('./modules/radiologi-thorax-sesuai-jadwal'));
+router.use('/radiologi-thorax-luar-jadwal', require('./modules/radiologi-thorax-luar-jadwal'));
+router.use('/radiologi-foto-ulang', require('./modules/radiologi-foto-ulang'));
+router.use('/radiologi-info-tindakan', require('./modules/radiologi-info-tindakan'));
+router.use('/radiologi-identifikasi-pasien', require('./modules/radiologi-identifikasi-pasien'));
+
 module.exports = router;

@@ -61,6 +61,13 @@ const services = {
   // Laundry
   'Ketepatan Waktu Penyediaan Linen Bersih': { service: require('../services/modules/laundry-ketepatan-linen.service'), table: 'laundryKetepatanLinen', category: 'Laundry' },
   'Tidak Adanya Kejadian Linen Hilang': { service: require('../services/modules/laundry-linen-hilang.service'), table: 'laundryLinenHilang', category: 'Laundry' },
+
+  // Radiologi
+  'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': { service: require('../services/modules/radiologi-thorax-sesuai-jadwal.service'), table: 'radiologiThoraxSesuaiJadwal', category: 'Radiologi' },
+  'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': { service: require('../services/modules/radiologi-thorax-luar-jadwal.service'), table: 'radiologiThoraxLuarJadwal', category: 'Radiologi' },
+  'Kejadian Foto Ulang Pasien': { service: require('../services/modules/radiologi-foto-ulang.service'), table: 'radiologiFotoUlang', category: 'Radiologi' },
+  'Kelengkapan pengisian form pemberian info tindakan radiologi': { service: require('../services/modules/radiologi-info-tindakan.service'), table: 'radiologiInfoTindakan', category: 'Radiologi' },
+  'Kepatuhan Identifikasi Pasien (Radiologi)': { service: require('../services/modules/radiologi-identifikasi-pasien.service'), table: 'radiologiIdentifikasiPasien', category: 'Radiologi' },
 };
 
 async function exportExcel(req, res, next) {
@@ -154,11 +161,52 @@ async function exportExcel(req, res, next) {
           flat[keyLabel] = val;
         }
 
+        let hasilVal = null;
+        if (cfg.table === 'radiologiThoraxSesuaiJadwal' || cfg.table === 'radiologiThoraxLuarJadwal') {
+          const jp = r.jumlah_pasien || 0;
+          const waktu = r.waktu || 0;
+          hasilVal = jp > 0 ? `${Math.round(waktu / jp)} menit/pasien` : '0 menit/pasien';
+        } else if (cfg.table === 'radiologiFotoUlang') {
+          const over = r.over_exposure || 0;
+          const under = r.under_exposure || 0;
+          const pos = r.positioning || 0;
+          const art = r.artefac || 0;
+          const equit = r.equitmen || 0;
+          const jp = r.jumlah_pemeriksaan || 0;
+          const totalKejadian = over + under + pos + art + equit;
+          hasilVal = jp > 0 ? `${parseFloat(((totalKejadian / jp) * 100).toFixed(2))}%` : '0%';
+        } else if (cfg.table === 'radiologiInfoTindakan') {
+          const jp = r.jumlah_pemeriksaan || 0;
+          const kp = r.kepatuhan_pengisian || 0;
+          hasilVal = jp > 0 ? `${parseFloat(((kp / jp) * 100).toFixed(2))}%` : '0%';
+        } else if (cfg.table === 'radiologiIdentifikasiPasien') {
+          const fields = ['pemberian_obat', 'pemberian_nutrisi', 'pemberian_darah', 'pengambilan_spesimen', 'melakukan_tindakan'];
+          let num = 0;
+          let den = 0;
+          fields.forEach(f => {
+            if (r[f] !== 'tidak_ada_peluang' && r[f] !== 'tidak ada peluang') {
+              den++;
+              if (r[f] === 'dilakukan') num++;
+            }
+          });
+          hasilVal = den > 0 ? `${parseFloat(((num / den) * 100).toFixed(2))}%` : '100%';
+        }
+
+        if (hasilVal !== null) {
+          flat['Hasil'] = hasilVal;
+        }
+
         return flat;
       });
 
       // Sheet names must be <= 31 chars
-      const sheetName = name.substring(0, 30);
+      let sheetName = name.substring(0, 30);
+      let counter = 1;
+      while (wb.SheetNames.includes(sheetName)) {
+        const suffix = `_${counter}`;
+        sheetName = name.substring(0, 30 - suffix.length) + suffix;
+        counter++;
+      }
       const ws = XLSX.utils.json_to_sheet(rows);
       XLSX.utils.book_append_sheet(wb, ws, sheetName);
     }

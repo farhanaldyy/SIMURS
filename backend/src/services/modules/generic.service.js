@@ -46,7 +46,7 @@ function coerceTypes(data) {
       else if (key.startsWith('tanggal') && finalVal !== '') {
         data[key] = new Date(finalVal);
       }
-      else if (key.startsWith('jam') && key !== 'jam_mulai_selesai' && finalVal !== '') {
+      else if (key.startsWith('jam') && key !== 'jam_mulai_selesai' && key !== 'jam_mulai' && key !== 'jam_selesai' && finalVal !== '') {
         data[key] = new Date(`1970-01-01T${finalVal}${finalVal.split(':').length === 2 ? ':00' : ''}Z`);
       }
       else {

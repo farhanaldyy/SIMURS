@@ -91,7 +91,14 @@ const serviceToHash = {
 
   // Laundry
   'Ketepatan Waktu Penyediaan Linen Bersih': '#/laundry-ketepatan-linen',
-  'Tidak Adanya Kejadian Linen Hilang': '#/laundry-linen-hilang'
+  'Tidak Adanya Kejadian Linen Hilang': '#/laundry-linen-hilang',
+
+  // Radiologi
+  'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': '#/radiologi-thorax-sesuai-jadwal',
+  'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': '#/radiologi-thorax-luar-jadwal',
+  'Kejadian Foto Ulang Pasien': '#/radiologi-foto-ulang',
+  'Kelengkapan pengisian form pemberian info tindakan radiologi': '#/radiologi-info-tindakan',
+  'Kepatuhan Identifikasi Pasien (Radiologi)': '#/radiologi-identifikasi-pasien'
 };
 
 function renderReportTable() {

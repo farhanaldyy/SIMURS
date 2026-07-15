@@ -102,6 +102,17 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '🩻 Mutu Radiologi',
+    items: [
+      { label: 'Jadwal Dokter', hash: '#/radiologi-jadwal-dokter' },
+      { label: 'Thorax Sesuai Jadwal', hash: '#/radiologi-thorax-sesuai-jadwal' },
+      { label: 'Thorax Luar Jadwal', hash: '#/radiologi-thorax-luar-jadwal' },
+      { label: 'Kejadian Foto Ulang', hash: '#/radiologi-foto-ulang' },
+      { label: 'Kelengkapan Info Tindakan', hash: '#/radiologi-info-tindakan' },
+      { label: 'Kepatuhan Identifikasi Pasien', hash: '#/radiologi-identifikasi-pasien' },
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

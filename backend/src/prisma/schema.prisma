@@ -33,6 +33,12 @@ model User {
   rehabKepuasanPasiens    RehabKepuasanPasien[]
   laundryKetepatanLinens  LaundryKetepatanLinen[]
   laundryLinenHilangs     LaundryLinenHilang[]
+  radiologiJadwalDokters      RadiologiJadwalDokter[]
+  radiologiThoraxSesuaiJadwals RadiologiThoraxSesuaiJadwal[]
+  radiologiThoraxLuarJadwals   RadiologiThoraxLuarJadwal[]
+  radiologiFotoUlangs         RadiologiFotoUlang[]
+  radiologiInfoTindakans      RadiologiInfoTindakan[]
+  radiologiIdentifikasiPasiens RadiologiIdentifikasiPasien[]
 
   @@map("users")
 }
@@ -58,6 +64,12 @@ model Unit {
   rehabKepuasanPasiens    RehabKepuasanPasien[]
   laundryKetepatanLinens  LaundryKetepatanLinen[]
   laundryLinenHilangs     LaundryLinenHilang[]
+  radiologiJadwalDokters      RadiologiJadwalDokter[]
+  radiologiThoraxSesuaiJadwals RadiologiThoraxSesuaiJadwal[]
+  radiologiThoraxLuarJadwals   RadiologiThoraxLuarJadwal[]
+  radiologiFotoUlangs         RadiologiFotoUlang[]
+  radiologiInfoTindakans      RadiologiInfoTindakan[]
+  radiologiIdentifikasiPasiens RadiologiIdentifikasiPasien[]
 
   @@map("units")
 }
@@ -81,6 +93,12 @@ model Periode {
   rehabKepuasanPasiens    RehabKepuasanPasien[]
   laundryKetepatanLinens  LaundryKetepatanLinen[]
   laundryLinenHilangs     LaundryLinenHilang[]
+  radiologiJadwalDokters      RadiologiJadwalDokter[]
+  radiologiThoraxSesuaiJadwals RadiologiThoraxSesuaiJadwal[]
+  radiologiThoraxLuarJadwals   RadiologiThoraxLuarJadwal[]
+  radiologiFotoUlangs         RadiologiFotoUlang[]
+  radiologiInfoTindakans      RadiologiInfoTindakan[]
+  radiologiIdentifikasiPasiens RadiologiIdentifikasiPasien[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -1082,6 +1100,135 @@ model LaundryLinenHilang {
   @@index([periode_id])
   @@index([unit_id])
   @@map("laundry_linen_hilang")
+}
+
+model RadiologiJadwalDokter {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  hari        String   @db.VarChar(100)
+  jam_mulai   String   @db.VarChar(10)
+  jam_selesai String   @db.VarChar(10)
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("radiologi_jadwal_dokter")
+}
+
+model RadiologiThoraxSesuaiJadwal {
+  id            Int      @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  tanggal       DateTime @db.Date
+  jumlah_pasien Int
+  waktu         Int
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("radiologi_thorax_sesuai_jadwal")
+}
+
+model RadiologiThoraxLuarJadwal {
+  id            Int      @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  tanggal       DateTime @db.Date
+  jumlah_pasien Int
+  waktu         Int
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("radiologi_thorax_luar_jadwal")
+}
+
+model RadiologiFotoUlang {
+  id                 Int      @id @default(autoincrement())
+  periode_id         Int
+  unit_id            Int
+  tanggal            DateTime @db.Date
+  over_exposure      Int
+  under_exposure     Int
+  positioning        Int
+  artefac            Int
+  equitmen           Int
+  jumlah_pemeriksaan Int
+  created_by         Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("radiologi_foto_ulang")
+}
+
+model RadiologiInfoTindakan {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  tanggal             DateTime @db.Date
+  jumlah_pemeriksaan  Int
+  kepatuhan_pengisian Int
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("radiologi_info_tindakan")
+}
+
+model RadiologiIdentifikasiPasien {
+  id                   Int              @id @default(autoincrement())
+  periode_id           Int
+  unit_id              Int
+  tanggal              DateTime         @db.Date
+  nama_pasien          String           @db.VarChar(100)
+  no_rm                String           @db.VarChar(20)
+  pemberian_obat       IdentifikasiEnum
+  pemberian_nutrisi    IdentifikasiEnum
+  pemberian_darah      IdentifikasiEnum
+  pengambilan_spesimen IdentifikasiEnum
+  melakukan_tindakan   IdentifikasiEnum
+  created_by           Int
+  created_at           DateTime         @default(now())
+  updated_at           DateTime         @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("radiologi_identifikasi_pasien")
 }
 
 
