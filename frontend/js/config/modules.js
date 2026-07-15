@@ -4,7 +4,8 @@ export const NAV_GROUPS = [
     title: '📊 Dashboard & Laporan',
     items: [
       { label: 'Dashboard', hash: '#/dashboard' },
-      { label: 'Cetak Laporan', hash: '#/laporan' }
+      { label: 'Cetak Laporan', hash: '#/laporan' },
+      { label: 'Daftar Modul', hash: '#/modul' }
     ],
   },
   {
@@ -102,7 +103,7 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    title: '🩻 Mutu Radiologi',
+    title: '🩻 Radiologi',
     items: [
       { label: 'Jadwal Dokter', hash: '#/radiologi-jadwal-dokter' },
       { label: 'Thorax Sesuai Jadwal', hash: '#/radiologi-thorax-sesuai-jadwal' },
