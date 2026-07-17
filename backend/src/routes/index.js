@@ -80,4 +80,14 @@ router.use('/radiologi-foto-ulang', require('./modules/radiologi-foto-ulang'));
 router.use('/radiologi-info-tindakan', require('./modules/radiologi-info-tindakan'));
 router.use('/radiologi-identifikasi-pasien', require('./modules/radiologi-identifikasi-pasien'));
 
+// Laboratorium modules
+router.use('/laboratorium-jadwal-dokter', require('./modules/laboratorium-jadwal-dokter'));
+router.use('/laboratorium-waktu-tunggu-lt-140', require('./modules/laboratorium-waktu-tunggu-lt-140'));
+router.use('/laboratorium-waktu-tunggu-gt-140', require('./modules/laboratorium-waktu-tunggu-gt-140'));
+router.use('/laboratorium-hasil-kritis', require('./modules/laboratorium-hasil-kritis'));
+router.use('/laboratorium-kesalahan-input', require('./modules/laboratorium-kesalahan-input'));
+router.use('/laboratorium-kerusakan-sampel', require('./modules/laboratorium-kerusakan-sampel'));
+router.use('/laboratorium-kepatuhan-identifikasi', require('./modules/laboratorium-kepatuhan-identifikasi'));
+router.use('/laboratorium-ekspertisi-dokter', require('./modules/laboratorium-ekspertisi-dokter'));
+
 module.exports = router;

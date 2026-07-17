@@ -83,6 +83,16 @@ const routes = {
   '#/radiologi-foto-ulang':                 { module: () => import('./pages/modules/radiologi-foto-ulang.js'), title: 'Kejadian Foto Ulang Pasien' },
   '#/radiologi-info-tindakan':              { module: () => import('./pages/modules/radiologi-info-tindakan.js'), title: 'Kelengkapan Info Tindakan' },
   '#/radiologi-identifikasi-pasien':        { module: () => import('./pages/modules/radiologi-identifikasi-pasien.js'), title: 'Kepatuhan Identifikasi Pasien' },
+
+  // Laboratorium
+  '#/laboratorium-jadwal-dokter':              { module: () => import('./pages/modules/laboratorium-jadwal-dokter.js'), title: 'Jadwal Dokter Laboratorium' },
+  '#/laboratorium-waktu-tunggu-lt-140':       { module: () => import('./pages/modules/laboratorium-waktu-tunggu-lt-140.js'), title: 'Waktu Tunggu Lab < 140 Menit' },
+  '#/laboratorium-waktu-tunggu-gt-140':       { module: () => import('./pages/modules/laboratorium-waktu-tunggu-gt-140.js'), title: 'Waktu Tunggu Lab > 140 Menit' },
+  '#/laboratorium-hasil-kritis':              { module: () => import('./pages/modules/laboratorium-hasil-kritis.js'), title: 'Pelaporan Hasil Kritis Lab ≤ 30 Menit' },
+  '#/laboratorium-kesalahan-input':           { module: () => import('./pages/modules/laboratorium-kesalahan-input.js'), title: 'Tidak Adanya Kesalahan Input Lab' },
+  '#/laboratorium-kerusakan-sampel':          { module: () => import('./pages/modules/laboratorium-kerusakan-sampel.js'), title: 'Tidak Adanya Kerusakan Sampel Lab' },
+  '#/laboratorium-kepatuhan-identifikasi':    { module: () => import('./pages/modules/laboratorium-kepatuhan-identifikasi.js'), title: 'Kepatuhan Identifikasi Pasien Lab' },
+  '#/laboratorium-ekspertisi-dokter':         { module: () => import('./pages/modules/laboratorium-ekspertisi-dokter.js'), title: 'Data Ekspertisi Oleh Dokter Lab' },
 };
 
 let currentPage = null;

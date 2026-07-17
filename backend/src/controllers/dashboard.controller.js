@@ -21,7 +21,10 @@ async function getSummary(req, res, next) {
       rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
       laundryKetepatanLinen, laundryLinenHilang,
       radiologiJadwalDokter, radiologiThoraxSesuaiJadwal, radiologiThoraxLuarJadwal,
-      radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien
+      radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien,
+      laboratoriumJadwalDokter, laboratoriumWaktuTungguLt140, laboratoriumWaktuTungguGt140,
+      laboratoriumHasilKritis, laboratoriumKesalahanInput,
+      laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -69,6 +72,14 @@ async function getSummary(req, res, next) {
       prisma.radiologiFotoUlang.count({ where }),
       prisma.radiologiInfoTindakan.count({ where }),
       prisma.radiologiIdentifikasiPasien.count({ where }),
+      prisma.laboratoriumJadwalDokter.count({ where }),
+      prisma.laboratoriumWaktuTungguLt140.count({ where }),
+      prisma.laboratoriumWaktuTungguGt140.count({ where }),
+      prisma.laboratoriumHasilKritis.count({ where }),
+      prisma.laboratoriumKesalahanInput.count({ where }),
+      prisma.laboratoriumKerusakanSampel.count({ where }),
+      prisma.laboratoriumKepatuhanIdentifikasi.count({ where }),
+      prisma.laboratoriumEkspertisiDokter.count({ where }),
     ]);
 
     res.json({
@@ -87,7 +98,10 @@ async function getSummary(req, res, next) {
           rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
           laundryKetepatanLinen, laundryLinenHilang,
           radiologiJadwalDokter, radiologiThoraxSesuaiJadwal, radiologiThoraxLuarJadwal,
-          radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien
+          radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien,
+          laboratoriumJadwalDokter, laboratoriumWaktuTungguLt140, laboratoriumWaktuTungguGt140,
+          laboratoriumHasilKritis, laboratoriumKesalahanInput,
+          laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter
         },
       },
     });
@@ -167,6 +181,16 @@ const services = {
   'Kejadian Foto Ulang Pasien': { service: require('../services/modules/radiologi-foto-ulang.service'), category: 'Radiologi' },
   'Kelengkapan pengisian form pemberian info tindakan radiologi': { service: require('../services/modules/radiologi-info-tindakan.service'), category: 'Radiologi' },
   'Kepatuhan Identifikasi Pasien (Radiologi)': { service: require('../services/modules/radiologi-identifikasi-pasien.service'), category: 'Radiologi' },
+
+  // Laboratorium
+  'Jadwal Dokter Laboratorium': { service: require('../services/modules/laboratorium-jadwal-dokter.service'), category: 'Laboratorium' },
+  'Waktu tunggu hasil pemeriksaan laboratorium (< 140 Menit)': { service: require('../services/modules/laboratorium-waktu-tunggu-lt-140.service'), category: 'Laboratorium' },
+  'Waktu tunggu hasil pemeriksaan laboratorium (> 140 Menit)': { service: require('../services/modules/laboratorium-waktu-tunggu-gt-140.service'), category: 'Laboratorium' },
+  'Pelaporan hasil kritis laboratorium  ≤ 30 menit': { service: require('../services/modules/laboratorium-hasil-kritis.service'), category: 'Laboratorium' },
+  'Tidak adanya kesalahan hasil input pemeriksaan lab': { service: require('../services/modules/laboratorium-kesalahan-input.service'), category: 'Laboratorium' },
+  'Tidak adanya kerusakan sampel di laboratorium': { service: require('../services/modules/laboratorium-kerusakan-sampel.service'), category: 'Laboratorium' },
+  'Kepatuhan Identifikasi Pasien Laboratorium': { service: require('../services/modules/laboratorium-kepatuhan-identifikasi.service'), category: 'Laboratorium' },
+  'Data Ekspertisi Oleh Dokter Laboratorium': { service: require('../services/modules/laboratorium-ekspertisi-dokter.service'), category: 'Laboratorium' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

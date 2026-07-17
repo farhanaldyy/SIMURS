@@ -114,6 +114,19 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '🔬 Laboratorium',
+    items: [
+      { label: 'Jadwal Dokter', hash: '#/laboratorium-jadwal-dokter' },
+      { label: 'Waktu Tunggu Lab < 140 Menit', hash: '#/laboratorium-waktu-tunggu-lt-140' },
+      { label: 'Waktu Tunggu Lab > 140 Menit', hash: '#/laboratorium-waktu-tunggu-gt-140' },
+      { label: 'Pelaporan Hasil Kritis ≤ 30 Menit', hash: '#/laboratorium-hasil-kritis' },
+      { label: 'Tidak Adanya Kesalahan Input Lab', hash: '#/laboratorium-kesalahan-input' },
+      { label: 'Tidak Adanya Kerusakan Sampel', hash: '#/laboratorium-kerusakan-sampel' },
+      { label: 'Kepatuhan Identifikasi Pasien', hash: '#/laboratorium-kepatuhan-identifikasi' },
+      { label: 'Data Ekspertisi Oleh Dokter', hash: '#/laboratorium-ekspertisi-dokter' },
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

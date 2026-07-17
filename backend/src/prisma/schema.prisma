@@ -39,6 +39,14 @@ model User {
   radiologiFotoUlangs         RadiologiFotoUlang[]
   radiologiInfoTindakans      RadiologiInfoTindakan[]
   radiologiIdentifikasiPasiens RadiologiIdentifikasiPasien[]
+  laboratoriumJadwalDokters      LaboratoriumJadwalDokter[]
+  laboratoriumWaktuTungguLt140s  LaboratoriumWaktuTungguLt140[]
+  laboratoriumWaktuTungguGt140s  LaboratoriumWaktuTungguGt140[]
+  laboratoriumHasilKritis        LaboratoriumHasilKritis[]
+  laboratoriumKesalahanInputs    LaboratoriumKesalahanInput[]
+  laboratoriumKerusakanSampels   LaboratoriumKerusakanSampel[]
+  laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
+  laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
 
   @@map("users")
 }
@@ -70,6 +78,14 @@ model Unit {
   radiologiFotoUlangs         RadiologiFotoUlang[]
   radiologiInfoTindakans      RadiologiInfoTindakan[]
   radiologiIdentifikasiPasiens RadiologiIdentifikasiPasien[]
+  laboratoriumJadwalDokters      LaboratoriumJadwalDokter[]
+  laboratoriumWaktuTungguLt140s  LaboratoriumWaktuTungguLt140[]
+  laboratoriumWaktuTungguGt140s  LaboratoriumWaktuTungguGt140[]
+  laboratoriumHasilKritis        LaboratoriumHasilKritis[]
+  laboratoriumKesalahanInputs    LaboratoriumKesalahanInput[]
+  laboratoriumKerusakanSampels   LaboratoriumKerusakanSampel[]
+  laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
+  laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
 
   @@map("units")
 }
@@ -99,6 +115,14 @@ model Periode {
   radiologiFotoUlangs         RadiologiFotoUlang[]
   radiologiInfoTindakans      RadiologiInfoTindakan[]
   radiologiIdentifikasiPasiens RadiologiIdentifikasiPasien[]
+  laboratoriumJadwalDokters      LaboratoriumJadwalDokter[]
+  laboratoriumWaktuTungguLt140s  LaboratoriumWaktuTungguLt140[]
+  laboratoriumWaktuTungguGt140s  LaboratoriumWaktuTungguGt140[]
+  laboratoriumHasilKritis        LaboratoriumHasilKritis[]
+  laboratoriumKesalahanInputs    LaboratoriumKesalahanInput[]
+  laboratoriumKerusakanSampels   LaboratoriumKerusakanSampel[]
+  laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
+  laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -1229,6 +1253,171 @@ model RadiologiIdentifikasiPasien {
   @@index([periode_id])
   @@index([unit_id])
   @@map("radiologi_identifikasi_pasien")
+}
+
+model LaboratoriumJadwalDokter {
+  id          Int      @id @default(autoincrement())
+  periode_id  Int
+  unit_id     Int
+  hari        String   @db.VarChar(100)
+  jam_mulai   String   @db.VarChar(10)
+  jam_selesai String   @db.VarChar(10)
+  created_by  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_jadwal_dokter")
+}
+
+model LaboratoriumWaktuTungguLt140 {
+  id            Int      @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  tanggal       DateTime @db.Date
+  jumlah_pasien Int
+  waktu         Int
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_waktu_tunggu_lt140")
+}
+
+model LaboratoriumWaktuTungguGt140 {
+  id            Int      @id @default(autoincrement())
+  periode_id    Int
+  unit_id       Int
+  tanggal       DateTime @db.Date
+  jumlah_pasien Int
+  prx_gt_140    Int      @default(0)
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_waktu_tunggu_gt140")
+}
+
+model LaboratoriumHasilKritis {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int
+  unit_id      Int
+  tanggal      DateTime @db.Date
+  nilai_kritis Int
+  lt_30        Int
+  gt_30        Int
+  created_by   Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_hasil_kritis")
+}
+
+model LaboratoriumKesalahanInput {
+  id               Int      @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  tanggal          DateTime @db.Date
+  jumlah_pasien    Int
+  jumlah_kesalahan Int
+  keterangan       String?  @db.Text
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_kesalahan_input")
+}
+
+model LaboratoriumKerusakanSampel {
+  id              Int      @id @default(autoincrement())
+  periode_id      Int
+  unit_id         Int
+  tanggal         DateTime @db.Date
+  jumlah_pasien   Int
+  jumlah_kerusakan Int
+  keterangan      String?  @db.Text
+  created_by      Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_kerusakan_sampel")
+}
+
+model LaboratoriumKepatuhanIdentifikasi {
+  id               Int      @id @default(autoincrement())
+  periode_id       Int
+  unit_id          Int
+  tanggal          DateTime @db.Date
+  jumlah_pasien    Int
+  jumlah_kepatuhan Int
+  keterangan       String?  @db.Text
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_kepatuhan_identifikasi")
+}
+
+model LaboratoriumEkspertisiDokter {
+  id                Int      @id @default(autoincrement())
+  periode_id        Int
+  unit_id           Int
+  tanggal           DateTime @db.Date
+  jumlah_pasien     Int
+  ekspertisi_dokter Int
+  keterangan        String?  @db.Text
+  created_by        Int
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("laboratorium_ekspertisi_dokter")
 }
 
 

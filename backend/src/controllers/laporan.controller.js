@@ -68,6 +68,16 @@ const services = {
   'Kejadian Foto Ulang Pasien': { service: require('../services/modules/radiologi-foto-ulang.service'), table: 'radiologiFotoUlang', category: 'Radiologi' },
   'Kelengkapan pengisian form pemberian info tindakan radiologi': { service: require('../services/modules/radiologi-info-tindakan.service'), table: 'radiologiInfoTindakan', category: 'Radiologi' },
   'Kepatuhan Identifikasi Pasien (Radiologi)': { service: require('../services/modules/radiologi-identifikasi-pasien.service'), table: 'radiologiIdentifikasiPasien', category: 'Radiologi' },
+
+  // Laboratorium
+  'Jadwal Dokter Laboratorium': { service: require('../services/modules/laboratorium-jadwal-dokter.service'), table: 'laboratoriumJadwalDokter', category: 'Laboratorium' },
+  'Waktu tunggu hasil pemeriksaan laboratorium (< 140 Menit)': { service: require('../services/modules/laboratorium-waktu-tunggu-lt-140.service'), table: 'laboratoriumWaktuTungguLt140', category: 'Laboratorium' },
+  'Waktu tunggu hasil pemeriksaan laboratorium (> 140 Menit)': { service: require('../services/modules/laboratorium-waktu-tunggu-gt-140.service'), table: 'laboratoriumWaktuTungguGt140', category: 'Laboratorium' },
+  'Pelaporan hasil kritis laboratorium  ≤ 30 menit': { service: require('../services/modules/laboratorium-hasil-kritis.service'), table: 'laboratoriumHasilKritis', category: 'Laboratorium' },
+  'Tidak adanya kesalahan hasil input pemeriksaan lab': { service: require('../services/modules/laboratorium-kesalahan-input.service'), table: 'laboratoriumKesalahanInput', category: 'Laboratorium' },
+  'Tidak adanya kerusakan sampel di laboratorium': { service: require('../services/modules/laboratorium-kerusakan-sampel.service'), table: 'laboratoriumKerusakanSampel', category: 'Laboratorium' },
+  'Kepatuhan Identifikasi Pasien Laboratorium': { service: require('../services/modules/laboratorium-kepatuhan-identifikasi.service'), table: 'laboratoriumKepatuhanIdentifikasi', category: 'Laboratorium' },
+  'Data Ekspertisi Oleh Dokter Laboratorium': { service: require('../services/modules/laboratorium-ekspertisi-dokter.service'), table: 'laboratoriumEkspertisiDokter', category: 'Laboratorium' },
 };
 
 async function exportExcel(req, res, next) {
@@ -190,6 +200,41 @@ async function exportExcel(req, res, next) {
             }
           });
           hasilVal = den > 0 ? `${parseFloat(((num / den) * 100).toFixed(2))}%` : '100%';
+        } else if (cfg.table === 'laboratoriumWaktuTungguLt140') {
+          const jp = r.jumlah_pasien || 0;
+          const waktu = r.waktu || 0;
+          hasilVal = jp > 0 ? `${Math.round(waktu / jp)} menit/pasien` : '0 menit/pasien';
+        } else if (cfg.table === 'laboratoriumWaktuTungguGt140') {
+          const jp = r.jumlah_pasien || 0;
+          const gt = r.prx_gt_140 || 0;
+          const lt = jp - gt;
+          const presentase = jp > 0 ? parseFloat(((lt / jp) * 100).toFixed(2)) : 0;
+          hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'laboratoriumHasilKritis') {
+          const nk = r.nilai_kritis || 0;
+          const lt = r.lt_30 || 0;
+          const presentase = nk > 0 ? parseFloat(((lt / nk) * 100).toFixed(2)) : 0;
+          hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'laboratoriumKesalahanInput') {
+          const jp = r.jumlah_pasien || 0;
+          const jk = r.jumlah_kesalahan || 0;
+          const presentase = jp > 0 ? parseFloat((((jp - jk) / jp) * 100).toFixed(2)) : 100;
+          hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'laboratoriumKerusakanSampel') {
+          const jp = r.jumlah_pasien || 0;
+          const jk = r.jumlah_kerusakan || 0;
+          const presentase = jp > 0 ? parseFloat((((jp - jk) / jp) * 100).toFixed(2)) : 100;
+          hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'laboratoriumKepatuhanIdentifikasi') {
+          const jp = r.jumlah_pasien || 0;
+          const jk = r.jumlah_kepatuhan || 0;
+          const presentase = jp > 0 ? parseFloat(((jk / jp) * 100).toFixed(2)) : 100;
+          hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'laboratoriumEkspertisiDokter') {
+          const jp = r.jumlah_pasien || 0;
+          const je = r.ekspertisi_dokter || 0;
+          const presentase = jp > 0 ? parseFloat(((je / jp) * 100).toFixed(2)) : 0;
+          hasilVal = `${presentase}%`;
         }
 
         if (hasilVal !== null) {
