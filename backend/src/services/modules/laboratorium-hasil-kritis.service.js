@@ -27,6 +27,7 @@ const baseService = createGenericService('laboratoriumHasilKritis', {
       total_lt_30: totalLt30,
       total_gt_30: totalGt30,
       presentase,
+      persen: presentase,
       standar: '100%',
       category: 'Laboratorium'
     };

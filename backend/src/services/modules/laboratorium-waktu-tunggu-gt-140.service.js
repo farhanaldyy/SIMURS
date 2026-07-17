@@ -26,6 +26,7 @@ const baseService = createGenericService('laboratoriumWaktuTungguGt140', {
       total_pasien_gt_140: totalPasienGt140,
       total_pasien_lt_140: totalPasienLt140,
       presentase,
+      persen: presentase,
       sisa_presentase: sisaPresentase,
       standar: '100%',
       category: 'Laboratorium'

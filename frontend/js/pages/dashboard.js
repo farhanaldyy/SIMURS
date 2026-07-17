@@ -127,18 +127,26 @@ async function loadDashboard() {
       achieved = s.total === 0;
     } else if (s.rataRata !== undefined) {
       hasilPercent = s.rataRata;
-      hasilText = `${s.rataRata}`;
-      const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
-      const rVal = parseFloat(s.rataRata);
-      if (s.standar.includes('≤')) {
-        achieved = rVal <= targetVal;
+      hasilText = `${s.rataRata} ${s.standar.includes('menit') ? 'menit' : ''}`.trim();
+      if (s.standar === '-') {
+        achieved = s.total > 0;
       } else {
-        achieved = rVal >= targetVal;
+        const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
+        const rVal = parseFloat(s.rataRata);
+        if (s.standar.includes('≤')) {
+          achieved = rVal <= targetVal;
+        } else {
+          achieved = rVal >= targetVal;
+        }
       }
     } else if ((name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
       hasilPercent = s.total === 0 ? 100 : 0;
       hasilText = `${s.total} Kasus`;
       achieved = s.total === 0;
+    } else if (s.standar === '-') {
+      hasilPercent = s.total > 0 ? 100 : 0;
+      hasilText = s.total > 0 ? 'Tersedia' : 'Belum Ada';
+      achieved = s.total > 0;
     } else {
       const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
       const currentVal = parseFloat(s.persen || 0);

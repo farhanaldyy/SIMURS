@@ -24,6 +24,7 @@ const baseService = createGenericService('laboratoriumKesalahanInput', {
       total_pasien: totalPasien,
       total_kesalahan: totalKesalahan,
       presentase,
+      persen: presentase,
       standar: '100%',
       category: 'Laboratorium'
     };
