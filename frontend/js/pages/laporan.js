@@ -98,7 +98,16 @@ const serviceToHash = {
   'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': '#/radiologi-thorax-luar-jadwal',
   'Kejadian Foto Ulang Pasien': '#/radiologi-foto-ulang',
   'Kelengkapan pengisian form pemberian info tindakan radiologi': '#/radiologi-info-tindakan',
-  'Kepatuhan Identifikasi Pasien (Radiologi)': '#/radiologi-identifikasi-pasien'
+  'Kepatuhan Identifikasi Pasien (Radiologi)': '#/radiologi-identifikasi-pasien',
+
+  // Farmasi
+  'Kepatuhan Pelaksanaan Double Check Obat High Alert': '#/mutu-farmasi',
+  'Ketidaktersediaan Obat di Farmasi di Rawat Jalan': '#/mutu-farmasi',
+  'Ketidaktersediaan Obat di Farmasi di Rawat Inap': '#/mutu-farmasi',
+  'Waktu Tunggu Obat Racikan dan Non Racikan': '#/mutu-farmasi',
+  'Rata Rata Menut waktu tunggu': '#/mutu-farmasi',
+  'Kesalahan Penyerahan Obat Kepada Pasien': '#/kesalahan-penyerahan-obat',
+  'Kepatuhan penggunaan formularium nasional': '#/kepatuhan-formularium-nasional'
 };
 
 function renderReportTable() {
@@ -138,12 +147,23 @@ function renderReportTable() {
       achieved = s.total === 0;
     } else if (s.rataRata !== undefined) {
       hasil = `${s.rataRata}`;
-      const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
-      const rVal = parseFloat(s.rataRata);
-      if (s.standar.includes('≤')) {
-        achieved = rVal <= targetVal;
+      if (name === 'Rata Rata Menut waktu tunggu') {
+        const match = s.rataRata.match(/\d+/g);
+        if (match && match.length >= 2) {
+          const racikanVal = parseFloat(match[0]);
+          const nonRacikanVal = parseFloat(match[1]);
+          achieved = racikanVal < 60 && nonRacikanVal < 30;
+        } else {
+          achieved = false;
+        }
       } else {
-        achieved = rVal >= targetVal;
+        const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
+        const rVal = parseFloat(s.rataRata);
+        if (s.standar.includes('≤')) {
+          achieved = rVal <= targetVal;
+        } else {
+          achieved = rVal >= targetVal;
+        }
       }
     } else if ((name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan')) {
       hasil = `${s.total} Kasus`;

@@ -17,7 +17,7 @@ export async function render(container) {
     <div class="dashboard-stats" id="stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
       <div class="stat-card stat-primary" style="background: var(--color-bg-card); border-left: 4px solid var(--color-primary); padding: 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
         <div class="stat-icon" style="font-size: 2rem;">📊</div>
-        <div class="stat-info"><h3 style="font-size: 1.5rem; margin: 0;">27</h3><p style="color: var(--color-text-secondary); margin: 0; font-size: 0.85rem;">Total Indikator</p></div>
+        <div class="stat-info"><h3 id="stat-total" style="font-size: 1.5rem; margin: 0;">-</h3><p style="color: var(--color-text-secondary); margin: 0; font-size: 0.85rem;">Total Indikator</p></div>
       </div>
       <div class="stat-card stat-success" style="background: var(--color-bg-card); border-left: 4px solid var(--color-success); padding: 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
         <div class="stat-icon" style="font-size: 2rem; color: var(--color-success);">✓</div>
@@ -127,8 +127,17 @@ async function loadDashboard() {
       achieved = s.total === 0;
     } else if (s.rataRata !== undefined) {
       hasilPercent = s.rataRata;
-      hasilText = `${s.rataRata} ${s.standar.includes('menit') ? 'menit' : ''}`.trim();
-      if (s.standar === '-') {
+      hasilText = s.rataRata;
+      if (name === 'Rata Rata Menut waktu tunggu') {
+        const match = s.rataRata.match(/\d+/g);
+        if (match && match.length >= 2) {
+          const racikanVal = parseFloat(match[0]);
+          const nonRacikanVal = parseFloat(match[1]);
+          achieved = racikanVal < 60 && nonRacikanVal < 30;
+        } else {
+          achieved = false;
+        }
+      } else if (s.standar === '-') {
         achieved = s.total > 0;
       } else {
         const targetVal = parseFloat(s.standar.replace(/[^\d.]/g, ''));
@@ -183,6 +192,7 @@ async function loadDashboard() {
   }
 
   // Update Stats Cards
+  document.getElementById('stat-total').textContent = formattedList.length;
   document.getElementById('stat-good').textContent = tercapaiCount;
   document.getElementById('stat-bad').textContent = tidakTercapaiCount;
   document.getElementById('stat-empty').textContent = belumAdaDataCount;
@@ -291,6 +301,7 @@ function filterAndRenderRecapTable() {
     'IGD': 'background: #fef3c7; color: #92400e;',
     'Hemodialisa': 'background: #f1f5f9; color: #475569;',
     'Operasi & Anestesi': 'background: #ffe4e6; color: #9f1239;',
+    'Farmasi': 'background: #dcfce7; color: #166534;',
   };
 
   const rows = filtered.map((item, idx) => {

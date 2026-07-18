@@ -1420,5 +1420,49 @@ model LaboratoriumEkspertisiDokter {
   @@map("laboratorium_ekspertisi_dokter")
 }
 
+model MutuFarmasi {
+  id             Int      @id @default(autoincrement())
+  periode_id     Int
+  tipe           String   @db.VarChar(50) // 'double_check', 'tidak_tersedia_rajal', 'tidak_tersedia_ranap', 'waktu_tunggu', 'rata_waktu_tunggu'
+  val1           Int      @default(0)
+  val2           Int      @default(0)
+  val3           Int      @default(0)
+  val4           Int      @default(0)
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 
+  @@unique([periode_id, tipe])
+  @@index([periode_id])
+  @@map("mutu_farmasi")
+}
+model MutuFarmasiKesalahanObat {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int
+  tanggal      DateTime @db.Date
+  resep_rajal  Int      @default(0)
+  resep_ranap  Int      @default(0)
+  resep_igd    Int      @default(0)
+  salah_rajal  Int      @default(0)
+  salah_ranap  Int      @default(0)
+  salah_igd    Int      @default(0)
+  created_by   Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
+  @@index([periode_id])
+  @@map("mutu_farmasi_kesalahan_obat")
+}
+
+model MutuFarmasiObatDiluarFornas {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int
+  nama_dokter  String   @db.VarChar(100)
+  obat         String   @db.Text
+  created_by   Int
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("mutu_farmasi_obat_diluar_fornas")
+}

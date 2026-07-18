@@ -90,4 +90,9 @@ router.use('/laboratorium-kerusakan-sampel', require('./modules/laboratorium-ker
 router.use('/laboratorium-kepatuhan-identifikasi', require('./modules/laboratorium-kepatuhan-identifikasi'));
 router.use('/laboratorium-ekspertisi-dokter', require('./modules/laboratorium-ekspertisi-dokter'));
 
+// Farmasi modules
+router.use('/mutu-farmasi', require('./modules/mutu-farmasi'));
+router.use('/kesalahan-penyerahan-obat', require('./modules/kesalahan-penyerahan-obat'));
+router.use('/kepatuhan-fornas', require('./modules/kepatuhan-fornas'));
+
 module.exports = router;

@@ -54,6 +54,11 @@ const routes = {
   '#/gizi-kesalahan-diet':         { module: () => import('./pages/modules/gizi-kesalahan-diet.js'), title: 'Tidak Adanya Kesalahan Pemberian Diet' },
   '#/gizi-identifikasi-pasien':   { module: () => import('./pages/modules/gizi-identifikasi-pasien.js'), title: 'Kepatuhan Identifikasi Pasien (SIMRS)' },
  
+  // Farmasi
+  '#/mutu-farmasi':               { module: () => import('./pages/modules/mutu-farmasi.js'), title: 'Standar Minimal Mutu Farmasi' },
+  '#/kesalahan-penyerahan-obat':  { module: () => import('./pages/modules/kesalahan-penyerahan-obat.js'), title: 'Kesalahan Penyerahan Obat' },
+  '#/kepatuhan-formularium-nasional': { module: () => import('./pages/modules/kepatuhan-formularium-nasional.js'), title: 'Kepatuhan Formularium Nasional' },
+
   // Admin Panel
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },
   '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },

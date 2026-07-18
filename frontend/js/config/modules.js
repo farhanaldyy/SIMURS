@@ -127,6 +127,14 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '💊 Farmasi',
+    items: [
+      { label: 'Standar Minimal Mutu Farmasi', hash: '#/mutu-farmasi' },
+      { label: 'Kesalahan Penyerahan Obat', hash: '#/kesalahan-penyerahan-obat' },
+      { label: 'Kepatuhan Formularium Nasional', hash: '#/kepatuhan-formularium-nasional' }
+    ]
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

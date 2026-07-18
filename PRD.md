@@ -72,7 +72,7 @@ Membangun aplikasi web berbasis Vanilla JS (tanpa framework frontend) untuk inpu
 
 | Kategori | Pilihan |
 |---|---|
-| **Utama** | MySQL 8.0 |
+| **Utama** | MariaDB / MySQL |
 | **Koneksi** | Prisma Client |
 | **Cache** | Tidak digunakan di v1.0 |
 
@@ -661,7 +661,7 @@ kepatuhan_apd (
 * **Proses Normalisasi Data:** Rute API backend harus fleksibel menerima input ber-spasi maupun ber-underscore dari frontend, lalu melakukan normalisasi data ke bentuk key ber-underscore sebelum dikirimkan ke Prisma Client. Tampilan frontend juga harus secara dinamis menyesuaikan nilai option terpilih ketika memuat data yang dikembalikan oleh database (yang bertipe spasi).
 
 ### 5.4 Waktu dan Pencegahan Pergeseran Timezone
-* **Penyimpanan Baseline UTC:** Kolom bertipe `DateTime` (Prisma) atau `TIME` (MySQL) disimpan menggunakan format ISO String ber-baseline UTC (`1970-01-01T[time]Z` untuk waktu mandiri).
+* **Penyimpanan Baseline UTC:** Kolom bertipe `DateTime` (Prisma) atau `TIME` (MariaDB/MySQL) disimpan menggunakan format ISO String ber-baseline UTC (`1970-01-01T[time]Z` untuk waktu mandiri).
 * **Ekstraksi Waktu di Frontend:** Untuk menghindari pergeseran jam kejadian akibat perbedaan zona waktu (timezone offset) antara browser pengguna dan database server, frontend dilarang keras mengubah objek waktu ke representasi lokal menggunakan `.toLocaleTimeString()`. Pemrosesan komponen jam dan menit wajib menggunakan metode `.getUTCHours()` dan `.getUTCMinutes()` yang dibungkus oleh formatter global `formatTime` di `frontend/js/utils/formatter.js`.
 
 ---
@@ -998,7 +998,7 @@ BACKEND:
 - Gunakan dotenv untuk semua konfigurasi environment
 
 DATABASE:
-- MySQL 8.0 — definisikan schema via Prisma schema.prisma
+- MariaDB / MySQL — definisikan schema via Prisma schema.prisma
 - Setiap tabel indikator wajib punya: created_by (FK ke users), created_at, updated_at
 - Setiap tabel indikator wajib punya: periode_id (FK ke periode), unit_id (FK ke units)
 - Buat index pada kolom periode_id dan unit_id di setiap tabel indikator

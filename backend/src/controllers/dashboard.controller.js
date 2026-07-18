@@ -17,7 +17,7 @@ async function getSummary(req, res, next) {
       informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
       mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
       giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
-      waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
+      waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis, mutuFarmasi,
       rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
       laundryKetepatanLinen, laundryLinenHilang,
       radiologiJadwalDokter, radiologiThoraxSesuaiJadwal, radiologiThoraxLuarJadwal,
@@ -59,6 +59,7 @@ async function getSummary(req, res, next) {
       prisma.waktuTungguPoliklinik.count({ where }),
       prisma.waktuTungguOperasi.count({ where }),
       prisma.mutuRekamMedis.count({ where: { periode_id: where.periode_id } }),
+      prisma.mutuFarmasi.count({ where: { periode_id: where.periode_id } }),
       prisma.rehabPasienDropOut.count({ where }),
       prisma.rehabKesalahanTindakan.count({ where }),
       prisma.rehabWaktuTunggu.count({ where }),
@@ -94,7 +95,7 @@ async function getSummary(req, res, next) {
           informedConsent, asesmenPra, surgicalChecklist, penandaanLokasi,
           mutuKamarOperasi, giziWaktuMakanan, giziSisaMakanan,
           giziKesalahanDiet, giziIdentifikasiPasien, kepatuhanKebersihanTangan, kepatuhanApd,
-          waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis,
+          waktuTungguPoliklinik, waktuTungguOperasi, mutuRekamMedis, mutuFarmasi,
           rehabPasienDropOut, rehabKesalahanTindakan, rehabWaktuTunggu, rehabKepatuhanIdentitas, rehabKepuasanPasien,
           laundryKetepatanLinen, laundryLinenHilang,
           radiologiJadwalDokter, radiologiThoraxSesuaiJadwal, radiologiThoraxLuarJadwal,
@@ -147,6 +148,15 @@ const services = {
   'Kejadian Operasi Salah Orang': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_orang' } },
   'Kejadian Operasi Salah Prosedur / Tindakan': { service: require('../services/modules/mutu-kamar-operasi.service'), category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_prosedur' } },
   
+  // Farmasi
+  'Kepatuhan Pelaksanaan Double Check Obat High Alert': { service: require('../services/modules/mutu-farmasi.service'), category: 'Farmasi', extraWhere: { tipe: 'double_check' } },
+  'Ketidaktersediaan Obat di Farmasi di Rawat Jalan': { service: require('../services/modules/mutu-farmasi.service'), category: 'Farmasi', extraWhere: { tipe: 'tidak_tersedia_rajal' } },
+  'Ketidaktersediaan Obat di Farmasi di Rawat Inap': { service: require('../services/modules/mutu-farmasi.service'), category: 'Farmasi', extraWhere: { tipe: 'tidak_tersedia_ranap' } },
+  'Waktu Tunggu Obat Racikan dan Non Racikan': { service: require('../services/modules/mutu-farmasi.service'), category: 'Farmasi', extraWhere: { tipe: 'waktu_tunggu' } },
+  'Rata Rata Menut waktu tunggu': { service: require('../services/modules/mutu-farmasi.service'), category: 'Farmasi', extraWhere: { tipe: 'rata_waktu_tunggu' } },
+  'Kesalahan Penyerahan Obat Kepada Pasien': { service: require('../services/modules/kesalahan-penyerahan-obat.service'), category: 'Farmasi' },
+  'Kepatuhan penggunaan formularium nasional': { service: require('../services/modules/kepatuhan-fornas.service'), category: 'Farmasi' },
+
   // Gizi
   'Ketepatan Waktu Makanan': { service: require('../services/modules/gizi-waktu-makanan.service'), category: 'Gizi' },
   'Sisa Makanan Pasien': { service: require('../services/modules/gizi-sisa-makanan.service'), category: 'Gizi' },

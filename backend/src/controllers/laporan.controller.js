@@ -41,6 +41,15 @@ const services = {
   'Kejadian Operasi Salah Orang': { service: require('../services/modules/mutu-kamar-operasi.service'), table: 'mutuKamarOperasi', category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_orang' } },
   'Kejadian Operasi Salah Prosedur / Tindakan': { service: require('../services/modules/mutu-kamar-operasi.service'), table: 'mutuKamarOperasi', category: 'Operasi & Anestesi', extraWhere: { tipe: 'salah_prosedur' } },
 
+  // Farmasi
+  'Kepatuhan Pelaksanaan Double Check Obat High Alert': { service: require('../services/modules/mutu-farmasi.service'), table: 'mutuFarmasi', category: 'Farmasi', extraWhere: { tipe: 'double_check' } },
+  'Ketidaktersediaan Obat di Farmasi di Rawat Jalan': { service: require('../services/modules/mutu-farmasi.service'), table: 'mutuFarmasi', category: 'Farmasi', extraWhere: { tipe: 'tidak_tersedia_rajal' } },
+  'Ketidaktersediaan Obat di Farmasi di Rawat Inap': { service: require('../services/modules/mutu-farmasi.service'), table: 'mutuFarmasi', category: 'Farmasi', extraWhere: { tipe: 'tidak_tersedia_ranap' } },
+  'Waktu Tunggu Obat Racikan dan Non Racikan': { service: require('../services/modules/mutu-farmasi.service'), table: 'mutuFarmasi', category: 'Farmasi', extraWhere: { tipe: 'waktu_tunggu' } },
+  'Rata Rata Menut waktu tunggu': { service: require('../services/modules/mutu-farmasi.service'), table: 'mutuFarmasi', category: 'Farmasi', extraWhere: { tipe: 'rata_waktu_tunggu' } },
+  'Kesalahan Penyerahan Obat Kepada Pasien': { service: require('../services/modules/kesalahan-penyerahan-obat.service'), table: 'mutuFarmasiKesalahanObat', category: 'Farmasi' },
+  'Kepatuhan penggunaan formularium nasional': { service: require('../services/modules/kepatuhan-fornas.service'), table: 'mutuFarmasi', category: 'Farmasi', extraWhere: { tipe: 'kepatuhan_fornas' } },
+
   // Gizi
   'Ketepatan Waktu Makanan': { service: require('../services/modules/gizi-waktu-makanan.service'), table: 'giziWaktuMakanan', category: 'Gizi' },
   'Sisa Makanan Pasien': { service: require('../services/modules/gizi-sisa-makanan.service'), table: 'giziSisaMakanan', category: 'Gizi' },
@@ -135,6 +144,9 @@ async function exportExcel(req, res, next) {
       const sw = { ...queryWhere, ...cfg.extraWhere };
       if (cfg.service.ignoreUnitId) {
         delete sw.unit_id;
+      }
+      if (cfg.table === 'mutuFarmasiKesalahanObat') {
+        delete sw.tipe;
       }
       
       const records = await prisma[cfg.table].findMany({ where: sw });
@@ -235,6 +247,83 @@ async function exportExcel(req, res, next) {
           const je = r.ekspertisi_dokter || 0;
           const presentase = jp > 0 ? parseFloat(((je / jp) * 100).toFixed(2)) : 0;
           hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'mutuFarmasi') {
+          const t = r.tipe;
+          const val1 = r.val1 || 0;
+          const val2 = r.val2 || 0;
+          const val3 = r.val3 || 0;
+          const val4 = r.val4 || 0;
+          
+          delete flat['Tipe'];
+          delete flat['Val1'];
+          delete flat['Val2'];
+          delete flat['Val3'];
+          delete flat['Val4'];
+
+          if (t === 'double_check') {
+            flat['Total Obat (D)'] = val1;
+            flat['Total Double Check (N)'] = val2;
+            flat['Tidak Double Check'] = val1 - val2;
+            hasilVal = val1 > 0 ? `${parseFloat(((val2 / val1) * 100).toFixed(2))}%` : '0%';
+          } else if (t === 'tidak_tersedia_rajal') {
+            flat['Total Obat (D)'] = val1;
+            flat['Total Tidak Tersedia (N)'] = val2;
+            hasilVal = val1 > 0 ? `${parseFloat((val2 / val1).toFixed(4))}%` : '0%';
+          } else if (t === 'tidak_tersedia_ranap') {
+            flat['Total Obat (D)'] = val1;
+            flat['Total Tidak Tersedia (N)'] = val2;
+            hasilVal = val1 > 0 ? `${parseFloat((val2 / val1).toFixed(4))}%` : '0%';
+          } else if (t === 'waktu_tunggu') {
+            flat['Total Obat Racikan'] = val1;
+            flat['Total Tunggu Racikan <= 60 Menit'] = val2;
+            flat['Total Obat Non Racikan'] = val3;
+            flat['Total Tunggu Non Racikan <= 30 Menit'] = val4;
+            const totalObat = val1 + val3;
+            const totalTunggu = val2 + val4;
+            hasilVal = totalObat > 0 ? `${parseFloat(((totalTunggu / totalObat) * 100).toFixed(2))}%` : '0%';
+          } else if (t === 'rata_waktu_tunggu') {
+            flat['Rata-Rata Waktu Tunggu Racikan (Menit)'] = `${val1} Menit`;
+            flat['Rata-Rata Waktu Tunggu Non-Racikan (Menit)'] = `${val2} Menit`;
+            hasilVal = `Racikan: ${val1}m, Non-Racikan: ${val2}m`;
+          } else if (t === 'kepatuhan_fornas') {
+            flat['Total Resep'] = val1;
+            flat['Total Resep Sesuai Fornas'] = val2;
+            hasilVal = val1 > 0 ? `${parseFloat(((val2 / val1) * 100).toFixed(2))}%` : '0%';
+          }
+        } else if (cfg.table === 'mutuFarmasiKesalahanObat') {
+          const resepRajal = r.resep_rajal || 0;
+          const resepRanap = r.resep_ranap || 0;
+          const resepIgd = r.resep_igd || 0;
+          const salahRajal = r.salah_rajal || 0;
+          const salahRanap = r.salah_ranap || 0;
+          const salahIgd = r.salah_igd || 0;
+
+          const totalResep = resepRajal + resepRanap + resepIgd;
+          const totalSalah = salahRajal + salahRanap + salahIgd;
+          const persen = totalSalah === 0 ? 100 : parseFloat(((totalResep / totalSalah) * 100).toFixed(2));
+
+          delete flat['Periode Id'];
+          delete flat['Created By'];
+          delete flat['Created At'];
+          delete flat['Updated At'];
+          delete flat['Resep Rajal'];
+          delete flat['Resep Ranap'];
+          delete flat['Resep Igd'];
+          delete flat['Salah Rajal'];
+          delete flat['Salah Ranap'];
+          delete flat['Salah Igd'];
+          delete flat['Tanggal'];
+
+          flat['Tanggal'] = r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID') : '-';
+          flat['Resep Rawat Jalan'] = resepRajal;
+          flat['Resep Rawat Inap'] = resepRanap;
+          flat['Resep IGD'] = resepIgd;
+          flat['Total Lembar Resep'] = totalResep;
+          flat['Kesalahan Rawat Jalan'] = salahRajal;
+          flat['Kesalahan Rawat Inap'] = salahRanap;
+          flat['Kesalahan IGD'] = salahIgd;
+          flat['Total Kesalahan Kejadian'] = totalSalah;
+          hasilVal = `${persen}%`;
         }
 
         if (hasilVal !== null) {

@@ -63,26 +63,63 @@ Modul pencatatan data yang dikelompokkan ke dalam 6 kategori pelayanan utama:
 ### 1. Prasyarat (Prerequisites)
 Pastikan sistem Anda sudah terinstal:
 * [Node.js](https://nodejs.org/) (versi 18 atau yang lebih baru)
-* [Docker & Docker Compose](https://www.docker.com/) (jika ingin menjalankan MariaDB dengan Docker)
+* [Docker & Docker Compose](https://www.docker.com/) (opsional, jika ingin menjalankan MariaDB dengan Docker)
+* **MariaDB Server** (jika ingin diinstal langsung di server lokal)
 
-### 2. Jalankan Database MariaDB (Menggunakan Docker Compose)
+### 2. Jalankan Database MariaDB
+
+#### Opsi A: Menggunakan Docker Compose (Bawaan)
 Jika menggunakan konfigurasi docker-compose bawaan, jalankan perintah berikut di root folder:
 ```bash
 docker-compose up -d
 ```
 
+#### Opsi B: Menggunakan MariaDB-Server Lokal (Tanpa Docker)
+Jika Anda menginstal MariaDB langsung pada sistem operasi server lokal:
+1. Masuk ke terminal/console MariaDB:
+   ```bash
+   sudo mysql -u root -p
+   ```
+2. Buat database baru bernama `db_mutu_rsik`:
+   ```sql
+   CREATE DATABASE db_mutu_rsik;
+   ```
+3. Buat user dan berikan hak akses penuh. Jika ingin diakses secara remote/dari perangkat lain di jaringan lokal yang sama, gunakan host `%` atau IP spesifik klien Anda:
+   ```sql
+   -- Memberikan akses dari IP mana saja di jaringan lokal:
+   GRANT ALL PRIVILEGES ON db_mutu_rsik.* TO 'simurs'@'%' IDENTIFIED BY 'password_anda';
+   FLUSH PRIVILEGES;
+   EXIT;
+   ```
+
 ### 3. Konfigurasi Environment
 Salin file konfigurasi environment di dalam folder `backend/`:
-```bash
-cp backend/.env.example backend/.env
-```
+* **Linux/macOS:**
+  ```bash
+  cp backend/.env.example backend/.env
+  ```
+* **Windows (PowerShell):**
+  ```powershell
+  Copy-Item backend/.env.example backend/.env
+  ```
+
 Sesuaikan nilai `DATABASE_URL` di file `backend/.env` sesuai konfigurasi MariaDB Anda:
 ```env
-DATABASE_URL="mysql://sudosu:sudosu99#@localhost:3306/db_mutu_rsik"
+DATABASE_URL="mysql://simurs:password_anda@localhost:3306/db_mutu_rsik"
 JWT_SECRET="ganti_dengan_jwt_secret_aman"
 JWT_REFRESH_SECRET="ganti_dengan_jwt_refresh_secret_aman"
 PORT=3000
 ```
+
+> [!WARNING]
+> **Troubleshooting Karakter Khusus di Password Database (Error P1013/P1012):**
+> Jika password database Anda menggunakan karakter khusus seperti `#`, `@`, `:`, `/`, atau `?`, Anda **wajib** mengubahnya ke bentuk *URL-encoded* di dalam file `.env`:
+> - `#` menjadi `%23`
+> - `@` menjadi `%40`
+> - `:` menjadi `%3A`
+> - `/` menjadi `%2F`
+>
+> *Contoh:* jika password Anda `sudosu99#`, tulis di `.env` sebagai `mysql://user:sudosu99%23@localhost:3306/db_mutu_rsik`.
 
 ---
 
@@ -115,6 +152,24 @@ npm run dev
 ```
 Aplikasi kini berjalan dan dapat diakses di browser Anda:
 👉 **[http://localhost:3000](http://localhost:3000)**
+
+#### Tips Menjalankan di Windows (Server Lokal)
+1. **Gunakan Script `.bat` Otomatis**:
+   Anda bisa membuat file bernama `start_server.bat` di Windows dengan isi berikut untuk menjalankan server cukup dengan klik dua kali:
+   ```bat
+   @echo off
+   title SIMURS Server
+   color 0B
+   cls
+   echo Memulai Server SIMURS...
+   cd /d C:\path\ke\proyek\SIMURS\backend
+   npm run start
+   pause
+   ```
+2. **Akses dari Perangkat Lain di Jaringan yang Sama**:
+   Jika ingin mengakses server dari HP/Komputer lain menggunakan IP local server (misal `http://192.168.1.2:3000/`):
+   * **Windows Defender Firewall**: Buka *Windows Defender Firewall with Advanced Security* -> Klik *Inbound Rules* -> Klik *New Rule...* -> Pilih *Port* (TCP) -> Isi port `3000` (atau port yang Anda gunakan) -> Pilih *Allow the connection* -> Simpan dengan nama `SIMURS Port`.
+   * **Profil Jaringan**: Pastikan tipe profil jaringan internet Wi-Fi/Ethernet di Windows Anda disetel ke **Private**, bukan *Public*.
 
 ---
 
