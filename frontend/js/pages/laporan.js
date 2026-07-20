@@ -107,7 +107,10 @@ const serviceToHash = {
   'Waktu Tunggu Obat Racikan dan Non Racikan': '#/mutu-farmasi',
   'Rata Rata Menut waktu tunggu': '#/mutu-farmasi',
   'Kesalahan Penyerahan Obat Kepada Pasien': '#/kesalahan-penyerahan-obat',
-  'Kepatuhan penggunaan formularium nasional': '#/kepatuhan-formularium-nasional'
+  'Kepatuhan penggunaan formularium nasional': '#/kepatuhan-formularium-nasional',
+
+  // SIMRS
+  'Response Time SIMRS IT': '#/simrs-response-time-it'
 };
 
 function renderReportTable() {

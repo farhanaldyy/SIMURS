@@ -63,4 +63,48 @@ export const api = {
   post: (endpoint, body) => apiCall('POST', endpoint, body),
   put: (endpoint, body) => apiCall('PUT', endpoint, body),
   delete: (endpoint) => apiCall('DELETE', endpoint),
+  upload: async (endpoint, formData) => {
+    const headers = {};
+    const token = Store.get('token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    try {
+      const res = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers,
+        body: formData,
+        credentials: 'include'
+      });
+      return res.json();
+    } catch (err) {
+      console.error('API Upload Error:', err);
+      showToast('Gagal terhubung ke server', 'error');
+      return { success: false, message: 'Network error' };
+    }
+  },
+  download: async (endpoint, filename) => {
+    const headers = {};
+    const token = Store.get('token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    try {
+      const res = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+      });
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download Error:', err);
+      showToast('Gagal mengunduh file', 'error');
+    }
+  }
 };

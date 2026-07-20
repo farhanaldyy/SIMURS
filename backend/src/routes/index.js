@@ -95,4 +95,7 @@ router.use('/mutu-farmasi', require('./modules/mutu-farmasi'));
 router.use('/kesalahan-penyerahan-obat', require('./modules/kesalahan-penyerahan-obat'));
 router.use('/kepatuhan-fornas', require('./modules/kepatuhan-fornas'));
 
+// SIMRS modules
+router.use('/simrs-response-time-it', require('./modules/simrs-response-time-it'));
+
 module.exports = router;

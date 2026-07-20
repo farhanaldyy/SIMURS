@@ -175,6 +175,16 @@ textarea.form-control {
   font-size: var(--font-size-sm);
 }
 
+.data-table.data-table-compact th {
+  padding: 8px 10px;
+  font-size: var(--font-size-xs);
+}
+
+.data-table.data-table-compact td {
+  padding: 6px 10px;
+  font-size: var(--font-size-xs);
+}
+
 .data-table thead {
   background: var(--color-bg);
   border-bottom: 2px solid var(--color-border);

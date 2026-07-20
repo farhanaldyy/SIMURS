@@ -75,7 +75,8 @@ export function createGenericIndicatorPage(config) {
     ];
 
     renderTable('table-container', columns, state.data, {
-      rowClass: config.rowClass
+      rowClass: config.rowClass,
+      compact: config.compact ?? true
     });
 
     // Bind events
@@ -279,12 +280,15 @@ export function createGenericIndicatorPage(config) {
           }
         });
 
-        if (!isEdit) {
-          if (Store.periodeAktif) formData.periode_id = Store.periodeAktif.id;
-          if (!config.ignoreUnit) {
-            if (Store.unitAktif) formData.unit_id = Store.unitAktif.id;
-            else if (Store.user.unit_id) formData.unit_id = Store.user.unit_id;
-          }
+        if (formData.unit_id) {
+          formData.unit_id = parseInt(formData.unit_id);
+        } else if (!isEdit && !config.ignoreUnit) {
+          if (Store.unitAktif) formData.unit_id = Store.unitAktif.id;
+          else if (Store.user.unit_id) formData.unit_id = Store.user.unit_id;
+        }
+
+        if (!isEdit && Store.periodeAktif) {
+          formData.periode_id = Store.periodeAktif.id;
         }
 
         const res = isEdit 
@@ -375,8 +379,12 @@ export function createGenericIndicatorPage(config) {
               <h1 class="page-title">${config.title}</h1>
               <p class="page-subtitle">${config.subtitle}</p>
             </div>
-            <button class="btn btn-primary" id="btn-add">+ Tambah Data</button>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              ${config.headerActions ? config.headerActions : ''}
+              <button class="btn btn-primary" id="btn-add">+ Tambah Data</button>
+            </div>
           </div>
+          ${config.infoCardHTML ? config.infoCardHTML : ''}
           <div id="summary-data-container"></div>
           <div id="table-container"></div>
           <div id="pagination-container"></div>
@@ -386,6 +394,7 @@ export function createGenericIndicatorPage(config) {
 
       document.getElementById('btn-add').addEventListener('click', () => openFormModal());
       await loadData();
+      if (config.onMount) config.onMount(loadData);
       window.addEventListener('periodeChanged', loadData);
       if (!config.ignoreUnit) window.addEventListener('unitChanged', loadData);
     },

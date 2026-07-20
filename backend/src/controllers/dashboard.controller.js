@@ -24,7 +24,8 @@ async function getSummary(req, res, next) {
       radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien,
       laboratoriumJadwalDokter, laboratoriumWaktuTungguLt140, laboratoriumWaktuTungguGt140,
       laboratoriumHasilKritis, laboratoriumKesalahanInput,
-      laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter
+      laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter,
+      simrsResponseTimeIt
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -81,6 +82,7 @@ async function getSummary(req, res, next) {
       prisma.laboratoriumKerusakanSampel.count({ where }),
       prisma.laboratoriumKepatuhanIdentifikasi.count({ where }),
       prisma.laboratoriumEkspertisiDokter.count({ where }),
+      prisma.simrsResponseTimeIt.count({ where }),
     ]);
 
     res.json({
@@ -102,7 +104,8 @@ async function getSummary(req, res, next) {
           radiologiFotoUlang, radiologiInfoTindakan, radiologiIdentifikasiPasien,
           laboratoriumJadwalDokter, laboratoriumWaktuTungguLt140, laboratoriumWaktuTungguGt140,
           laboratoriumHasilKritis, laboratoriumKesalahanInput,
-          laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter
+          laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter,
+          simrsResponseTimeIt
         },
       },
     });
@@ -201,6 +204,9 @@ const services = {
   'Tidak adanya kerusakan sampel di laboratorium': { service: require('../services/modules/laboratorium-kerusakan-sampel.service'), category: 'Laboratorium' },
   'Kepatuhan Identifikasi Pasien Laboratorium': { service: require('../services/modules/laboratorium-kepatuhan-identifikasi.service'), category: 'Laboratorium' },
   'Data Ekspertisi Oleh Dokter Laboratorium': { service: require('../services/modules/laboratorium-ekspertisi-dokter.service'), category: 'Laboratorium' },
+  
+  // SIMRS
+  'Response Time SIMRS IT': { service: require('../services/modules/simrs-response-time-it.service'), category: 'SIMRS' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

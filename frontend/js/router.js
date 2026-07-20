@@ -98,6 +98,9 @@ const routes = {
   '#/laboratorium-kerusakan-sampel':          { module: () => import('./pages/modules/laboratorium-kerusakan-sampel.js'), title: 'Tidak Adanya Kerusakan Sampel Lab' },
   '#/laboratorium-kepatuhan-identifikasi':    { module: () => import('./pages/modules/laboratorium-kepatuhan-identifikasi.js'), title: 'Kepatuhan Identifikasi Pasien Lab' },
   '#/laboratorium-ekspertisi-dokter':         { module: () => import('./pages/modules/laboratorium-ekspertisi-dokter.js'), title: 'Data Ekspertisi Oleh Dokter Lab' },
+
+  // SIMRS
+  '#/simrs-response-time-it':                 { module: () => import('./pages/modules/simrs-response-time-it.js'), title: 'Response Time SIMRS IT' },
 };
 
 let currentPage = null;

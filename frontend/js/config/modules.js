@@ -135,6 +135,12 @@ export const NAV_GROUPS = [
     ]
   },
   {
+    title: '💻 SIMRS',
+    items: [
+      { label: 'Response Time SIMRS IT', hash: '#/simrs-response-time-it' }
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },

@@ -47,6 +47,7 @@ model User {
   laboratoriumKerusakanSampels   LaboratoriumKerusakanSampel[]
   laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
   laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
+  simrsResponseTimeIts           SimrsResponseTimeIt[]
 
   @@map("users")
 }
@@ -86,6 +87,7 @@ model Unit {
   laboratoriumKerusakanSampels   LaboratoriumKerusakanSampel[]
   laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
   laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
+  simrsResponseTimeIts           SimrsResponseTimeIt[]
 
   @@map("units")
 }
@@ -123,6 +125,7 @@ model Periode {
   laboratoriumKerusakanSampels   LaboratoriumKerusakanSampel[]
   laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
   laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
+  simrsResponseTimeIts           SimrsResponseTimeIt[]
 
   @@unique([bulan, tahun])
   @@map("periode")
@@ -1465,4 +1468,29 @@ model MutuFarmasiObatDiluarFornas {
 
   @@index([periode_id])
   @@map("mutu_farmasi_obat_diluar_fornas")
+}
+
+model SimrsResponseTimeIt {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  unit_diperbaiki     String?  @db.VarChar(100)
+  tanggal             DateTime @db.Date
+  permasalahan        String   @db.Text
+  jam_laporan         DateTime @db.Time(0)
+  jam_tindakan        DateTime @db.Time(0)
+  response_time_menit Int      @db.SmallInt
+  status              String   @db.VarChar(50)
+  petugas             String   @db.VarChar(100)
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  periode Periode @relation(fields: [periode_id], references: [id])
+  unit    Unit    @relation(fields: [unit_id], references: [id])
+  user    User    @relation(fields: [created_by], references: [id])
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@map("simrs_response_time_it")
 }

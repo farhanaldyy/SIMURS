@@ -87,6 +87,9 @@ const services = {
   'Tidak adanya kerusakan sampel di laboratorium': { service: require('../services/modules/laboratorium-kerusakan-sampel.service'), table: 'laboratoriumKerusakanSampel', category: 'Laboratorium' },
   'Kepatuhan Identifikasi Pasien Laboratorium': { service: require('../services/modules/laboratorium-kepatuhan-identifikasi.service'), table: 'laboratoriumKepatuhanIdentifikasi', category: 'Laboratorium' },
   'Data Ekspertisi Oleh Dokter Laboratorium': { service: require('../services/modules/laboratorium-ekspertisi-dokter.service'), table: 'laboratoriumEkspertisiDokter', category: 'Laboratorium' },
+
+  // SIMRS
+  'Response Time SIMRS IT': { service: require('../services/modules/simrs-response-time-it.service'), table: 'simrsResponseTimeIt', category: 'SIMRS' },
 };
 
 async function exportExcel(req, res, next) {
@@ -324,6 +327,9 @@ async function exportExcel(req, res, next) {
           flat['Kesalahan IGD'] = salahIgd;
           flat['Total Kesalahan Kejadian'] = totalSalah;
           hasilVal = `${persen}%`;
+        } else if (cfg.table === 'simrsResponseTimeIt') {
+          const rt = r.response_time_menit || 0;
+          hasilVal = `${rt} Menit`;
         }
 
         if (hasilVal !== null) {

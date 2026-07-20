@@ -32,7 +32,7 @@ export function renderTable(containerId, columns, data, options = {}) {
 
   container.innerHTML = `
     <div class="table-wrapper">
-      <table class="data-table" id="${containerId}-table">
+      <table class="data-table ${options.compact ? 'data-table-compact' : ''}" id="${containerId}-table">
         <thead><tr>${headerCells}</tr></thead>
         <tbody>${rows}</tbody>
       </table>

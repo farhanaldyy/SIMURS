@@ -76,6 +76,7 @@ export async function render(container) {
             'rehabilitasi medis': '#ec4899',  // Pink
             'laundry': '#06b6d4',            // Cyan
             'mutu radiologi': '#64748b',     // Slate
+            'simrs': '#6366f1',              // Indigo / Violet
             'master data': '#84cc16',        // Lime
             'admin': '#0f172a',              // Dark slate
           };
