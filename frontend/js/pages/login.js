@@ -79,6 +79,16 @@ async function handleLogin(e) {
   if (result.success) {
     Store.set('token', result.data.accessToken);
     Store.set('user', result.data.user);
+    if (result.data.user && result.data.user.unit) {
+      Store.set('unitAktif', result.data.user.unit);
+    } else if (result.data.user && result.data.user.unit_id) {
+      Store.set('unitAktif', { id: result.data.user.unit_id });
+    } else {
+      Store.set('unitAktif', null);
+    }
+    if (result.data.user && result.data.user.role === 'petugas') {
+      sessionStorage.setItem('show_petugas_warning', 'true');
+    }
     showToast(`Selamat datang, ${result.data.user.nama}!`, 'success');
     window.location.hash = '#/dashboard';
     window.dispatchEvent(new Event('userLoggedIn'));

@@ -33,6 +33,6 @@ router.put('/:id', [
   }
 ], validate, ctrl.update);
 
-router.delete('/:id', checkRole('admin', 'pic_mutu'), ctrl.remove);
+router.delete('/:id', checkRole('admin', 'pic_mutu', 'petugas'), ctrl.remove);
 
 module.exports = router;

@@ -19,6 +19,6 @@ router.put('/:id', checkRole('admin', 'pic_mutu', 'komite'), [
   body('nilai').optional().isNumeric().withMessage('Nilai wajib berupa angka'),
 ], validate, ctrl.update);
 
-router.delete('/:id', checkRole('admin', 'pic_mutu', 'komite'), ctrl.remove);
+router.delete('/:id', checkRole('admin', 'pic_mutu', 'komite', 'petugas'), ctrl.remove);
 
 module.exports = router;

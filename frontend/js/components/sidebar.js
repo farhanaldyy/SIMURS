@@ -23,6 +23,18 @@ export function renderSidebar(container) {
     if (item.hash === '#/master-tindakan') {
       return role === 'admin' || role === 'komite' || role === 'pic_mutu';
     }
+    if (item.hash === '#/master-poliklinik') {
+      if (role === 'admin' || role === 'komite' || role === 'pic_mutu') return true;
+      if (role === 'petugas') {
+        const unitObj = (user && user.unit) || Store.get('unitAktif');
+        if (unitObj) {
+          const unitNama = (unitObj.nama_unit || '').toUpperCase();
+          const unitKode = (unitObj.kode_unit || '').toUpperCase();
+          return unitKode === 'RJ_POLIKLINIK' || unitNama.includes('POLI');
+        }
+      }
+      return allowed.includes(item.hash);
+    }
     if (role === 'admin' || role === 'komite') return true;
     return allowed.includes(item.hash);
   };

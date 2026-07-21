@@ -29,6 +29,6 @@ router.post('/', [
   body('mobile_jkn_den').isInt({ min: 0 }).withMessage('Denominator antrian mobile JKN wajib berupa angka non-negatif')
 ], validate, ctrl.upsert);
 
-router.delete('/:id', checkRole('admin', 'pic_mutu'), ctrl.remove);
+router.delete('/:id', checkRole('admin', 'pic_mutu', 'petugas'), ctrl.remove);
 
 module.exports = router;

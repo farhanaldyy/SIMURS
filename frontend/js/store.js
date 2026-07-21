@@ -10,17 +10,20 @@ const Store = {
   set(key, value) {
     this[key] = value;
     if (key === 'token') {
-      if (value) localStorage.setItem('simurs_token', value);
-      else localStorage.removeItem('simurs_token');
+      if (value) sessionStorage.setItem('simurs_token', value);
+      else sessionStorage.removeItem('simurs_token');
     }
-    if (key === 'user' && value) {
-      localStorage.setItem('simurs_user', JSON.stringify(value));
+    if (key === 'user') {
+      if (value) sessionStorage.setItem('simurs_user', JSON.stringify(value));
+      else sessionStorage.removeItem('simurs_user');
     }
-    if (key === 'periodeAktif' && value) {
-      localStorage.setItem('simurs_periode', JSON.stringify(value));
+    if (key === 'periodeAktif') {
+      if (value) sessionStorage.setItem('simurs_periode', JSON.stringify(value));
+      else sessionStorage.removeItem('simurs_periode');
     }
-    if (key === 'unitAktif' && value) {
-      localStorage.setItem('simurs_unit', JSON.stringify(value));
+    if (key === 'unitAktif') {
+      if (value) sessionStorage.setItem('simurs_unit', JSON.stringify(value));
+      else sessionStorage.removeItem('simurs_unit');
     }
   },
 
@@ -29,12 +32,26 @@ const Store = {
   },
 
   loadFromStorage() {
-    this.token = localStorage.getItem('simurs_token') || null;
+    // Clear legacy persistent localStorage items to ensure session-only authentication
+    localStorage.removeItem('simurs_token');
+    localStorage.removeItem('simurs_user');
+    localStorage.removeItem('simurs_periode');
+    localStorage.removeItem('simurs_unit');
+
+    this.token = sessionStorage.getItem('simurs_token') || null;
     try {
-      this.user = JSON.parse(localStorage.getItem('simurs_user')) || null;
-      this.periodeAktif = JSON.parse(localStorage.getItem('simurs_periode')) || null;
-      this.unitAktif = JSON.parse(localStorage.getItem('simurs_unit')) || null;
+      this.user = JSON.parse(sessionStorage.getItem('simurs_user')) || null;
+      this.periodeAktif = JSON.parse(sessionStorage.getItem('simurs_periode')) || null;
+      this.unitAktif = JSON.parse(sessionStorage.getItem('simurs_unit')) || null;
     } catch { /* ignore parse errors */ }
+
+    // Enforce unitAktif for petugas role synchronously on load
+    if (this.user && this.user.role === 'petugas' && (this.user.unit || this.user.unit_id)) {
+      if (!this.unitAktif || (this.user.unit_id && this.unitAktif.id !== this.user.unit_id)) {
+        this.unitAktif = this.user.unit || { id: this.user.unit_id };
+        sessionStorage.setItem('simurs_unit', JSON.stringify(this.unitAktif));
+      }
+    }
   },
 
   clear() {
@@ -44,6 +61,10 @@ const Store = {
     this.unitAktif = null;
     this.periodeList = [];
     this.unitList = [];
+    sessionStorage.removeItem('simurs_token');
+    sessionStorage.removeItem('simurs_user');
+    sessionStorage.removeItem('simurs_periode');
+    sessionStorage.removeItem('simurs_unit');
     localStorage.removeItem('simurs_token');
     localStorage.removeItem('simurs_user');
     localStorage.removeItem('simurs_periode');
@@ -59,7 +80,7 @@ const Store = {
   },
 
   canDelete() {
-    return this.user && ['admin', 'pic_mutu'].includes(this.user.role);
+    return this.user && ['admin', 'pic_mutu', 'petugas'].includes(this.user.role);
   },
 
   canExport() {

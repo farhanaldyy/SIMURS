@@ -85,7 +85,7 @@ function createGenericService(modelName, options = {}) {
     async create(body, userId) {
       let data = { ...body, created_by: userId };
       if (options.beforeCreate) {
-        data = options.beforeCreate(data);
+        data = await options.beforeCreate(data);
       }
       
       coerceTypes(data);
@@ -108,7 +108,7 @@ function createGenericService(modelName, options = {}) {
     async update(id, body, userId) {
       let data = { ...body };
       if (options.beforeUpdate) {
-        data = options.beforeUpdate(data);
+        data = await options.beforeUpdate(data, id);
       }
       
       // Strip read-only fields

@@ -28,7 +28,7 @@ export function showModal(title, contentHTML, options = {}) {
       <button class="btn btn-primary" id="modal-confirm-btn">${options.confirmText || 'Simpan'}</button>
     `;
   } else {
-    footerHTML = `<button class="btn btn-outline" id="modal-cancel-btn">Tutup</button>`;
+    footerHTML = `<button class="${options.btnClass || 'btn btn-outline'}" id="modal-cancel-btn">${options.confirmText || 'Tutup'}</button>`;
   }
   footer.innerHTML = footerHTML;
 

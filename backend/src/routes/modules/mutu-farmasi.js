@@ -19,6 +19,6 @@ router.post('/', [
   body('val4').optional().isInt({ min: 0 }).withMessage('Val 4 wajib berupa angka non-negatif')
 ], validate, ctrl.upsert);
 
-router.delete('/:id', checkRole('admin', 'pic_mutu'), ctrl.remove);
+router.delete('/:id', checkRole('admin', 'pic_mutu', 'petugas'), ctrl.remove);
 
 module.exports = router;

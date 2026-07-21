@@ -2,18 +2,59 @@ const { createGenericService } = require('./generic.service');
 const prisma = require('../../config/database');
 
 const baseService = createGenericService('waktuTungguPoliklinik', {
-  beforeCreate(data) {
+  async beforeCreate(data) {
     if (data.waktu_tunggu !== undefined) {
       data.waktu_tunggu = parseFloat(data.waktu_tunggu);
     }
+
+    if (data.poli_id && data.periode_id) {
+      const existing = await prisma.waktuTungguPoliklinik.findFirst({
+        where: {
+          poli_id: parseInt(data.poli_id),
+          periode_id: parseInt(data.periode_id),
+        },
+        include: { poliklinik: true }
+      });
+
+      if (existing) {
+        const poliNama = existing.poliklinik ? existing.poliklinik.nama : 'Poliklinik ini';
+        throw Object.assign(
+          new Error(`Data waktu tunggu untuk ${poliNama} pada periode terpilih sudah tersimpan. Silakan edit data yang sudah ada.`),
+          { statusCode: 400 }
+        );
+      }
+    }
+
     return data;
   },
-  beforeUpdate(data) {
+
+  async beforeUpdate(data, id) {
     if (data.waktu_tunggu !== undefined) {
       data.waktu_tunggu = parseFloat(data.waktu_tunggu);
     }
+
+    if (data.poli_id && data.periode_id) {
+      const existing = await prisma.waktuTungguPoliklinik.findFirst({
+        where: {
+          poli_id: parseInt(data.poli_id),
+          periode_id: parseInt(data.periode_id),
+          NOT: { id: parseInt(id) }
+        },
+        include: { poliklinik: true }
+      });
+
+      if (existing) {
+        const poliNama = existing.poliklinik ? existing.poliklinik.nama : 'Poliklinik ini';
+        throw Object.assign(
+          new Error(`Data waktu tunggu untuk ${poliNama} pada periode terpilih sudah tersimpan.`),
+          { statusCode: 400 }
+        );
+      }
+    }
+
     return data;
   },
+
   calculateSummary(data) {
     const total = data.length;
     const totalPasien = data.reduce((sum, item) => sum + item.jumlah_pasien, 0);

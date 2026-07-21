@@ -16,7 +16,7 @@ router.post('/', [
   body('val2').isInt({ min: 0 }).withMessage('Resep Sesuai Fornas (N) wajib berupa angka non-negatif')
 ], validate, ctrl.upsert);
 
-router.delete('/:id', checkRole('admin', 'pic_mutu'), ctrl.remove);
+router.delete('/:id', checkRole('admin', 'pic_mutu', 'petugas'), ctrl.remove);
 
 // Exceptions List
 router.get('/obat-diluar-fornas', ctrl.getAllObatDiluarFornas);
@@ -30,6 +30,6 @@ router.post('/obat-diluar-fornas', [
     return true;
   })
 ], validate, ctrl.upsertObatDiluarFornas);
-router.delete('/obat-diluar-fornas/:id', checkRole('admin', 'pic_mutu'), ctrl.removeObatDiluarFornas);
+router.delete('/obat-diluar-fornas/:id', checkRole('admin', 'pic_mutu', 'petugas'), ctrl.removeObatDiluarFornas);
 
 module.exports = router;

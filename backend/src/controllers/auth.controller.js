@@ -9,7 +9,6 @@ async function login(req, res, next) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({ success: true, data: { accessToken: result.accessToken, user: result.user } });

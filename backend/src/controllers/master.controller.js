@@ -138,10 +138,34 @@ async function updateUser(req, res, next) {
 
 async function getAuditLogs(req, res, next) {
   try {
-    const { page = 1, limit = 50, tabel } = req.query;
+    const { page = 1, limit = 50, tabel, aksi, search } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const where = {};
     if (tabel) where.tabel = tabel;
+    if (aksi) where.aksi = aksi;
+
+    if (search && search.trim() !== '') {
+      const trimmed = search.trim();
+      const matchingUsers = await prisma.user.findMany({
+        where: { nama: { contains: trimmed } },
+        select: { id: true }
+      });
+      const userIds = matchingUsers.map(u => u.id);
+
+      const searchConditions = [
+        { tabel: { contains: trimmed } },
+      ];
+
+      if (userIds.length > 0) {
+        searchConditions.push({ user_id: { in: userIds } });
+      }
+
+      if (!isNaN(parseInt(trimmed))) {
+        searchConditions.push({ record_id: parseInt(trimmed) });
+      }
+
+      where.OR = searchConditions;
+    }
 
     const [logs, total] = await Promise.all([
       prisma.auditLog.findMany({

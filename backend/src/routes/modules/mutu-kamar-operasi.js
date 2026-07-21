@@ -17,6 +17,6 @@ router.post('/', [
   body('total_operasi').isInt({ min: 0 }).withMessage('Total operasi wajib berupa angka non-negatif')
 ], validate, ctrl.upsert);
 
-router.delete('/:id', checkRole('admin', 'pic_mutu'), ctrl.remove);
+router.delete('/:id', checkRole('admin', 'pic_mutu', 'petugas'), ctrl.remove);
 
 module.exports = router;

@@ -129,23 +129,36 @@ async function loadUnitOptions() {
   if (res.success) {
     Store.unitList = res.data;
 
-    // Default to user's assigned unit if not set
     const user = Store.get('user');
-    if (!Store.unitAktif && user && user.unit_id) {
-      const userUnit = res.data.find(u => u.id === user.unit_id);
-      if (userUnit) {
-        Store.set('unitAktif', userUnit);
-        window.dispatchEvent(new CustomEvent('unitChanged'));
+    if (user && user.unit_id) {
+      if (user.role === 'petugas' || !Store.unitAktif) {
+        const userUnit = res.data.find(u => u.id === user.unit_id);
+        if (userUnit) {
+          const changed = !Store.unitAktif || Store.unitAktif.id !== userUnit.id;
+          Store.set('unitAktif', userUnit);
+          if (changed) {
+            window.dispatchEvent(new CustomEvent('unitChanged'));
+          }
+        }
       }
     }
 
     const select = document.getElementById('header-unit-select');
     if (select) {
-      select.innerHTML = '<option value="">Semua Unit</option>' +
-        res.data.map(u => {
-          const selected = Store.unitAktif && Store.unitAktif.id === u.id ? 'selected' : '';
-          return `<option value="${u.id}" ${selected}>${u.nama_unit}</option>`;
-        }).join('');
+      if (user && user.role === 'petugas' && user.unit_id) {
+        select.innerHTML = res.data
+          .filter(u => u.id === user.unit_id)
+          .map(u => `<option value="${u.id}" selected>${u.nama_unit}</option>`)
+          .join('');
+        select.disabled = true;
+      } else {
+        select.disabled = false;
+        select.innerHTML = '<option value="">Semua Unit</option>' +
+          res.data.map(u => {
+            const selected = Store.unitAktif && Store.unitAktif.id === u.id ? 'selected' : '';
+            return `<option value="${u.id}" ${selected}>${u.nama_unit}</option>`;
+          }).join('');
+      }
     }
   }
 }
