@@ -9,7 +9,7 @@ const adaBadge = (v) => {
 
 const adaOptions = [
   { value: 'ada', label: 'Ada' },
-  { value: 'tidak ada', label: 'Tidak Ada' }
+  { value: 'tidak_ada', label: 'Tidak Ada' }
 ];
 
 export default createGenericIndicatorPage({

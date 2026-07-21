@@ -10,9 +10,9 @@ export default createGenericIndicatorPage({
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
     { label: 'Tgl Masuk', key: 'tanggal_masuk', render: (r) => new Date(r.tanggal_masuk).toLocaleDateString('id-ID') },
-    { label: 'Jam Masuk', key: 'jam_masuk', render: (r) => new Date(r.jam_masuk).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Jam Masuk', key: 'jam_masuk', render: (r) => formatTime(r.jam_masuk) },
     { label: 'Tgl Keluar/Wafat', key: 'tanggal_keluar', render: (r) => new Date(r.tanggal_keluar).toLocaleDateString('id-ID') },
-    { label: 'Jam Keluar/Wafat', key: 'jam_keluar', render: (r) => new Date(r.jam_keluar).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Jam Keluar/Wafat', key: 'jam_keluar', render: (r) => formatTime(r.jam_keluar) },
     { label: 'Keterangan', key: 'keterangan' }
   ],
   beforeSubmit(formData) {

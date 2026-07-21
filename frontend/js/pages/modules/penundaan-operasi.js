@@ -16,8 +16,8 @@ export default createGenericIndicatorPage({
     { label: 'No RM', key: 'no_rm' },
     { label: 'DPJP Bedah', key: 'dpjp' },
     { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
-    { label: 'Jadwal Operasi', key: 'jadwal_jam_operasi', render: (r) => new Date(r.jadwal_jam_operasi).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
-    { label: 'Mulai Operasi', key: 'jam_mulai_operasi', render: (r) => r.batal ? '<span class="text-danger" style="font-weight: 500;">Dibatalkan</span>' : new Date(r.jam_mulai_operasi).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Jadwal Operasi', key: 'jadwal_jam_operasi', render: (r) => formatTime(r.jadwal_jam_operasi) },
+    { label: 'Mulai Operasi', key: 'jam_mulai_operasi', render: (r) => r.batal ? '<span class="text-danger" style="font-weight: 500;">Dibatalkan</span>' : formatTime(r.jam_mulai_operasi) },
     { 
       label: 'Status Penundaan', 
       render: (r) => {

@@ -310,9 +310,11 @@ export function createGenericIndicatorPage(config) {
     const val = data ? data[f.name] : '';
     
     if (f.type === 'select') {
-      const optionsHTML = f.options.map(opt => `
-        <option value="${opt.value}" ${val === opt.value ? 'selected' : ''}>${opt.label}</option>
-      `).join('');
+      const optionsHTML = f.options.map(opt => {
+        const isSelected = val === opt.value || 
+          (typeof val === 'string' && typeof opt.value === 'string' && val.trim().replace(/_/g, ' ') === opt.value.trim().replace(/_/g, ' '));
+        return `<option value="${opt.value}" ${isSelected ? 'selected' : ''}>${opt.label}</option>`;
+      }).join('');
       return `
         <div class="form-group">
           <label class="form-label">${f.label} ${f.required ? '<span class="required">*</span>' : ''}</label>

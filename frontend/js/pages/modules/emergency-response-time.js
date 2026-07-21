@@ -11,8 +11,8 @@ export default createGenericIndicatorPage({
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
     { label: 'Triase', key: 'triase', render: (r) => `<span class="badge triase-${r.triase.toLowerCase()}">${r.triase}</span>` },
-    { label: 'Jam Datang', key: 'jam_datang', render: (r) => new Date(r.jam_datang).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
-    { label: 'Dilayani Dokter', key: 'jam_dilayani_dokter', render: (r) => new Date(r.jam_dilayani_dokter).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Jam Datang', key: 'jam_datang', render: (r) => formatTime(r.jam_datang) },
+    { label: 'Dilayani Dokter', key: 'jam_dilayani_dokter', render: (r) => formatTime(r.jam_dilayani_dokter) },
     { label: 'Selisih (Menit)', key: 'respon_time_menit', render: (r) => `${r.respon_time_menit} Menit` }
   ],
   rowClass: (r) => parseFloat(r.respon_time_menit) <= 5 ? '' : 'row-danger',

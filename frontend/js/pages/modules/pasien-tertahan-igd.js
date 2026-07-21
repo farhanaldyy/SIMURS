@@ -9,8 +9,8 @@ export default createGenericIndicatorPage({
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
-    { label: 'Jam Masuk', key: 'jam_masuk', render: (r) => new Date(r.jam_masuk).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
-    { label: 'Pindah Ruangan', key: 'jam_pindah_ruangan', render: (r) => new Date(r.jam_pindah_ruangan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Jam Masuk', key: 'jam_masuk', render: (r) => formatTime(r.jam_masuk) },
+    { label: 'Pindah Ruangan', key: 'jam_pindah_ruangan', render: (r) => formatTime(r.jam_pindah_ruangan) },
     { label: 'Waktu Tunggu', key: 'waktu_tunggu_menit', render: (r) => `${r.waktu_tunggu_menit} Menit` },
     { label: 'Keterangan', key: 'keterangan' }
   ],

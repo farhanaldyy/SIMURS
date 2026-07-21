@@ -1,4 +1,5 @@
 import { createGenericIndicatorPage } from './generic-indicator.js';
+import { formatTime } from '../../utils/formatter.js';
 
 const kat = (v) => {
   if (v === 'cepat') return '<span class="badge badge-primary">Lebih Cepat</span>';
@@ -21,7 +22,7 @@ export default createGenericIndicatorPage({
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
     { label: 'Mulai-Selesai', key: 'jam_mulai_selesai' },
-    { label: 'Jam Visit', key: 'jam_visit', render: (r) => new Date(r.jam_visit).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) },
+    { label: 'Jam Visit', key: 'jam_visit', render: (r) => formatTime(r.jam_visit) },
     { label: 'Kategori Waktu', key: 'kategori_visit', render: (r) => kat(r.kategori_visit) }
   ],
   beforeSubmit: (formData) => {
