@@ -12,14 +12,13 @@ const baseService = createGenericService('insidenJarumVena', {
     });
 
     const totalPemasangan = summary ? summary.total_pemasangan_bulan : 0;
-    const persen = totalPemasangan > 0 ? ((totalIncidents / totalPemasangan) * 100).toFixed(2) : 0;
 
     return {
       total: totalIncidents,
       numerator: totalIncidents,
       denominator: totalPemasangan,
-      persen,
-      standar: '0%'
+      persen: '-',
+      standar: '0'
     };
   }
 });

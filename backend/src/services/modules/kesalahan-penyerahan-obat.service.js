@@ -25,33 +25,55 @@ const service = {
     let pId = typeof periode_id === 'object' && periode_id !== null ? periode_id.periode_id : periode_id;
     pId = parseInt(pId);
     if (isNaN(pId)) {
-      return { total: 0, numerator: 0, denominator: 0, persen: 100, standar: '100%' };
+      return { 
+        total: 0, 
+        numerator: 0, 
+        denominator: 0, 
+        persen: 0, 
+        standar: '0%',
+        salah_rajal: 0,
+        salah_ranap: 0,
+        salah_igd: 0,
+        resep_rajal: 0,
+        resep_ranap: 0,
+        resep_igd: 0
+      };
     }
     const records = await prisma.mutuFarmasiKesalahanObat.findMany({
       where: { periode_id: pId }
     });
 
-    let totalResep = 0;
-    let totalSalah = 0;
-    let sumPercentage = 0;
+    let resepRajal = 0, resepRanap = 0, resepIgd = 0;
+    let salahRajal = 0, salahRanap = 0, salahIgd = 0;
 
     records.forEach(r => {
-      const jResep = r.resep_rajal + r.resep_ranap + r.resep_igd;
-      const jSalah = r.salah_rajal + r.salah_ranap + r.salah_igd;
-      totalResep += jResep;
-      totalSalah += jSalah;
-      const dailyPersen = jSalah === 0 ? 100 : parseFloat(((jResep / jSalah) * 100).toFixed(2));
-      sumPercentage += dailyPersen;
+      resepRajal += (r.resep_rajal || 0);
+      resepRanap += (r.resep_ranap || 0);
+      resepIgd += (r.resep_igd || 0);
+
+      salahRajal += (r.salah_rajal || 0);
+      salahRanap += (r.salah_ranap || 0);
+      salahIgd += (r.salah_igd || 0);
     });
 
-    const averagePersen = records.length > 0 ? parseFloat((sumPercentage / records.length).toFixed(2)) : 100;
+    const totalResep = resepRajal + resepRanap + resepIgd;
+    const totalSalah = salahRajal + salahRanap + salahIgd;
+
+    const persenKesalahan = totalResep > 0 ? parseFloat(((totalSalah / totalResep) * 100).toFixed(2)) : 0;
 
     return {
       total: records.length,
       numerator: totalSalah,
       denominator: totalResep,
-      persen: averagePersen,
-      standar: '100%'
+      persen: persenKesalahan,
+      persenKesalahan,
+      standar: '0%',
+      salah_rajal: salahRajal,
+      salah_ranap: salahRanap,
+      salah_igd: salahIgd,
+      resep_rajal: resepRajal,
+      resep_ranap: resepRanap,
+      resep_igd: resepIgd
     };
   },
 

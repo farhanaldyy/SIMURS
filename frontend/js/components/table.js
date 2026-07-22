@@ -18,14 +18,18 @@ export function renderTable(containerId, columns, data, options = {}) {
   const headerCells = columns.map((col, i) => {
     const sortable = col.sortable ? 'sortable' : '';
     const sortIcon = col.sortable ? '<span class="sort-icon">↕</span>' : '';
-    return `<th class="${sortable}" data-col-index="${i}">${col.label}${sortIcon}</th>`;
+    const alignClass = col.align ? ` text-${col.align}` : '';
+    const styleAttr = col.style ? ` style="${col.style}"` : (col.width ? ` style="width: ${col.width}"` : '');
+    return `<th class="${sortable}${alignClass}" data-col-index="${i}"${styleAttr}>${col.label}${sortIcon}</th>`;
   }).join('');
 
   const rows = data.map((row, rowIndex) => {
     const rowClass = options.rowClass ? options.rowClass(row) : '';
     const cells = columns.map(col => {
       const value = col.render ? col.render(row, rowIndex) : (row[col.key] ?? '-');
-      return `<td>${value}</td>`;
+      const alignClass = col.align ? ` text-${col.align}` : '';
+      const styleAttr = col.style ? ` style="${col.style}"` : (col.width ? ` style="width: ${col.width}"` : '');
+      return `<td class="${alignClass}"${styleAttr}>${value}</td>`;
     }).join('');
     return `<tr class="${rowClass}">${cells}</tr>`;
   }).join('');

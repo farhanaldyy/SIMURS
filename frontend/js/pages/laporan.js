@@ -110,7 +110,14 @@ const serviceToHash = {
   'Kepatuhan penggunaan formularium nasional': '#/kepatuhan-formularium-nasional',
 
   // SIMRS
-  'Response Time SIMRS IT': '#/simrs-response-time-it'
+  'Response Time SIMRS IT': '#/simrs-response-time-it',
+
+  // Rekam Medis
+  'Kelengkapan Dokumen Rekam Medis Pasien Ranap': '#/mutu-rekam-medis',
+  'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam': '#/mutu-rekam-medis',
+  'Pemberian Informasi Antrian Online': '#/mutu-rekam-medis',
+  'Ketepatan Coding Rawat Inap & Rawat Jalan': '#/mutu-rekam-medis',
+  'Antrian Mobile JKN': '#/mutu-rekam-medis'
 };
 
 function renderReportTable() {

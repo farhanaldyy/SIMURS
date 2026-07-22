@@ -9,8 +9,10 @@ export default createGenericIndicatorPage({
   metricType: 'compliance',
   hasSummaryData: true,
   summaryDataFields: [
-    { name: 'standar_menit', label: 'Batas Menit Penundaan', type: 'number' }
+    { name: 'standar_menit', label: 'Batas Menit Penundaan Operasi', type: 'number', unit: 'Menit' }
   ],
+  summaryDataInfo: 'Batas toleransi penundaan waktu pelaksanaan operasi elektif. Pelaksanaan > batas menit tanpa indikasi medis dianggap tertunda.',
+  summaryDataModalTitle: 'Edit Batas Menit Penundaan Operasi',
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },

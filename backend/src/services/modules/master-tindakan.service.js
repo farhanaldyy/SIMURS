@@ -28,11 +28,26 @@ async function getAll(where, page, limit) {
   return { data, total };
 }
 
+const apdKeys = [
+  'apd_penutup_kepala',
+  'apd_face_shield',
+  'apd_masker',
+  'apd_apron',
+  'apd_coverall',
+  'apd_sarung_tangan',
+  'apd_cover_shoes'
+];
+
 async function create(body, userId) {
   const data = {
     nama: body.nama,
     nilai: parseFloat(body.nilai) || 0
   };
+  apdKeys.forEach(k => {
+    if (body[k] !== undefined) {
+      data[k] = body[k] === true || body[k] === 'true';
+    }
+  });
 
   const record = await prisma.masterTindakan.create({ data });
   await logAudit(userId, 'master_tindakan', record.id, 'create', null, record);
@@ -43,6 +58,11 @@ async function update(id, body, userId) {
   const data = {};
   if (body.nama !== undefined) data.nama = body.nama;
   if (body.nilai !== undefined) data.nilai = parseFloat(body.nilai) || 0;
+  apdKeys.forEach(k => {
+    if (body[k] !== undefined) {
+      data[k] = body[k] === true || body[k] === 'true';
+    }
+  });
 
   let oldRecord = null;
   if (userId) {

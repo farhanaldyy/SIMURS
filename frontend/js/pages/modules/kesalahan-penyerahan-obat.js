@@ -50,39 +50,67 @@ function renderSummary() {
 
   let totalResep = 0;
   let totalSalah = 0;
-  let sumPercentage = 0;
+  let resepRajal = 0, resepRanap = 0, resepIgd = 0;
+  let salahRajal = 0, salahRanap = 0, salahIgd = 0;
 
   state.records.forEach(r => {
-    const jResep = r.resep_rajal + r.resep_ranap + r.resep_igd;
-    const jSalah = r.salah_rajal + r.salah_ranap + r.salah_igd;
-    totalResep += jResep;
-    totalSalah += jSalah;
-    const dailyPersen = jSalah === 0 ? 100 : parseFloat(((jResep / jSalah) * 100).toFixed(2));
-    sumPercentage += dailyPersen;
+    resepRajal += (r.resep_rajal || 0);
+    resepRanap += (r.resep_ranap || 0);
+    resepIgd += (r.resep_igd || 0);
+
+    salahRajal += (r.salah_rajal || 0);
+    salahRanap += (r.salah_ranap || 0);
+    salahIgd += (r.salah_igd || 0);
   });
 
-  const avgPersen = state.records.length > 0 ? parseFloat((sumPercentage / state.records.length).toFixed(2)) : 100;
-  const isTargetAchieved = avgPersen === 100;
+  totalResep = resepRajal + resepRanap + resepIgd;
+  totalSalah = salahRajal + salahRanap + salahIgd;
+
+  const persenKesalahan = totalResep > 0 ? parseFloat(((totalSalah / totalResep) * 100).toFixed(2)) : 0;
+  const isTargetAchieved = totalSalah === 0;
   const badgeClass = isTargetAchieved ? 'badge-success' : 'badge-danger';
-  const badgeText = isTargetAchieved ? 'Tercapai' : 'Belum Tercapai';
+  const badgeText = isTargetAchieved ? '✓ Tercapai (0% Kesalahan)' : '✕ Tidak Tercapai (Ada Kesalahan)';
 
   summaryContainer.innerHTML = `
-    <div style="display: flex; gap: 16px; flex-wrap: wrap; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); width: 100%;">
-      <div style="flex: 1; min-width: 150px;">
-        <div style="font-size: 0.85rem; color: var(--text-light);">Rata-Rata Kepatuhan (${activePeriodName})</div>
-        <div style="font-size: 1.5rem; font-weight: 700; color: ${isTargetAchieved ? 'var(--color-success)' : 'var(--color-danger)'};">${avgPersen.toFixed(2)}%</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: var(--bg-light, #f8fafc); padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0); width: 100%;">
+      
+      <!-- Card 1: Persentase Kesalahan -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9rem;">📊</span>
+        <div>
+          <span style="font-size: 0.72rem; color: var(--text-muted, #64748b); font-weight: 500;">% Kesalahan:</span>
+          <span style="font-size: 0.95rem; font-weight: 700; color: ${isTargetAchieved ? 'var(--color-success, #16a34a)' : 'var(--color-danger, #dc2626)'}; margin-left: 4px;">
+            ${persenKesalahan.toFixed(2)}%
+          </span>
+        </div>
       </div>
-      <div style="flex: 1; min-width: 120px;">
-        <div style="font-size: 0.85rem; color: var(--text-light);">Total Lembar Resep</div>
-        <div style="font-size: 1.25rem; font-weight: 600;">${totalResep}</div>
+
+      <!-- Card 2: Total Kesalahan -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9rem;">⚠️</span>
+        <div>
+          <span style="font-size: 0.72rem; color: var(--text-muted, #64748b); font-weight: 500;">Total Kesalahan:</span>
+          <span style="font-size: 0.95rem; font-weight: 700; color: ${totalSalah > 0 ? 'var(--color-danger, #dc2626)' : 'var(--text-color, #1e293b)'}; margin-left: 4px;">${totalSalah}</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted, #64748b); margin-left: 2px;">(RJ: ${salahRajal} | RI: ${salahRanap} | IGD: ${salahIgd})</span>
+        </div>
       </div>
-      <div style="flex: 1; min-width: 120px;">
-        <div style="font-size: 0.85rem; color: var(--text-light);">Total Kesalahan Kejadian</div>
-        <div style="font-size: 1.25rem; font-weight: 600; color: ${totalSalah > 0 ? 'var(--color-danger)' : 'var(--text-primary)'};">${totalSalah}</div>
+
+      <!-- Card 3: Total Lembar Resep -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9rem;">📋</span>
+        <div>
+          <span style="font-size: 0.72rem; color: var(--text-muted, #64748b); font-weight: 500;">Total Resep:</span>
+          <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-color, #1e293b); margin-left: 4px;">${totalResep}</span>
+          <span style="font-size: 0.7rem; color: var(--text-muted, #64748b); margin-left: 2px;">(RJ: ${resepRajal} | RI: ${resepRanap} | IGD: ${resepIgd})</span>
+        </div>
       </div>
-      <div style="display: flex; align-items: center;">
-        <span class="badge ${badgeClass}" style="font-size: 0.95rem; padding: 6px 12px;">${badgeText}</span>
+
+      <!-- Card 4: Status Badge -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="badge ${badgeClass}" style="font-size: 0.75rem; padding: 2px 8px;">${badgeText}</span>
+        <span style="font-size: 0.68rem; color: var(--text-muted, #64748b);">(Standar: 0%)</span>
       </div>
+
     </div>
   `;
 }
@@ -102,17 +130,25 @@ function renderTable() {
 
   const canDelete = Store.canDelete();
   container.innerHTML = state.records.map(r => {
-    const resepTotal = r.resep_rajal + r.resep_ranap + r.resep_igd;
-    const salahTotal = r.salah_rajal + r.salah_ranap + r.salah_igd;
-    const pct = salahTotal === 0 ? 100 : (resepTotal / salahTotal) * 100;
+    const resepTotal = (r.resep_rajal || 0) + (r.resep_ranap || 0) + (r.resep_igd || 0);
+    const salahTotal = (r.salah_rajal || 0) + (r.salah_ranap || 0) + (r.salah_igd || 0);
+    const pctKesalahan = resepTotal > 0 ? ((salahTotal / resepTotal) * 100) : 0;
     const formattedDate = new Date(r.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
     return `
       <tr>
         <td><strong>${formattedDate}</strong></td>
-        <td style="text-align: center;">${r.resep_rajal} / ${r.resep_ranap} / ${r.resep_igd} <strong>(${resepTotal})</strong></td>
-        <td style="text-align: center;">${r.salah_rajal} / ${r.salah_ranap} / ${r.salah_igd} <strong>(${salahTotal})</strong></td>
-        <td style="text-align: center; font-weight: bold; color: ${pct === 100 ? 'var(--color-success)' : 'var(--color-danger)'};">${pct.toFixed(2)}%</td>
+        <td style="text-align: center;">
+          <span title="Rajal: ${r.resep_rajal}, Ranap: ${r.resep_ranap}, IGD: ${r.resep_igd}">
+            ${r.resep_rajal} / ${r.resep_ranap} / ${r.resep_igd} <strong>(${resepTotal})</strong>
+          </span>
+        </td>
+        <td style="text-align: center;">
+          <span title="Rajal: ${r.salah_rajal}, Ranap: ${r.salah_ranap}, IGD: ${r.salah_igd}" style="color: ${salahTotal > 0 ? 'var(--color-danger)' : 'inherit'};">
+            ${r.salah_rajal} / ${r.salah_ranap} / ${r.salah_igd} <strong>(${salahTotal})</strong>
+          </span>
+        </td>
+        <td style="text-align: center; font-weight: bold; color: ${salahTotal === 0 ? 'var(--color-success)' : 'var(--color-danger)'};">${pctKesalahan.toFixed(2)}%</td>
         <td style="text-align: center;">
           <div style="display: flex; gap: 4px; justify-content: center;">
             <button class="btn btn-outline btn-sm btn-edit" data-id="${r.id}">Edit</button>
@@ -239,7 +275,7 @@ export default {
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
             <div>
               <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">Kesalahan Penyerahan Obat Kepada Pasien (Rawat Jalan, Inap dan IGD)</h3>
-              <span class="badge badge-outline" style="margin-top: 4px; display: inline-block;">Target: 100% Benar (0% Kesalahan)</span>
+              <span class="badge badge-outline" style="margin-top: 4px; display: inline-block;">Target Standar: 0% Kesalahan</span>
             </div>
             <button class="btn btn-primary btn-add">+ Tambah Log Kejadian Harian</button>
           </div>
@@ -253,7 +289,7 @@ export default {
                   <th>Tanggal</th>
                   <th style="text-align: center;">Resep Rajal / Ranap / IGD (Total)</th>
                   <th style="text-align: center;">Salah Rajal / Ranap / IGD (Total)</th>
-                  <th style="text-align: center;">Kepatuhan (%)</th>
+                  <th style="text-align: center;">Persentase Kesalahan (%)</th>
                   <th style="text-align: center; width: 120px;">Aksi</th>
                 </tr>
               </thead>

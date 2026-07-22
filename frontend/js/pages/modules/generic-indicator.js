@@ -102,7 +102,7 @@ export function createGenericIndicatorPage(config) {
       return;
     }
 
-    let targetMetric = `${s.persen || 0}%`;
+    let targetMetric = (s.persen !== undefined && s.persen !== '-' && s.persen !== null) ? `${s.persen}%` : '-';
     let labelMetric = 'Kepatuhan';
     let numeratorText = config.numeratorLabel || 'Patuh (N)';
     let denominatorText = config.denominatorLabel || 'Denominator (D)';
@@ -115,6 +115,9 @@ export function createGenericIndicatorPage(config) {
     } else if (config.metricType === 'count') {
       targetMetric = s.total || 0;
       labelMetric = 'Jumlah Kejadian';
+    } else if (config.metricType === 'incident_ratio') {
+      numeratorText = config.numeratorLabel || 'Jumlah Insiden (N)';
+      denominatorText = config.denominatorLabel || 'Total Pemasangan (D)';
     }
 
     let numeratorValueText = s.numerator;
@@ -131,16 +134,18 @@ export function createGenericIndicatorPage(config) {
       numerator2HTML = `<div class="summary-item"><div class="summary-value">${numerator2ValueText}</div><div class="summary-label">${numerator2Text}</div></div>`;
     }
 
+    const showTargetMetric = config.metricType !== 'incident_ratio' && s.persen !== '-' && s.persen !== null && s.persen !== undefined;
+
     container.innerHTML = `
       <div class="summary-item"><div class="summary-value">${s.total || 0}</div><div class="summary-label">Total Data</div></div>
       ${config.metricType !== 'count' && s.numerator !== undefined ? `<div class="summary-item"><div class="summary-value">${numeratorValueText}</div><div class="summary-label">${numeratorText}</div></div>` : ''}
       ${numerator2HTML}
-      ${config.metricType === 'compliance' && s.denominator !== undefined ? `<div class="summary-item"><div class="summary-value">${s.denominator}</div><div class="summary-label">${denominatorText}</div></div>` : ''}
-      <div class="summary-item"><div class="summary-value">${targetMetric}</div><div class="summary-label">${labelMetric}</div></div>
+      ${(config.metricType === 'compliance' || config.metricType === 'incident_ratio') && s.denominator !== undefined ? `<div class="summary-item"><div class="summary-value">${s.denominator}</div><div class="summary-label">${denominatorText}</div></div>` : ''}
+      ${showTargetMetric ? `<div class="summary-item"><div class="summary-value">${targetMetric}</div><div class="summary-label">${labelMetric}</div></div>` : ''}
       <div class="summary-item">
-        ${config.metricType === 'count'
+        ${config.metricType === 'count' || config.metricType === 'incident_ratio' || s.standar === '0'
           ? `<span class="badge ${(s.total || 0) === 0 ? 'badge-success' : 'badge-danger'}">${(s.total || 0) === 0 ? '✓ Tercapai' : '✕ Tidak Tercapai'}</span>`
-          : renderBadge(config.metricType === 'average' ? (s.rataRata || 0) : (s.persen || 0), s.standar || '100')
+          : (s.persen === '-' || s.standar === '-' ? `<span class="badge badge-info">-</span>` : renderBadge(config.metricType === 'average' ? (s.rataRata || 0) : (s.persen || 0), s.standar || '100'))
         }
         <div class="summary-label" style="margin-top:8px">Standar: ${s.standar}</div>
       </div>
@@ -152,17 +157,37 @@ export function createGenericIndicatorPage(config) {
     if (!container || !state.summaryData) return;
 
     const fieldsHTML = config.summaryDataFields.map(f => {
-      const val = state.summaryData[f.name] || 0;
-      return `<div style="margin-right: 24px"><strong>${f.label}:</strong> ${val}</div>`;
+      const val = state.summaryData[f.name] !== undefined ? state.summaryData[f.name] : 0;
+      const unit = f.unit ? ` ${f.unit}` : '';
+      return `
+        <div style="margin-right: 24px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.1rem; color: var(--primary-color, #2563eb);">⚙️</span>
+          <div>
+            <span style="color: var(--text-muted, #64748b); font-weight: 500; font-size: 0.9rem;">${f.label}:</span>
+            <span style="font-weight: 700; font-size: 1.1rem; margin-left: 6px; color: var(--text-color, #1e293b);">${val}${unit}</span>
+          </div>
+        </div>
+      `;
     }).join('');
 
+    const titleHTML = config.summaryDataTitle 
+      ? `<div style="font-size: 1rem; margin-right: 24px; font-weight: 600; color: var(--text-color, #1e293b);">📋 ${config.summaryDataTitle}</div>`
+      : '';
+
+    const infoHTML = config.summaryDataInfo
+      ? `<div style="font-size: 0.85rem; color: var(--text-muted, #64748b); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-color, #e2e8f0);">ℹ️ ${config.summaryDataInfo}</div>`
+      : '';
+
     container.innerHTML = `
-      <div class="card" style="margin-bottom: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; flex-direction: row; align-items: center;">
-          <div style="font-size: 1.2rem; margin-right: 24px">📋 <strong>Parameter Periode:</strong></div>
-          ${fieldsHTML}
+      <div class="card" style="margin-bottom: 16px; padding: 14px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px;">
+            ${titleHTML}
+            ${fieldsHTML}
+          </div>
+          <button class="btn btn-outline btn-sm" id="btn-edit-summary-data">Edit Parameter</button>
         </div>
-        <button class="btn btn-outline btn-sm" id="btn-edit-summary-data">Edit Parameter</button>
+        ${infoHTML}
       </div>
     `;
 
@@ -170,14 +195,15 @@ export function createGenericIndicatorPage(config) {
   }
 
   function openSummaryDataModal() {
+    const modalTitle = config.summaryDataModalTitle || 'Edit Parameter Modul';
     const fieldsHTML = config.summaryDataFields.map(f => `
       <div class="form-group">
-        <label class="form-label">${f.label} <span class="required">*</span></label>
-        <input type="number" name="${f.name}" class="form-control" value="${state.summaryData?.[f.name] || 0}" min="0" required>
+        <label class="form-label">${f.label} ${f.unit ? `(${f.unit})` : ''} <span class="required">*</span></label>
+        <input type="number" name="${f.name}" class="form-control" value="${state.summaryData?.[f.name] !== undefined ? state.summaryData[f.name] : 0}" min="0" required>
       </div>
     `).join('');
 
-    showModal('Edit Parameter Bulanan', `
+    showModal(modalTitle, `
       <form id="summary-data-form">
         ${fieldsHTML}
       </form>
@@ -310,11 +336,24 @@ export function createGenericIndicatorPage(config) {
     const val = data ? data[f.name] : '';
     
     if (f.type === 'select') {
-      const optionsHTML = f.options.map(opt => {
-        const isSelected = val === opt.value || 
-          (typeof val === 'string' && typeof opt.value === 'string' && val.trim().replace(/_/g, ' ') === opt.value.trim().replace(/_/g, ' '));
+      const isMatch = (optVal, currentVal) => {
+        if (!currentVal) return false;
+        const normOpt = String(optVal).trim().toLowerCase().replace(/_/g, ' ');
+        const normCur = String(currentVal).trim().toLowerCase().replace(/_/g, ' ');
+        return normOpt === normCur;
+      };
+      
+      const hasMatch = val && f.options.some(opt => isMatch(opt.value, val));
+      
+      let optionsHTML = f.options.map(opt => {
+        const isSelected = isMatch(opt.value, val);
         return `<option value="${opt.value}" ${isSelected ? 'selected' : ''}>${opt.label}</option>`;
       }).join('');
+
+      if (val && !hasMatch) {
+        optionsHTML += `<option value="${val}" selected>${val}</option>`;
+      }
+
       return `
         <div class="form-group">
           <label class="form-label">${f.label} ${f.required ? '<span class="required">*</span>' : ''}</label>

@@ -4,6 +4,16 @@ import { api } from '../../api/client.js';
 
 let masterTindakanOptions = [];
 
+const apdItemsList = [
+  { name: 'penutup_kepala', reqKey: 'apd_penutup_kepala', abbr: 'PK', label: 'Penutup Kepala' },
+  { name: 'face_shield', reqKey: 'apd_face_shield', abbr: 'FS', label: 'Face Shield' },
+  { name: 'masker', reqKey: 'apd_masker', abbr: 'M', label: 'Masker' },
+  { name: 'apron', reqKey: 'apd_apron', abbr: 'A', label: 'Apron' },
+  { name: 'coverall', reqKey: 'apd_coverall', abbr: 'C', label: 'Coverall' },
+  { name: 'sarung_tangan', reqKey: 'apd_sarung_tangan', abbr: 'ST', label: 'Sarung Tangan' },
+  { name: 'cover_shoes', reqKey: 'apd_cover_shoes', abbr: 'CS', label: 'Cover Shoes' }
+];
+
 async function loadMasterTindakanOptions() {
   const res = await api.get('/master-tindakan?all=true');
   if (res.success) {
@@ -11,66 +21,60 @@ async function loadMasterTindakanOptions() {
   }
 }
 
+function getRequiredItemsForRecord(r) {
+  const master = r.master_tindakan || masterTindakanOptions.find(m => m.nama?.trim().toLowerCase() === r.tindakan?.trim().toLowerCase());
+  if (!master) return apdItemsList;
+  const reqs = apdItemsList.filter(item => master[item.reqKey] === true);
+  return reqs.length > 0 ? reqs : apdItemsList;
+}
+
 const pageObj = createGenericIndicatorPage({
   title: 'Kepatuhan Penggunaan APD',
-  subtitle: 'Kepatuhan penggunaan Alat Pelindung Diri (APD) pada petugas sesuai dengan standar keselamatan',
+  subtitle: 'Kepatuhan penggunaan Alat Pelindung Diri (APD) pada petugas sesuai standar tindakan di Master Tindakan',
   endpoint: '/kepatuhan-apd',
   metricType: 'compliance',
   columns: [
-    { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
+    { label: 'Tanggal', key: 'tanggal', width: '110px', align: 'center', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
     { label: 'Nama Pasien', key: 'nama_pasien' },
-    { label: 'Profesi', key: 'profesi' },
+    { label: 'Profesi', key: 'profesi', width: '100px' },
     { label: 'Tindakan', key: 'tindakan' },
     {
-      label: 'Status APD',
+      label: 'Status APD (Wajib vs Dipakai)',
       render: (r) => {
-        const items = [
-          { name: 'penutup_kepala', abbr: 'PK', label: 'Penutup Kepala' },
-          { name: 'face_shield', abbr: 'FS', label: 'Face Shield' },
-          { name: 'masker', abbr: 'M', label: 'Masker' },
-          { name: 'apron', abbr: 'A', label: 'Apron' },
-          { name: 'coverall', abbr: 'C', label: 'Coverall' },
-          { name: 'sarung_tangan', abbr: 'ST', label: 'Sarung Tangan' },
-          { name: 'cover_shoes', abbr: 'CS', label: 'Cover Shoes' }
-        ];
+        const reqItems = getRequiredItemsForRecord(r);
+        const reqNames = new Set(reqItems.map(i => i.name));
 
-        const badgesHTML = items.map(item => {
+        const badgesHTML = apdItemsList.map(item => {
+          const isReq = reqNames.has(item.name);
           const isUsed = r[item.name];
+
+          if (!isReq) {
+            return `<span class="badge" style="background:#e2e8f0; color:#94a3b8; font-size: 0.75rem; padding: 3px 6px; cursor: help; min-width: 24px; text-align: center;" title="${item.label}: Tidak Wajib">${item.abbr}</span>`;
+          }
+
           const badgeClass = isUsed ? 'badge-success' : 'badge-danger';
-          const labelVal = isUsed ? 'Ya' : 'Tidak';
-          return `<span class="badge ${badgeClass}" style="font-size: 0.75rem; padding: 3px 6px; cursor: help; min-width: 24px; text-align: center;" title="${item.label}: ${labelVal}">${item.abbr}</span>`;
+          const labelVal = isUsed ? 'Ya (Patuh)' : 'Tidak (Tidak Patuh)';
+          return `<span class="badge ${badgeClass}" style="font-size: 0.75rem; padding: 3px 6px; cursor: help; min-width: 24px; text-align: center;" title="${item.label} (WAJIB): ${labelVal}">${item.abbr}</span>`;
         }).join('');
 
         return `<div style="display: flex; gap: 4px; flex-wrap: nowrap; justify-content: start;">${badgesHTML}</div>`;
       }
     },
     {
-      label: 'Ya',
+      label: 'Capaian APD',
+      width: '110px',
+      align: 'center',
       render: (r) => {
-        return [
-          r.penutup_kepala,
-          r.face_shield,
-          r.masker,
-          r.apron,
-          r.coverall,
-          r.sarung_tangan,
-          r.cover_shoes
-        ].filter(Boolean).length;
-      }
-    },
-    {
-      label: 'Tidak',
-      render: (r) => {
-        const ya = [
-          r.penutup_kepala,
-          r.face_shield,
-          r.masker,
-          r.apron,
-          r.coverall,
-          r.sarung_tangan,
-          r.cover_shoes
-        ].filter(Boolean).length;
-        return 7 - ya;
+        const reqItems = getRequiredItemsForRecord(r);
+        const yaCount = reqItems.filter(i => r[i.name] === true).length;
+        const totalWajib = reqItems.length;
+        const isCompliant = yaCount === totalWajib;
+        return `
+          <div style="font-size: 0.85rem;">
+            <strong>${yaCount}/${totalWajib} APD</strong>
+            <div>${isCompliant ? '<span class="badge badge-success" style="font-size:0.7rem;">Sesuai 100%</span>' : '<span class="badge badge-danger" style="font-size:0.7rem;">Tidak Sesuai</span>'}</div>
+          </div>
+        `;
       }
     }
   ],
@@ -104,7 +108,7 @@ const pageObj = createGenericIndicatorPage({
         return `
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Tindakan <span class="required">*</span></label>
-            <select name="tindakan" class="form-control" required>
+            <select name="tindakan" id="select-tindakan-apd" class="form-control" required>
               <option value="">-- Pilih Tindakan --</option>
               ${optionsHTML}
             </select>
@@ -118,20 +122,20 @@ const pageObj = createGenericIndicatorPage({
       type: 'custom',
       row: 3,
       render: (val, data) => {
-        const items = [
-          { name: 'penutup_kepala', label: 'Penutup Kepala' },
-          { name: 'face_shield', label: 'Face Shield' },
-          { name: 'masker', label: 'Masker' },
-          { name: 'apron', label: 'Apron' },
-          { name: 'coverall', label: 'Coverall' },
-          { name: 'sarung_tangan', label: 'Sarung Tangan' },
-          { name: 'cover_shoes', label: 'Cover Shoes' }
-        ];
-        const rowsHTML = items.map(item => {
+        const selectedTindakan = data?.tindakan || '';
+        const master = masterTindakanOptions.find(m => m.nama === selectedTindakan);
+
+        const rowsHTML = apdItemsList.map(item => {
           const currentVal = data ? data[item.name] : false;
+          const isReq = master ? (master[item.reqKey] === true) : true;
           return `
             <tr style="border-bottom: 1px solid var(--border-color, #dee2e6);">
-              <td style="padding: 10px 0; font-weight: 500;">${item.label}</td>
+              <td style="padding: 10px 0; font-weight: 500;">
+                ${item.label}
+                <span id="tag-req-${item.name}" class="badge ${isReq ? 'badge-warning' : 'badge-info'}" style="font-size: 0.7rem; margin-left: 6px;">
+                  ${isReq ? 'Wajib' : 'Tidak Wajib'}
+                </span>
+              </td>
               <td style="padding: 10px; text-align: center;">
                 <label style="margin-right: 24px; cursor: pointer; font-weight: 500;">
                   <input type="radio" name="${item.name}" value="true" ${currentVal === true ? 'checked' : ''} required> Ya
@@ -145,7 +149,7 @@ const pageObj = createGenericIndicatorPage({
         }).join('');
         return `
           <div class="form-group" style="flex: 1; margin-top: 16px;">
-            <label class="form-label" style="font-weight: 600; margin-bottom: 12px; font-size: 1.05rem;">Item APD yang dipakai <span class="required">*</span></label>
+            <label class="form-label" style="font-weight: 600; margin-bottom: 12px; font-size: 1.05rem;">Checklist Item APD Petugas <span class="required">*</span></label>
             <div style="background: var(--bg-light, #f8f9fa); padding: 16px; border-radius: 8px; border: 1px dashed var(--border-color, #dee2e6);">
               <table style="width: 100%; border-collapse: collapse;">
                 <thead>
@@ -179,19 +183,19 @@ const pageObj = createGenericIndicatorPage({
     return `
       <div class="summary-item">
         <div class="summary-value">${s.total || 0}</div>
-        <div class="summary-label">Total Data</div>
+        <div class="summary-label">Total Transaksi</div>
       </div>
       <div class="summary-item">
         <div class="summary-value">${s.numerator || 0}</div>
-        <div class="summary-label">Total Ya</div>
+        <div class="summary-label">APD Dipakai (N)</div>
       </div>
       <div class="summary-item">
         <div class="summary-value">${s.denominator || 0}</div>
-        <div class="summary-label">Total Tidak</div>
+        <div class="summary-label">APD Wajib Indikasi (D)</div>
       </div>
       <div class="summary-item">
         <div class="summary-value">${s.persen || 0}%</div>
-        <div class="summary-label">Persentase Kepatuhan</div>
+        <div class="summary-label">Kepatuhan APD</div>
       </div>
       <div class="summary-item">
         ${renderBadge(s.persen || 0, '100')}
@@ -205,6 +209,28 @@ const originalRender = pageObj.render;
 pageObj.render = async (container) => {
   await loadMasterTindakanOptions();
   await originalRender(container);
+
+  // Bind change event to update APD requirements tag in modal form dynamically
+  document.addEventListener('change', (e) => {
+    if (e.target && e.target.id === 'select-tindakan-apd') {
+      const selectedName = e.target.value;
+      const master = masterTindakanOptions.find(m => m.nama === selectedName);
+
+      apdItemsList.forEach(item => {
+        const isReq = master ? (master[item.reqKey] === true) : true;
+        const tagEl = document.getElementById(`tag-req-${item.name}`);
+        if (tagEl) {
+          if (isReq) {
+            tagEl.className = 'badge badge-warning';
+            tagEl.innerText = 'Wajib';
+          } else {
+            tagEl.className = 'badge badge-info';
+            tagEl.innerText = 'Tidak Wajib';
+          }
+        }
+      });
+    }
+  });
 };
 
 export default pageObj;

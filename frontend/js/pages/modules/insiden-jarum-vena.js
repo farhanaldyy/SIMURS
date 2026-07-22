@@ -5,7 +5,9 @@ export default createGenericIndicatorPage({
   subtitle: 'Pencatatan insiden kegagalan/komplikasi pemasangan jarum vena fistula',
   endpoint: '/insiden-jarum-vena',
   ignoreUnit: true,
-  metricType: 'compliance',
+  metricType: 'incident_ratio',
+  numeratorLabel: 'Jumlah Insiden (N)',
+  denominatorLabel: 'Total Pemasangan (D)',
   hasSummaryData: true,
   summaryDataFields: [
     { name: 'total_pemasangan_bulan', label: 'Total Pemasangan Bulan Ini', type: 'number' }

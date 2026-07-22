@@ -20,19 +20,46 @@ async function loadData() {
   }
 }
 
+const apdList = [
+  { key: 'apd_penutup_kepala', label: 'Penutup Kepala', abbr: 'PK' },
+  { key: 'apd_face_shield', label: 'Face Shield', abbr: 'FS' },
+  { key: 'apd_masker', label: 'Masker', abbr: 'M' },
+  { key: 'apd_apron', label: 'Apron', abbr: 'A' },
+  { key: 'apd_coverall', label: 'Coverall', abbr: 'C' },
+  { key: 'apd_sarung_tangan', label: 'Sarung Tangan', abbr: 'ST' },
+  { key: 'apd_cover_shoes', label: 'Cover Shoes', abbr: 'CS' }
+];
+
 function renderTindakanTable() {
   const columns = [
-    { label: 'No', render: (_, i) => (state.page - 1) * state.limit + i + 1 },
+    { label: 'No', width: '50px', align: 'center', render: (_, i) => (state.page - 1) * state.limit + i + 1 },
     { label: 'Nama Tindakan', key: 'nama' },
     { 
       label: 'Nilai Tindakan', 
       key: 'nilai', 
+      width: '120px',
+      align: 'center',
       render: (r) => `<strong>${r.nilai}</strong>`
     },
     {
+      label: 'Standar APD Wajib',
+      render: (r) => {
+        const activeAPDs = apdList.filter(item => r[item.key] === true);
+        if (activeAPDs.length === 0) {
+          return `<span class="badge badge-secondary" style="font-size: 0.75rem;">Semua APD (Default)</span>`;
+        }
+        const badgesHTML = activeAPDs.map(item => `
+          <span class="badge badge-info" style="font-size: 0.75rem; padding: 3px 6px;" title="${item.label}">${item.abbr}</span>
+        `).join(' ');
+        return `<div style="display: flex; gap: 4px; flex-wrap: wrap;">${badgesHTML}</div>`;
+      }
+    },
+    {
       label: 'Aksi',
+      width: '120px',
+      align: 'center',
       render: (r) => `
-        <div style="display: flex; gap: 4px;">
+        <div style="display: flex; gap: 4px; justify-content: center;">
           <button class="btn btn-outline btn-sm btn-edit-tindakan" data-id="${r.id}">Edit</button>
           <button class="btn btn-danger btn-sm btn-delete-tindakan" data-id="${r.id}">Hapus</button>
         </div>
@@ -99,6 +126,16 @@ function renderPagination() {
 function openTindakanModal(tindakan = null) {
   const isEdit = !!tindakan;
 
+  const checkboxesHTML = apdList.map(item => {
+    const checked = tindakan ? (tindakan[item.key] === true) : false;
+    return `
+      <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; padding: 6px 10px; background: #fff; border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px;">
+        <input type="checkbox" name="${item.key}" value="true" ${checked ? 'checked' : ''}>
+        <span>${item.label} (${item.abbr})</span>
+      </label>
+    `;
+  }).join('');
+
   const modalHTML = `
     <form id="tindakan-form">
       <div class="form-group">
@@ -108,6 +145,15 @@ function openTindakanModal(tindakan = null) {
       <div class="form-group">
         <label class="form-label">Nilai Tindakan <span class="required">*</span></label>
         <input type="number" name="nilai" step="any" class="form-control" value="${tindakan?.nilai !== undefined ? tindakan.nilai : ''}" required placeholder="Contoh: 100 atau 85.5">
+      </div>
+      <div class="form-group" style="margin-top: 16px;">
+        <label class="form-label" style="font-weight: 600;">Standar Item APD Wajib Dipakai</label>
+        <p style="font-size: 0.825rem; color: var(--color-text-muted, #64748b); margin-top: -4px; margin-bottom: 10px;">
+          Pilih item APD yang WAJIB digunakan petugas saat melakukan tindakan ini.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; background: var(--bg-light, #f8f9fa); padding: 14px; border-radius: 8px; border: 1px dashed var(--border-color, #dee2e6);">
+          ${checkboxesHTML}
+        </div>
       </div>
     </form>
   `;
@@ -127,8 +173,11 @@ function openTindakanModal(tindakan = null) {
       const errors = validateForm(validations);
       if (errors) { showFormErrors(form, errors); return; }
 
-      // Parse float value
+      // Parse float value & APD checkboxes
       formData.nilai = parseFloat(formData.nilai);
+      apdList.forEach(item => {
+        formData[item.key] = form.querySelector(`input[name="${item.key}"]`)?.checked || false;
+      });
 
       if (isEdit) {
         const res = await api.put(`/master-tindakan/${tindakan.id}`, formData);

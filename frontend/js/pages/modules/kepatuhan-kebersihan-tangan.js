@@ -12,6 +12,28 @@ async function loadMasterTindakanOptions() {
   }
 }
 
+window.handleSearchTindakanMaster = function(inputEl) {
+  const selectEl = document.getElementById('select-tindakan-master');
+  if (!selectEl) return;
+  const query = (inputEl.value || '').toLowerCase().trim();
+  const currentSelected = selectEl.value;
+
+  const filtered = masterTindakanOptions.filter(item => {
+    return !query || item.nama.toLowerCase().includes(query);
+  });
+
+  const optionsHTML = filtered.map(item => `
+    <option value="${item.id}" ${String(currentSelected) === String(item.id) ? 'selected' : ''}>
+      ${item.nama} (Nilai: ${item.nilai})
+    </option>
+  `).join('');
+
+  selectEl.innerHTML = `
+    <option value="">-- Pilih Tindakan (${filtered.length} data) --</option>
+    ${optionsHTML}
+  `;
+};
+
 const profesiLabels = {
   dokter: 'Dokter',
   perawat: 'Perawat',
@@ -97,8 +119,9 @@ const pageObj = createGenericIndicatorPage({
         return `
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Tindakan Master <span class="required">*</span></label>
-            <select name="tindakan_id" class="form-control" required>
-              <option value="">-- Pilih Tindakan --</option>
+            <input type="text" id="search-tindakan-master" class="form-control" placeholder="🔍 Cari nama tindakan master..." style="margin-bottom: 6px; font-size: 0.85rem; padding: 6px 10px;" oninput="window.handleSearchTindakanMaster(this)">
+            <select name="tindakan_id" id="select-tindakan-master" class="form-control" required>
+              <option value="">-- Pilih Tindakan (${masterTindakanOptions.length} data) --</option>
               ${optionsHTML}
             </select>
           </div>

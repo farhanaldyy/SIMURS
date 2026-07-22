@@ -11,12 +11,13 @@ export default createGenericIndicatorPage({
   metricType: 'compliance',
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
-    { label: 'No RM', key: 'no_rm' },
+    { label: 'No RM', key: 'no_rm', width: '100px' },
     { label: 'DPJP Operator', key: 'dpjp' },
-    { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
-    { label: 'Sign In', key: 'sign_in', render: (r) => checkBadge(r.sign_in) },
-    { label: 'Time Out', key: 'time_out', render: (r) => checkBadge(r.time_out) },
-    { label: 'Sign Out', key: 'sign_out', render: (r) => checkBadge(r.sign_out) }
+    { label: 'Tanggal', key: 'tanggal', width: '110px', align: 'center', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID') },
+    { label: 'Sign In', key: 'sign_in', width: '80px', align: 'center', render: (r) => checkBadge(r.sign_in) },
+    { label: 'Time Out', key: 'time_out', width: '80px', align: 'center', render: (r) => checkBadge(r.time_out) },
+    { label: 'Sign Out', key: 'sign_out', width: '80px', align: 'center', render: (r) => checkBadge(r.sign_out) },
+    { label: 'Keterangan', key: 'keterangan', render: (r) => r.keterangan ? r.keterangan : '<span class="text-muted">-</span>' }
   ],
   rowClass: (r) => (r.sign_in && r.time_out && r.sign_out) ? '' : 'row-danger',
   fields: [

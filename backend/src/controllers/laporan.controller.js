@@ -90,6 +90,13 @@ const services = {
 
   // SIMRS
   'Response Time SIMRS IT': { service: require('../services/modules/simrs-response-time-it.service'), table: 'simrsResponseTimeIt', category: 'SIMRS' },
+
+  // Rekam Medis
+  'Kelengkapan Dokumen Rekam Medis Pasien Ranap': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'kelengkapan_ranap' } },
+  'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'pengembalian_rm' } },
+  'Pemberian Informasi Antrian Online': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'antrian_online' } },
+  'Ketepatan Coding Rawat Inap & Rawat Jalan': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'ketepatan_coding' } },
+  'Antrian Mobile JKN': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'mobile_jkn' } },
 };
 
 async function exportExcel(req, res, next) {
@@ -330,6 +337,39 @@ async function exportExcel(req, res, next) {
         } else if (cfg.table === 'simrsResponseTimeIt') {
           const rt = r.response_time_menit || 0;
           hasilVal = `${rt} Menit`;
+        } else if (cfg.table === 'mutuRekamMedis') {
+          const t = cfg.extraWhere?.tipe;
+          delete flat['Periode Id'];
+          delete flat['Created By'];
+          delete flat['Created At'];
+          delete flat['Updated At'];
+          
+          let num = 0, den = 0, pct = 0;
+          if (t === 'kelengkapan_ranap') {
+            num = r.kelengkapan_ranap_num || 0;
+            den = r.kelengkapan_ranap_den || 0;
+            pct = r.kelengkapan_ranap_pct || 0;
+          } else if (t === 'pengembalian_rm') {
+            num = r.pengembalian_num || 0;
+            den = r.pengembalian_den || 0;
+            pct = r.pengembalian_pct || 0;
+          } else if (t === 'antrian_online') {
+            num = r.antrian_online_num || 0;
+            den = r.antrian_online_den || 0;
+            pct = r.antrian_online_pct || 0;
+          } else if (t === 'ketepatan_coding') {
+            num = r.coding_num || 0;
+            den = r.coding_den || 0;
+            pct = r.coding_pct || 0;
+          } else if (t === 'mobile_jkn') {
+            num = r.mobile_jkn_num || 0;
+            den = r.mobile_jkn_den || 0;
+            pct = r.mobile_jkn_pct || 0;
+          }
+
+          flat['Numerator (N)'] = num;
+          flat['Denominator (D)'] = den;
+          hasilVal = `${pct}%`;
         }
 
         if (hasilVal !== null) {
