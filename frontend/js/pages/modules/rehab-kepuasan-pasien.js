@@ -8,14 +8,14 @@ export default createGenericIndicatorPage({
   metricType: 'compliance',
   columns: [
     { label: 'Tanggal', key: 'tanggal', render: (r) => new Date(r.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) },
-    { label: 'Pasien (Sampling)', key: 'nama_pasien' },
+    { label: 'Nama Pasien (Pasien Sampling)', key: 'nama_pasien' },
     { label: 'Nilai Maksimal Kuisioner', key: 'nilai_maksimal' },
     { label: 'Hasil Kuisioner', key: 'hasil_kuisioner' },
     { label: 'Total', key: 'total', render: (r) => `${r.total}%` }
   ],
   fields: [
     { name: 'tanggal', label: 'Tanggal', type: 'date', required: true, row: 1 },
-    { name: 'nama_pasien', label: 'Pasien (Sampling) / Kode Anonim', type: 'text', required: true, row: 1 },
+    { name: 'nama_pasien', label: 'Nama Pasien (Pasien Sampling)', type: 'text', placeholder: 'Contoh: Pasien A', required: true, row: 1 },
     { name: 'nilai_maksimal', label: 'Nilai Maksimal Kuisioner', type: 'number', required: true, row: 2 },
     { name: 'hasil_kuisioner', label: 'Hasil Kuisioner', type: 'number', required: true, row: 2 }
   ],

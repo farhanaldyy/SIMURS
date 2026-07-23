@@ -7,25 +7,75 @@ const prisma = require('../../config/database');
 const baseCtrl = createGenericController(service);
 
 function formatJamString(val) {
-  if (!val && val !== 0) return '';
+  if (val === null || val === undefined || val === '') return '';
+
+  // 1. If Date object (e.g. SheetJS parsed native Excel Time cell)
   if (val instanceof Date) {
-    const h = String(val.getHours()).padStart(2, '0');
-    const m = String(val.getMinutes()).padStart(2, '0');
+    if (isNaN(val.getTime())) return '';
+    const h = String(val.getUTCHours()).padStart(2, '0');
+    const m = String(val.getUTCMinutes()).padStart(2, '0');
     return `${h}:${m}`;
   }
+
+  // 2. If Number (Excel time fraction, timestamp, or integer like 830)
   if (typeof val === 'number') {
-    const totalSec = Math.round(val * 86400);
+    if (val >= 100 && val <= 2359 && Number.isInteger(val)) {
+      const h = String(Math.floor(val / 100)).padStart(2, '0');
+      const m = String(val % 100).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+    let frac = val % 1;
+    if (frac < 0) frac += 1;
+    const totalSec = Math.round(frac * 86400);
     const h = String(Math.floor(totalSec / 3600) % 24).padStart(2, '0');
     const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
     return `${h}:${m}`;
   }
-  const str = String(val).trim();
+
+  // 3. If String
+  let str = String(val).trim();
+  if (!str) return '';
+
+  // Handle AM/PM time format (e.g. "12:00:00 PM", "01:00:00 PM", "1:00 PM", "12:00 AM")
+  const ampmMatch = str.match(/^(\d{1,2})[:.](\d{2})(?:[:.]\d{2})?\s*(AM|PM)$/i);
+  if (ampmMatch) {
+    let h = parseInt(ampmMatch[1], 10);
+    const m = parseInt(ampmMatch[2], 10);
+    const period = ampmMatch[3].toUpperCase();
+    if (period === 'PM' && h < 12) {
+      h += 12;
+    } else if (period === 'AM' && h === 12) {
+      h = 0;
+    }
+    const hStr = String(h).padStart(2, '0');
+    const mStr = String(m).padStart(2, '0');
+    return `${hStr}:${mStr}`;
+  }
+
+  // Normalize dot separator (e.g. 08.30 or 8.30 -> 08:30)
+  if (str.includes('.') && !str.includes(':')) {
+    str = str.replace('.', ':');
+  }
+
   if (str.includes(':')) {
     const parts = str.split(':');
-    const h = parts[0].padStart(2, '0');
-    const m = parts[1].padStart(2, '0');
+    const hNum = parseInt(parts[0], 10);
+    const mNum = parseInt(parts[1], 10);
+    if (!isNaN(hNum) && !isNaN(mNum)) {
+      const h = String(hNum % 24).padStart(2, '0');
+      const m = String(mNum % 60).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+  }
+
+  // Handle 3-4 digit string inputs like '0830' or '830'
+  if (/^\d{3,4}$/.test(str)) {
+    const num = parseInt(str, 10);
+    const h = String(Math.floor(num / 100)).padStart(2, '0');
+    const m = String(num % 100).padStart(2, '0');
     return `${h}:${m}`;
   }
+
   return str;
 }
 
@@ -95,21 +145,34 @@ module.exports = {
 
       // Setup Main Sheet Columns
       wsMain.columns = [
-        { header: 'Tanggal', key: 'tanggal', width: 15 },
-        { header: 'Unit Diperbaiki', key: 'unit_diperbaiki', width: 25 },
-        { header: 'Permasalahan', key: 'permasalahan', width: 35 },
-        { header: 'Jam Laporan', key: 'jam_laporan', width: 15 },
-        { header: 'Jam Tindakan', key: 'jam_tindakan', width: 15 },
-        { header: 'Status', key: 'status', width: 18 },
-        { header: 'Petugas', key: 'petugas', width: 24 }
+        { key: 'tanggal', width: 16 },
+        { key: 'unit_diperbaiki', width: 28 },
+        { key: 'permasalahan', width: 38 },
+        { key: 'jam_laporan', width: 16 },
+        { key: 'jam_tindakan', width: 16 },
+        { key: 'status', width: 18 },
+        { key: 'petugas', width: 24 }
       ];
 
-      const mainHeader = wsMain.getRow(1);
+      // Banner Row (Row 1)
+      wsMain.mergeCells('A1:G1');
+      const bannerCell = wsMain.getCell('A1');
+      bannerCell.value = '📌 INFORMASI PENTING: Data harus sesuai dengan contoh template ini. Silakan isi data di bawah baris header dan gunakan pilihan dropdown.';
+      bannerCell.font = { bold: true, color: { argb: 'FF1E3A8A' }, size: 10 };
+      bannerCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0F2FE' } };
+      bannerCell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+      wsMain.getRow(1).height = 30;
+
+      // Header Row (Row 2)
+      const headers = ['Tanggal', 'Unit Diperbaiki', 'Permasalahan', 'Jam Laporan', 'Jam Tindakan', 'Status', 'Petugas'];
+      const mainHeader = wsMain.getRow(2);
+      mainHeader.values = headers;
       mainHeader.font = { bold: true, color: { argb: 'FFFFFFFF' } };
       mainHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
       mainHeader.alignment = { vertical: 'middle', horizontal: 'center' };
+      wsMain.getRow(2).height = 25;
 
-      // Add Sample Rows
+      // Add Sample Rows (Starting from Row 3)
       wsMain.addRow({
         tanggal: '2026-07-20',
         unit_diperbaiki: unitNames[0] || 'Jabal Nur',
@@ -143,8 +206,8 @@ module.exports = {
       const statusFormula = `'Referensi Data'!$B$2:$B$${statusOptions.length + 1}`;
       const petugasFormula = `'Referensi Data'!$C$2:$C$${petugasOptions.length + 1}`;
 
-      // Apply Data Validation Picklist (Dropdown) to rows 2 to 500
-      for (let r = 2; r <= 500; r++) {
+      // Apply Data Validation Picklist (Dropdown) to rows 3 to 500
+      for (let r = 3; r <= 500; r++) {
         wsMain.getCell(`B${r}`).dataValidation = {
           type: 'list',
           allowBlank: true,
@@ -199,11 +262,22 @@ module.exports = {
         return res.status(400).json({ success: false, message: 'Periode aktif tidak ditemukan. Silakan pilih periode pada header.' });
       }
 
-      let unit_id = req.body.unit_id || req.query.unit_id || (req.user ? req.user.unit_id : 1);
+      let unit_id = (req.body && req.body.unit_id) || (req.query && req.query.unit_id) || (req.user ? req.user.unit_id : 1);
 
       const wb = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true });
       const sheetName = wb.SheetNames[0];
-      const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+      const sheet = wb.Sheets[sheetName];
+      let rows = XLSX.utils.sheet_to_json(sheet);
+
+      if (!rows || rows.length === 0) {
+        return res.status(400).json({ success: false, message: 'File Excel kosong atau format sheet tidak sesuai' });
+      }
+
+      // Check if Row 1 was a banner cell instead of headers
+      const hasHeaderKeys = 'Tanggal' in rows[0] || 'Unit Diperbaiki' in rows[0] || 'Permasalahan' in rows[0];
+      if (!hasHeaderKeys) {
+        rows = XLSX.utils.sheet_to_json(sheet, { range: 1 });
+      }
 
       if (!rows || rows.length === 0) {
         return res.status(400).json({ success: false, message: 'File Excel kosong atau format sheet tidak sesuai' });
@@ -222,7 +296,7 @@ module.exports = {
       let failedCount = 0;
 
       rows.forEach((row, idx) => {
-        const rowNum = idx + 2; // Excel row index (header is row 1)
+        const rowNum = hasHeaderKeys ? idx + 2 : idx + 3; // Excel row index
         const msgs = [];
 
         const tglRaw = row['Tanggal'];

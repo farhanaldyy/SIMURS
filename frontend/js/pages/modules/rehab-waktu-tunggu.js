@@ -14,14 +14,14 @@ export default createGenericIndicatorPage({
       render: (r) => {
         return `
           <div style="display: flex; gap: 4px; flex-wrap: nowrap;">
-            <span class="badge badge-danger" style="font-size: 0.75rem; padding: 3px 6px;" title="Waktu tunggu > 60 menit">&gt; 60m: ${r.waktu_tunggu_gt_60}</span>
-            <span class="badge badge-success" style="font-size: 0.75rem; padding: 3px 6px;" title="Waktu tunggu < 60 menit">&lt; 60m: ${r.waktu_tunggu_lt_60}</span>
+            <span class="badge badge-danger" style="font-size: 0.75rem; padding: 3px 6px;" title="Waktu tunggu > 60 menit">&gt; 60 Menit: ${r.waktu_tunggu_gt_60}</span>
+            <span class="badge badge-success" style="font-size: 0.75rem; padding: 3px 6px;" title="Waktu tunggu < 60 menit">&lt; 60 Menit: ${r.waktu_tunggu_lt_60}</span>
           </div>
         `;
       }
     },
-    { label: 'Total Waktu', key: 'total_waktu_tunggu', render: (r) => `${r.total_waktu_tunggu} m` },
-    { label: 'Rerata Tunggu', key: 'rata_rata_waktu_tunggu', render: (r) => `${r.rata_rata_waktu_tunggu} m` },
+    { label: 'Total Waktu', key: 'total_waktu_tunggu', render: (r) => `${r.total_waktu_tunggu} Menit` },
+    { label: 'Rerata Tunggu', key: 'rata_rata_waktu_tunggu', render: (r) => `${r.rata_rata_waktu_tunggu} Menit` },
     { label: 'Hasil', key: 'hasil', render: (r) => `${r.hasil}%` }
   ],
   fields: [
@@ -39,10 +39,10 @@ export default createGenericIndicatorPage({
       </div>
       <div class="summary-item">
         <div class="summary-value">${s.total_waktu_tunggu_lt_60 || 0}</div>
-        <div class="summary-label">Total Tunggu < 60m</div>
+        <div class="summary-label">Total Tunggu < 60 Menit</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">${s.rata_rata_waktu_tunggu || 0} m</div>
+        <div class="summary-value">${s.rata_rata_waktu_tunggu || 0} Menit</div>
         <div class="summary-label">Rata-rata Waktu Tunggu</div>
       </div>
       <div class="summary-item">

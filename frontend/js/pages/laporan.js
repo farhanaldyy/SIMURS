@@ -89,6 +89,13 @@ const serviceToHash = {
   'Waktu Tunggu Poliklinik': '#/waktu-tunggu-poliklinik',
   'Waktu Tunggu Operasi Elektif': '#/waktu-tunggu-operasi-elektif',
 
+  // Rehabilitasi Medis
+  'Kejadian drop out pasien terhadap pelayanan rehabilitasi medik yang direncanakan': '#/rehab-drop-out',
+  'Tidak adanya kejadian kesalahan tindakan rehabilitasi medik': '#/rehab-kesalahan-tindakan',
+  'Waktu tunggu pelayanan rawat jalan rehabilitasi medik': '#/rehab-waktu-tunggu',
+  'Kepatuhan identitas pasien': '#/rehab-kepatuhan-identitas',
+  'Kepuasan pasien dengan pelayanan rehabilitasi medik': '#/rehab-kepuasan-pasien',
+
   // Laundry
   'Ketepatan Waktu Penyediaan Linen Bersih': '#/laundry-ketepatan-linen',
   'Tidak Adanya Kejadian Linen Hilang': '#/laundry-linen-hilang',
@@ -99,6 +106,16 @@ const serviceToHash = {
   'Kejadian Foto Ulang Pasien': '#/radiologi-foto-ulang',
   'Kelengkapan pengisian form pemberian info tindakan radiologi': '#/radiologi-info-tindakan',
   'Kepatuhan Identifikasi Pasien (Radiologi)': '#/radiologi-identifikasi-pasien',
+
+  // Laboratorium
+  'Jadwal Dokter Laboratorium': '#/laboratorium-jadwal-dokter',
+  'Waktu tunggu hasil pemeriksaan laboratorium (< 140 Menit)': '#/laboratorium-waktu-tunggu-lt-140',
+  'Waktu tunggu hasil pemeriksaan laboratorium (> 140 Menit)': '#/laboratorium-waktu-tunggu-gt-140',
+  'Pelaporan hasil kritis laboratorium  ≤ 30 menit': '#/laboratorium-hasil-kritis',
+  'Tidak adanya kesalahan hasil input pemeriksaan lab': '#/laboratorium-kesalahan-input',
+  'Tidak adanya kerusakan sampel di laboratorium': '#/laboratorium-kerusakan-sampel',
+  'Kepatuhan Identifikasi Pasien Laboratorium': '#/laboratorium-kepatuhan-identifikasi',
+  'Data Ekspertisi Oleh Dokter Laboratorium': '#/laboratorium-ekspertisi-dokter',
 
   // Farmasi
   'Kepatuhan Pelaksanaan Double Check Obat High Alert': '#/mutu-farmasi',

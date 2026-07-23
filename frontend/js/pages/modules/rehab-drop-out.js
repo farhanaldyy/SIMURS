@@ -36,8 +36,8 @@ export default createGenericIndicatorPage({
         <div class="summary-label">Rata-rata Hasil</div>
       </div>
       <div class="summary-item">
-        ${renderBadge(s.persen || 0, s.standar || '≥ 50%')}
-        <div class="summary-label" style="margin-top:8px">Standar: ${s.standar || '≥ 50%'}</div>
+        ${renderBadge(s.persen || 0, s.standar || '≤ 50%')}
+        <div class="summary-label" style="margin-top:8px">Standar: ${s.standar || '≤ 50%'}</div>
       </div>
     `;
   }

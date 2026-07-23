@@ -7,6 +7,32 @@ import { api } from '../../api/client.js';
 import Store from '../../store.js';
 import { getUnits } from '../../api/master.js';
 
+function formatTimeSimrs(timeStr) {
+  if (!timeStr) return '-';
+  if (timeStr instanceof Date) {
+    return `${String(timeStr.getUTCHours()).padStart(2, '0')}:${String(timeStr.getUTCMinutes()).padStart(2, '0')}`;
+  }
+  const str = String(timeStr).trim();
+  if (str.includes('T')) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+    }
+  }
+
+  const ampmMatch = str.match(/^(\d{1,2})[:.](\d{2})(?:[:.]\d{2})?\s*(AM|PM)$/i);
+  if (ampmMatch) {
+    let h = parseInt(ampmMatch[1], 10);
+    const m = parseInt(ampmMatch[2], 10);
+    const period = ampmMatch[3].toUpperCase();
+    if (period === 'PM' && h < 12) h += 12;
+    else if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+
+  return str.substring(0, 5);
+}
+
 const page = createGenericIndicatorPage({
   title: 'Response Time SIMRS IT',
   subtitle: 'Pelaporan dan evaluasi kecepatan penanganan masalah IT SIMRS',
@@ -122,8 +148,8 @@ const page = createGenericIndicatorPage({
     { label: 'Tanggal', key: 'tanggal', render: (r) => formatDate(r.tanggal) },
     { label: 'Unit Diperbaiki', key: 'unit_diperbaiki', render: (r) => r.unit_diperbaiki || '-' },
     { label: 'Permasalahan', key: 'permasalahan' },
-    { label: 'Jam Laporan', key: 'jam_laporan', render: (r) => formatTime(r.jam_laporan) },
-    { label: 'Jam Tindakan', key: 'jam_tindakan', render: (r) => formatTime(r.jam_tindakan) },
+    { label: 'Jam Laporan', key: 'jam_laporan', render: (r) => formatTimeSimrs(r.jam_laporan) },
+    { label: 'Jam Tindakan', key: 'jam_tindakan', render: (r) => formatTimeSimrs(r.jam_tindakan) },
     { label: 'Response Time', key: 'response_time_menit', render: (r) => `<strong>${r.response_time_menit || 0}</strong> Mnt` },
     { 
       label: 'Status', 
@@ -204,7 +230,41 @@ const page = createGenericIndicatorPage({
       required: true,
       row: 3,
       render: (val) => {
-        const formatted = val ? formatTime(val) : '';
+        const formatted = val ? formatTimeSimrs(val) : '';
+        const timeStr = formatted === '-' ? '' : formatted;
+        const hVal = timeStr.includes(':') ? timeStr.split(':')[0] : '';
+        const mVal = timeStr.includes(':') ? timeStr.split(':')[1] : '';
+        
+        return `
+          <div class="form-group">
+            <label class="form-label">Jam Laporan (HH:MM) <span class="required">*</span></label>
+            <div style="display: flex; gap: 8px;">
+              <select id="laporan_hour" class="form-control" style="flex: 1;">
+                <option value="">Jam</option>
+                ${Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => `
+                  <option value="${h}" ${hVal === h ? 'selected' : ''}>${h}</option>
+                `).join('')}
+              </select>
+              <select id="laporan_minute" class="form-control" style="flex: 1;">
+                <option value="">Menit</option>
+                ${Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => `
+                  <option value="${m}" ${mVal === m ? 'selected' : ''}>${m}</option>
+                `).join('')}
+              </select>
+            </div>
+            <input type="hidden" name="jam_laporan" id="jam_laporan" value="${timeStr}">
+          </div>
+        `;
+      }
+    },
+    {
+      name: 'jam_tindakan',
+      label: 'Jam Tindakan (HH:MM)',
+      type: 'custom',
+      required: true,
+      row: 3,
+      render: (val) => {
+        const formatted = val ? formatTimeSimrs(val) : '';
         const timeStr = formatted === '-' ? '' : formatted;
         const hVal = timeStr.includes(':') ? timeStr.split(':')[0] : '';
         const mVal = timeStr.includes(':') ? timeStr.split(':')[1] : '';
