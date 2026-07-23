@@ -79,8 +79,42 @@ async function getSummary(where) {
   const total = data.length;
   const byJenis = {};
   data.forEach(d => { byJenis[d.jenis_insiden] = (byJenis[d.jenis_insiden] || 0) + 1; });
+
+  const pId = parseInt(where.periode_id || 0);
+  const uId = parseInt(where.unit_id || 0);
+  const summary = await prisma.periodeInsidenSummary.findFirst({
+    where: { periode_id: pId, unit_id: uId }
+  });
+
+  const denominator = summary ? summary.total_pasien : 0;
   const persen = total === 0 ? 100 : 0;
-  return { total, byJenis, persen, standar: '0%' };
+  return { total, byJenis, denominator, persen, standar: '0%' };
 }
 
-module.exports = { getAll, create, update, remove, getSummary };
+async function getSummaryData(periodeId, unitId) {
+  const pId = parseInt(periodeId || 0);
+  const uId = parseInt(unitId || 0);
+  let summary = await prisma.periodeInsidenSummary.findFirst({
+    where: { periode_id: pId, unit_id: uId }
+  });
+  if (!summary) {
+    summary = { periode_id: pId, unit_id: uId, total_pasien: 0 };
+  }
+  return summary;
+}
+
+async function upsertSummaryData(periodeId, unitId, body) {
+  const pId = parseInt(periodeId || 0);
+  const uId = parseInt(unitId || 0);
+  const totalPasien = parseInt(body.total_pasien || 0);
+
+  return prisma.periodeInsidenSummary.upsert({
+    where: {
+      periode_id_unit_id: { periode_id: pId, unit_id: uId }
+    },
+    update: { total_pasien: totalPasien },
+    create: { periode_id: pId, unit_id: uId, total_pasien: totalPasien }
+  });
+}
+
+module.exports = { getAll, create, update, remove, getSummary, getSummaryData, upsertSummaryData };

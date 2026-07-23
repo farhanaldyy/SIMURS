@@ -171,11 +171,12 @@ function createGenericService(modelName, options = {}) {
       if (options.ignoreUnitId) {
         delete queryWhere.unit_id;
       }
-      const data = await model.findMany({ where: queryWhere });
       if (options.calculateSummary) {
+        const data = await model.findMany({ where: queryWhere });
         return options.calculateSummary(data, queryWhere);
       }
-      return { total: data.length, numerator: data.length, persen: 100, standar: '100%' };
+      const total = await model.count({ where: queryWhere });
+      return { total, numerator: total, persen: 100, standar: '100%' };
     }
   };
 }

@@ -100,13 +100,20 @@ async function loadDashboard() {
 
   if (!pid) return;
 
-  let url = `/dashboard/indicator-summaries?periode_id=${pid}`;
-  if (uid) url += `&unit_id=${uid}`;
+  const cacheKey = `${pid}_${uid || 'all'}`;
+  let data = null;
 
-  const res = await api.get(url);
-  if (!res.success) return;
+  if (Store.indicatorSummariesCache && Store.indicatorSummariesCache.key === cacheKey) {
+    data = Store.indicatorSummariesCache.data;
+  } else {
+    let url = `/dashboard/indicator-summaries?periode_id=${pid}`;
+    if (uid) url += `&unit_id=${uid}`;
 
-  const data = res.data;
+    const res = await api.get(url);
+    if (!res.success) return;
+    data = res.data;
+    Store.indicatorSummariesCache = { key: cacheKey, data };
+  }
   
   let tercapaiCount = 0;
   let tidakTercapaiCount = 0;

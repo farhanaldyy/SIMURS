@@ -84,10 +84,23 @@ const pageObj = createGenericIndicatorPage({
     { 
       label: 'Capaian', 
       render: (r) => {
-        if (!r.masterTindakan || !r.masterTindakan.nilai) return '<span style="color:var(--color-muted)">-</span>';
         const momentsCount = (r.momen_1 ? 1 : 0) + (r.momen_2 ? 1 : 0) + (r.momen_3 ? 1 : 0) + (r.momen_4 ? 1 : 0) + (r.momen_5 ? 1 : 0);
-        const score = Math.round((momentsCount / r.masterTindakan.nilai) * 100);
-        return `<strong>${score}%</strong> <span style="font-size: 0.8rem; color: var(--color-text-muted);">(${momentsCount}/${r.masterTindakan.nilai})</span>`;
+        const targetNilai = r.masterTindakan?.nilai || 0;
+
+        if (!r.tindakan || r.tindakan === 'missed') {
+          const denom = targetNilai || momentsCount || 1;
+          return `<strong>0%</strong> <span style="font-size: 0.8rem; color: var(--color-text-muted);">(0/${denom})</span>`;
+        }
+
+        if (!targetNilai) {
+          if (momentsCount > 0) {
+            return `<strong>100%</strong> <span style="font-size: 0.8rem; color: var(--color-text-muted);">(${momentsCount}/${momentsCount})</span>`;
+          }
+          return '<span style="color:var(--color-muted)">-</span>';
+        }
+
+        const score = Math.min(100, Math.round((momentsCount / targetNilai) * 100));
+        return `<strong>${score}%</strong> <span style="font-size: 0.8rem; color: var(--color-text-muted);">(${momentsCount}/${targetNilai})</span>`;
       }
     }
   ],
@@ -248,8 +261,8 @@ const pageObj = createGenericIndicatorPage({
         <div class="summary-label">Total Peluang (Opportunities)</div>
       </div>
       <div class="summary-item">
-        <div class="summary-value">${s.numerator || 0}</div>
-        <div class="summary-label">Patuh (N)</div>
+        <div class="summary-value">${s.numerator || 0} / ${s.denominator || 0}</div>
+        <div class="summary-label">Momen Sesuai (N/D)</div>
       </div>
       <div class="summary-item">
         <div class="summary-value">${s.persen || 0}%</div>

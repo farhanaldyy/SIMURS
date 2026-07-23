@@ -216,18 +216,17 @@ async function getIndicatorSummaries(req, res, next) {
     if (periode_id) queryWhere.periode_id = parseInt(periode_id);
     if (unit_id) queryWhere.unit_id = parseInt(unit_id);
 
-    const summaries = {};
-    for (const [name, cfg] of Object.entries(services)) {
-      const sw = { ...queryWhere, ...cfg.extraWhere };
-      if (cfg.service.ignoreUnitId) delete sw.unit_id;
-      
-      const sum = await cfg.service.getSummary(sw);
-      summaries[name] = {
-        ...sum,
-        category: cfg.category
-      };
-    }
+    const serviceEntries = Object.entries(services);
+    const results = await Promise.all(
+      serviceEntries.map(async ([name, cfg]) => {
+        const sw = { ...queryWhere, ...cfg.extraWhere };
+        if (cfg.service.ignoreUnitId) delete sw.unit_id;
+        const sum = await cfg.service.getSummary(sw);
+        return [name, { ...sum, category: cfg.category }];
+      })
+    );
 
+    const summaries = Object.fromEntries(results);
     res.json({ success: true, data: summaries });
   } catch (err) { next(err); }
 }

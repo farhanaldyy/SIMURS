@@ -34,12 +34,20 @@ async function loadData() {
     return;
   }
 
+  const cacheKey = `${pid}_${uid || 'all'}`;
+  if (Store.indicatorSummariesCache && Store.indicatorSummariesCache.key === cacheKey) {
+    state.summaries = Store.indicatorSummariesCache.data;
+    renderReportTable();
+    return;
+  }
+
   let url = `/dashboard/indicator-summaries?periode_id=${pid}`;
   if (uid) url += `&unit_id=${uid}`;
 
   const res = await api.get(url);
   if (res.success) {
     state.summaries = res.data;
+    Store.indicatorSummariesCache = { key: cacheKey, data: res.data };
     renderReportTable();
   }
 }

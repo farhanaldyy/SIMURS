@@ -5,7 +5,16 @@ export default createGenericIndicatorPage({
   title: 'Angka Kematian Ranap',
   subtitle: 'Pencatatan kasus kematian pasien rawat inap',
   endpoint: '/angka-kematian-ranap',
-  metricType: 'count',
+  metricType: 'compliance',
+  numeratorLabel: 'Jumlah Kematian (N)',
+  denominatorLabel: 'Total Pasien Ranap (D)',
+  hasSummaryData: true,
+  summaryDataTitle: 'Parameter Populasi Pasien Rawat Inap',
+  summaryDataInfo: 'Masukkan total populasi/jumlah seluruh pasien rawat inap yang dirawat pada periode & unit ini sebagai denominator (D) rasio angka kematian rawat inap.',
+  summaryDataModalTitle: 'Update Parameter Total Pasien Rawat Inap',
+  summaryDataFields: [
+    { name: 'total_pasien', label: 'Total Pasien Rawat Inap', type: 'number', unit: 'Pasien' }
+  ],
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },

@@ -9,7 +9,7 @@ import { renderBadge } from '../../components/indicator-badge.js';
 import { validateRequired, showFormErrors, validateForm } from '../../utils/validator.js';
 import { formatDate, formatTime } from '../../utils/formatter.js';
 
-let state = { data: [], page: 1, limit: 10, total: 0, summary: {} };
+let state = { data: [], page: 1, limit: 10, total: 0, summary: {}, summaryData: null };
 
 export async function render(container) {
   container.innerHTML = `
@@ -18,6 +18,7 @@ export async function render(container) {
         <div><h1 class="page-title">Insiden Keselamatan Pasien</h1><p class="page-subtitle">Pencatatan insiden keselamatan pasien</p></div>
         <button class="btn btn-primary" id="btn-add">+ Tambah Data</button>
       </div>
+      <div id="summary-data-container"></div>
       <div id="table-container"></div>
       <div id="pagination-container"></div>
       <div class="summary-box" id="summary-container"></div>
@@ -34,9 +35,104 @@ async function loadData() {
   if (Store.periodeAktif) params.periode_id = Store.periodeAktif.id;
   if (Store.unitAktif) params.unit_id = Store.unitAktif.id;
 
-  const [listRes, summaryRes] = await Promise.all([api.getAll(params), api.getSummary(params)]);
-  if (listRes.success) { state.data = listRes.data; state.total = listRes.meta.total; renderDataTable(); renderPagination('pagination-container', state.total, state.page, state.limit, (p) => { state.page = p; loadData(); }); }
-  if (summaryRes.success) { state.summary = summaryRes.data; renderSummary(); }
+  const promises = [
+    api.getAll(params),
+    api.getSummary(params)
+  ];
+
+  if (Store.periodeAktif) {
+    const summaryParams = { periode_id: Store.periodeAktif.id };
+    if (Store.unitAktif) summaryParams.unit_id = Store.unitAktif.id;
+    promises.push(api.getSummaryData(summaryParams));
+  }
+
+  const results = await Promise.all(promises);
+  const listRes = results[0];
+  const summaryRes = results[1];
+  const summaryDataRes = results[2];
+
+  if (listRes.success) {
+    state.data = listRes.data;
+    state.total = listRes.meta.total;
+    renderDataTable();
+    renderPagination('pagination-container', state.total, state.page, state.limit, (p) => {
+      state.page = p;
+      loadData();
+    });
+  }
+
+  if (summaryRes.success) {
+    state.summary = summaryRes.data;
+    renderSummary();
+  }
+
+  if (summaryDataRes && summaryDataRes.success) {
+    state.summaryData = summaryDataRes.data;
+    renderSummaryDataCard();
+  }
+}
+
+function renderSummaryDataCard() {
+  const container = document.getElementById('summary-data-container');
+  if (!container || !state.summaryData) return;
+
+  const totalPasien = state.summaryData.total_pasien !== undefined ? state.summaryData.total_pasien : 0;
+
+  container.innerHTML = `
+    <div class="summary-data-compact-card">
+      <div class="card-main-row">
+        <div style="display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-text);">📋 Parameter Populasi Pasien</div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 1rem; color: var(--color-primary);">⚙️</span>
+            <span style="color: var(--color-text-secondary); font-weight: 500; font-size: 0.85rem;">Total Data Pasien:</span>
+            <span style="font-weight: 700; font-size: 1rem; color: var(--color-text);">${totalPasien} Pasien</span>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btn-edit-summary-data" style="padding: 4px 10px; font-size: 0.8rem;">Edit Parameter</button>
+      </div>
+      <div class="card-info-row">
+        ℹ️ Masukkan total populasi/jumlah data seluruh pasien yang dirawat atau dilayani pada periode & unit ini sebagai denominator (D) rasio insiden keselamatan pasien.
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-edit-summary-data').addEventListener('click', openSummaryDataModal);
+}
+
+function openSummaryDataModal() {
+  const currentVal = state.summaryData?.total_pasien !== undefined ? state.summaryData.total_pasien : 0;
+  showModal('Update Parameter Total Data Pasien', `
+    <form id="summary-data-form">
+      <div class="form-group">
+        <label class="form-label">Total Data Pasien (Pasien) <span class="required">*</span></label>
+        <input type="number" name="total_pasien" class="form-control" value="${currentVal}" min="0" required>
+      </div>
+    </form>
+  `, {
+    confirmText: 'Simpan',
+    onConfirm: async () => {
+      const form = document.getElementById('summary-data-form');
+      const formData = Object.fromEntries(new FormData(form));
+      const totalPasien = parseInt(formData.total_pasien || 0);
+
+      const payload = {
+        periode_id: Store.periodeAktif.id,
+        total_pasien: totalPasien
+      };
+      if (Store.unitAktif) payload.unit_id = Store.unitAktif.id;
+      else if (Store.user && Store.user.unit_id) payload.unit_id = Store.user.unit_id;
+
+      const res = await api.upsertSummaryData(payload);
+      if (res.success) {
+        showToast('Parameter berhasil disimpan', 'success');
+        closeModal();
+        loadData();
+      } else {
+        showToast(res.message || 'Gagal menyimpan', 'error');
+      }
+    }
+  });
 }
 
 function renderDataTable() {
@@ -61,11 +157,14 @@ function renderSummary() {
   const container = document.getElementById('summary-container');
   if (!container) return;
   const byJenis = s.byJenis || {};
+  const denominator = s.denominator !== undefined ? s.denominator : 0;
+
   container.innerHTML = `
     <div class="summary-item"><div class="summary-value">${s.total || 0}</div><div class="summary-label">Total Insiden</div></div>
     <div class="summary-item"><div class="summary-value">${byJenis.KTD || 0}</div><div class="summary-label">KTD</div></div>
     <div class="summary-item"><div class="summary-value">${byJenis.KNC || 0}</div><div class="summary-label">KNC</div></div>
     <div class="summary-item"><div class="summary-value">${byJenis.Sentinel || 0}</div><div class="summary-label">Sentinel</div></div>
+    <div class="summary-item"><div class="summary-value">${denominator}</div><div class="summary-label">Total Pasien (D)</div></div>
     <div class="summary-item">${renderBadge(s.persen || 0, 100)}<div class="summary-label" style="margin-top:8px">Standar: ${s.standar}</div></div>
   `;
 }

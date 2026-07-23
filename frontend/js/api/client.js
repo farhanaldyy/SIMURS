@@ -4,12 +4,12 @@ import { showToast } from '../components/toast.js';
 
 const BASE_URL = '/api';
 
-export async function apiCall(method, endpoint, body = null) {
+export async function apiCall(method, endpoint, body = null, optionsOverrides = {}) {
   const headers = { 'Content-Type': 'application/json' };
   const token = Store.get('token');
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const options = { method, headers, credentials: 'include' };
+  const options = { method, headers, credentials: 'include', ...optionsOverrides };
   if (body && method !== 'GET') {
     options.body = JSON.stringify(body);
   }
@@ -31,8 +31,15 @@ export async function apiCall(method, endpoint, body = null) {
       return { success: false, message: 'Sesi berakhir. Silakan login kembali.' };
     }
 
-    return res.json();
+    const data = await res.json();
+    if (data.success && method !== 'GET') {
+      Store.clearSummaryCache();
+    }
+    return data;
   } catch (err) {
+    if (err.name === 'AbortError') {
+      return { success: false, message: 'Request dibatalkan' };
+    }
     console.error('API Error:', err);
     showToast('Gagal terhubung ke server', 'error');
     return { success: false, message: 'Network error' };

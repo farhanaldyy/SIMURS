@@ -95,17 +95,56 @@ async function remove(id, userId) {
 }
 
 async function getSummary(where) {
-  const data = await prisma.kepatuhanKebersihanTangan.findMany({ where });
+  const data = await prisma.kepatuhanKebersihanTangan.findMany({ 
+    where,
+    include: { masterTindakan: true }
+  });
   const total = data.length;
 
-  // Numerator: count where action is 'hr', 'hw', or 'hr_hw' (compliant)
-  const compliantCount = data.filter(d => d.tindakan === 'hr' || d.tindakan === 'hw' || d.tindakan === 'hr_hw').length;
-  const persen = total > 0 ? Math.round((compliantCount / total) * 100) : 0;
+  if (total === 0) {
+    return {
+      total: 0,
+      numerator: 0,
+      denominator: 0,
+      persen: 0,
+      standar: '≥ 85%',
+      category: 'Keselamatan Pasien'
+    };
+  }
+
+  let sumCapaian = 0;
+  let totalMomentsDone = 0;
+  let totalTargetMoments = 0;
+
+  data.forEach(d => {
+    const target = (d.masterTindakan && d.masterTindakan.nilai > 0) ? d.masterTindakan.nilai : 0;
+    const momentsCount = (d.momen_1 ? 1 : 0) + (d.momen_2 ? 1 : 0) + (d.momen_3 ? 1 : 0) + (d.momen_4 ? 1 : 0) + (d.momen_5 ? 1 : 0);
+
+    let score = 0;
+    if (d.tindakan && d.tindakan !== 'missed') {
+      if (target > 0) {
+        score = Math.min(100, Math.round((momentsCount / target) * 100));
+        totalMomentsDone += momentsCount;
+        totalTargetMoments += target;
+      } else {
+        score = momentsCount > 0 ? 100 : 0;
+        totalMomentsDone += momentsCount;
+        totalTargetMoments += momentsCount;
+      }
+    } else {
+      if (target > 0) {
+        totalTargetMoments += target;
+      }
+    }
+    sumCapaian += score;
+  });
+
+  const persen = Math.round(sumCapaian / total);
 
   return {
     total,
-    numerator: compliantCount,
-    denominator: total,
+    numerator: totalMomentsDone,
+    denominator: totalTargetMoments || total,
     persen,
     standar: '≥ 85%',
     category: 'Keselamatan Pasien'

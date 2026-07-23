@@ -25,7 +25,9 @@ export function createGenericIndicatorPage(config) {
     ];
 
     if (config.hasSummaryData && Store.periodeAktif) {
-      promises.push(api.get(`${endpoint}/summary-data?periode_id=${Store.periodeAktif.id}`));
+      let summaryDataUrl = `${endpoint}/summary-data?periode_id=${Store.periodeAktif.id}`;
+      if (Store.unitAktif && !config.ignoreUnit) summaryDataUrl += `&unit_id=${Store.unitAktif.id}`;
+      promises.push(api.get(summaryDataUrl));
     }
 
     try {
@@ -160,32 +162,30 @@ export function createGenericIndicatorPage(config) {
       const val = state.summaryData[f.name] !== undefined ? state.summaryData[f.name] : 0;
       const unit = f.unit ? ` ${f.unit}` : '';
       return `
-        <div style="margin-right: 24px; display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.1rem; color: var(--primary-color, #2563eb);">⚙️</span>
-          <div>
-            <span style="color: var(--text-muted, #64748b); font-weight: 500; font-size: 0.9rem;">${f.label}:</span>
-            <span style="font-weight: 700; font-size: 1.1rem; margin-left: 6px; color: var(--text-color, #1e293b);">${val}${unit}</span>
-          </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 1rem; color: var(--color-primary);">⚙️</span>
+          <span style="color: var(--color-text-secondary); font-weight: 500; font-size: 0.85rem;">${f.label}:</span>
+          <span style="font-weight: 700; font-size: 1rem; color: var(--color-text);">${val}${unit}</span>
         </div>
       `;
     }).join('');
 
     const titleHTML = config.summaryDataTitle 
-      ? `<div style="font-size: 1rem; margin-right: 24px; font-weight: 600; color: var(--text-color, #1e293b);">📋 ${config.summaryDataTitle}</div>`
+      ? `<div style="font-size: 0.95rem; font-weight: 600; color: var(--color-text);">📋 ${config.summaryDataTitle}</div>`
       : '';
 
     const infoHTML = config.summaryDataInfo
-      ? `<div style="font-size: 0.85rem; color: var(--text-muted, #64748b); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-color, #e2e8f0);">ℹ️ ${config.summaryDataInfo}</div>`
+      ? `<div class="card-info-row">ℹ️ ${config.summaryDataInfo}</div>`
       : '';
 
     container.innerHTML = `
-      <div class="card" style="margin-bottom: 16px; padding: 14px 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <div style="display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div class="summary-data-compact-card">
+        <div class="card-main-row">
+          <div style="display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 16px;">
             ${titleHTML}
             ${fieldsHTML}
           </div>
-          <button class="btn btn-outline btn-sm" id="btn-edit-summary-data">Edit Parameter</button>
+          <button class="btn btn-outline btn-sm" id="btn-edit-summary-data" style="padding: 4px 10px; font-size: 0.8rem;">Edit Parameter</button>
         </div>
         ${infoHTML}
       </div>
@@ -217,6 +217,11 @@ export function createGenericIndicatorPage(config) {
           formData[k] = parseInt(formData[k]);
         }
         formData.periode_id = Store.periodeAktif.id;
+        if (Store.unitAktif && !config.ignoreUnit) {
+          formData.unit_id = Store.unitAktif.id;
+        } else if (Store.user && Store.user.unit_id && !config.ignoreUnit) {
+          formData.unit_id = Store.user.unit_id;
+        }
 
         const res = await api.post(`${endpoint}/summary-data`, formData);
         if (res.success) {

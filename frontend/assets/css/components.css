@@ -506,32 +506,64 @@ textarea.form-control {
 /* ===== SUMMARY BOX ===== */
 .summary-box {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-md);
-  margin-top: var(--space-lg);
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .summary-item {
   background: var(--color-bg-card);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
   box-shadow: var(--shadow-sm);
   text-align: center;
-  border-top: 3px solid var(--color-primary);
+  border-top: 2.5px solid var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .summary-value {
-  font-size: var(--font-size-2xl);
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-text);
+  line-height: 1.25;
 }
 
 .summary-label {
-  font-size: var(--font-size-xs);
+  font-size: 0.72rem;
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 4px;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+
+/* ===== COMPACT PARAMETER CARD ===== */
+.summary-data-compact-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-data-compact-card .card-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.summary-data-compact-card .card-info-row {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px dashed var(--color-border);
 }
 
 /* ===== EMPTY STATE ===== */

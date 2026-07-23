@@ -6,14 +6,15 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "prisma:generate": "npx prisma generate",
-    "prisma:push": "npx prisma db push",
+    "prisma:generate": "npx prisma generate --schema=src/prisma/schema.prisma",
+    "prisma:push": "npx prisma db push --schema=src/prisma/schema.prisma",
     "prisma:seed": "node src/prisma/seed.js",
     "prisma:studio": "npx prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "bcryptjs": "^3.0.2",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

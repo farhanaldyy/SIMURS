@@ -127,39 +127,44 @@ async function exportExcel(req, res, next) {
     const wb = XLSX.utils.book_new();
 
     // 1. Generate Summary Ringkasan sheet
-    const summaryRows = [];
-    for (const [name, cfg] of Object.entries(services)) {
-      const sw = { ...queryWhere, ...cfg.extraWhere };
-      const sum = await cfg.service.getSummary(sw);
-      
-      let hasil = `${sum.persen || 0}%`;
-      if (sum.rataRata !== undefined) hasil = sum.rataRata;
-      else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name === 'Insiden Keselamatan') {
-        hasil = sum.total;
-      }
+    const serviceEntries = Object.entries(services);
+    const summaryRows = await Promise.all(
+      serviceEntries.map(async ([name, cfg]) => {
+        const sw = { ...queryWhere, ...cfg.extraWhere };
+        const sum = await cfg.service.getSummary(sw);
+        
+        let hasil = `${sum.persen || 0}%`;
+        if (sum.rataRata !== undefined) hasil = sum.rataRata;
+        else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name === 'Insiden Keselamatan') {
+          hasil = sum.total;
+        }
 
-      summaryRows.push({
-        'Kategori': cfg.category,
-        'Indikator Mutu': name,
-        'Target': sum.standar,
-        'Pencapaian': hasil,
-        'Total Data': sum.total || 0
-      });
-    }
+        return {
+          'Kategori': cfg.category,
+          'Indikator Mutu': name,
+          'Target': sum.standar,
+          'Pencapaian': hasil,
+          'Total Data': sum.total || 0
+        };
+      })
+    );
     const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
     XLSX.utils.book_append_sheet(wb, wsSummary, 'Ringkasan Mutu');
 
-    // 2. Generate detailed sheets for each indicator
-    for (const [name, cfg] of Object.entries(services)) {
-      const sw = { ...queryWhere, ...cfg.extraWhere };
-      if (cfg.service.ignoreUnitId) {
-        delete sw.unit_id;
-      }
-      if (cfg.table === 'mutuFarmasiKesalahanObat') {
-        delete sw.tipe;
-      }
-      
-      const records = await prisma[cfg.table].findMany({ where: sw });
+    // 2. Fetch all detailed records concurrently
+    const detailedSheetEntries = await Promise.all(
+      Object.entries(services).map(async ([name, cfg]) => {
+        const sw = { ...queryWhere, ...cfg.extraWhere };
+        if (cfg.service.ignoreUnitId) delete sw.unit_id;
+        if (cfg.table === 'mutuFarmasiKesalahanObat') delete sw.tipe;
+        const records = await prisma[cfg.table].findMany({ where: sw });
+        return { name, cfg, records };
+      })
+    );
+
+    // 3. Generate detailed sheets for each indicator
+    for (const { name, cfg, records } of detailedSheetEntries) {
+      if (!records || records.length === 0) continue;
       
       // Map records to readable objects
       const rows = records.map((r, idx) => {

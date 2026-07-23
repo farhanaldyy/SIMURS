@@ -5,6 +5,15 @@ export default createGenericIndicatorPage({
   subtitle: 'Kepatuhan verifikasi ganda pemberian obat kewaspadaan tinggi (High Alert)',
   endpoint: '/double-check-high-alert',
   metricType: 'compliance',
+  numeratorLabel: 'Patuh Double Check (N)',
+  denominatorLabel: 'Total Pasien High Alert (D)',
+  hasSummaryData: true,
+  summaryDataTitle: 'Parameter Populasi Pasien High Alert',
+  summaryDataInfo: 'Masukkan total seluruh populasi/jumlah data pasien yang menerima obat High Alert dalam periode & unit ini sebagai denominator (D) kepatuhan verifikasi ganda.',
+  summaryDataModalTitle: 'Update Parameter Total Pasien High Alert',
+  summaryDataFields: [
+    { name: 'total_pasien_high_alert', label: 'Total Pasien High Alert', type: 'number', unit: 'Pasien' }
+  ],
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },

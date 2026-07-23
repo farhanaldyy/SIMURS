@@ -16,13 +16,13 @@ export function formatDateShort(dateStr) {
 export function formatTime(timeStr) {
   if (!timeStr) return '-';
   if (timeStr instanceof Date) {
-    return `${String(timeStr.getHours()).padStart(2, '0')}:${String(timeStr.getMinutes()).padStart(2, '0')}`;
+    return `${String(timeStr.getUTCHours()).padStart(2, '0')}:${String(timeStr.getUTCMinutes()).padStart(2, '0')}`;
   }
   const str = String(timeStr);
   if (str.includes('T')) {
     const d = new Date(str);
     if (!isNaN(d.getTime())) {
-      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
     }
   }
   return str.substring(0, 5);

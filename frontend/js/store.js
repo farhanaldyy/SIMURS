@@ -6,9 +6,17 @@ const Store = {
   token: null,
   periodeList: [],
   unitList: [],
+  indicatorSummariesCache: null,
+
+  clearSummaryCache() {
+    this.indicatorSummariesCache = null;
+  },
 
   set(key, value) {
     this[key] = value;
+    if (key === 'periodeAktif' || key === 'unitAktif') {
+      this.clearSummaryCache();
+    }
     if (key === 'token') {
       if (value) sessionStorage.setItem('simurs_token', value);
       else sessionStorage.removeItem('simurs_token');
