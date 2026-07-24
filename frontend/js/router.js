@@ -6,6 +6,7 @@ const routes = {
   '#/login':                      { module: () => import('./pages/login.js'), title: 'Login' },
   '#/dashboard':                  { module: () => import('./pages/dashboard.js'), title: 'Dashboard' },
   '#/laporan':                    { module: () => import('./pages/laporan.js'), title: 'Cetak Laporan' },
+  '#/rekap-mutu':                 { module: () => import('./pages/modules/rekap-mutu.js'), title: 'Rekap Data Mutu' },
   '#/modul':                      { module: () => import('./pages/modul-grid.js'), title: 'Daftar Modul' },
   
   // Keselamatan Pasien
@@ -157,14 +158,14 @@ async function handleRoute(contentContainer) {
   if (hash === '#/login') {
     // login is always accessible
   } else if (role === 'petugas') {
-    // petugas can only access login, laporan, modul, and their allowed modules (specifically block dashboard and admin)
-    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && hash !== '#/modul' && !allowed.includes(hash))) {
+    // petugas can only access login, laporan, rekap-mutu, modul, and their allowed modules (specifically block dashboard and admin)
+    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && hash !== '#/rekap-mutu' && hash !== '#/modul' && !allowed.includes(hash))) {
       renderAccessDenied(contentContainer);
       return;
     }
   } else if (role === 'pic_mutu') {
-    // pic_mutu can access dashboard, laporan, master-tindakan, modul, and their allowed modules
-    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/master-tindakan' || hash === '#/modul';
+    // pic_mutu can access dashboard, laporan, rekap-mutu, master-tindakan, modul, and their allowed modules
+    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/rekap-mutu' || hash === '#/master-tindakan' || hash === '#/modul';
     if (!isGeneralRoute && !allowed.includes(hash)) {
       renderAccessDenied(contentContainer);
       return;

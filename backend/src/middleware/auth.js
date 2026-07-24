@@ -2,7 +2,12 @@ const jwt = require('jsonwebtoken');
 
 function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  let token = authHeader && authHeader.split(' ')[1];
+
+  // Fallback to query parameter token (for direct window/link downloads)
+  if (!token && req.query && req.query.token) {
+    token = req.query.token;
+  }
 
   if (!token) {
     return res.status(401).json({ success: false, message: 'Token tidak ditemukan' });

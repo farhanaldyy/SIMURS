@@ -5,6 +5,7 @@ export const NAV_GROUPS = [
     items: [
       { label: 'Dashboard', hash: '#/dashboard' },
       { label: 'Cetak Laporan', hash: '#/laporan' },
+      { label: 'Rekap Data Mutu', hash: '#/rekap-mutu' },
       { label: 'Daftar Modul', hash: '#/modul' }
     ],
   },

@@ -17,6 +17,7 @@ router.use('/dashboard', require('./dashboard'));
 
 // Laporan / Reports
 router.use('/laporan', require('./laporan'));
+router.use('/rekap-mutu', require('./modules/rekap-mutu'));
 
 // Indicator modules (Phase 1)
 router.use('/risiko-jatuh', require('./modules/risiko-jatuh'));
