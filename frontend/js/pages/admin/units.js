@@ -21,6 +21,19 @@ function renderUnitTable() {
     { label: 'Nama Unit', key: 'nama_unit' },
     { label: 'Kode Unit', key: 'kode_unit' },
     {
+      label: 'Kategori Unit',
+      key: 'kategori_unit',
+      render: (r) => {
+        const cat = (r.kategori_unit || 'rawat_inap').toLowerCase();
+        if (cat === 'rawat_inap') return '<span class="badge" style="background:#dbeafe; color:#1e40af;">🛏️ Rawat Inap</span>';
+        if (cat === 'unit_khusus') return '<span class="badge" style="background:#fce7f3; color:#9d174d;">🏥 Unit Khusus</span>';
+        if (cat === 'igd') return '<span class="badge" style="background:#fee2e2; color:#991b1b;">🚨 IGD</span>';
+        if (cat === 'rawat_jalan') return '<span class="badge" style="background:#fef3c7; color:#92400e;">🚶 Rawat Jalan</span>';
+        if (cat === 'farmasi') return '<span class="badge" style="background:#f3e8ff; color:#6b21a8;">💊 Farmasi</span>';
+        return '<span class="badge" style="background:#f1f5f9; color:#475569;">🛠️ Penunjang</span>';
+      }
+    },
+    {
       label: 'Status',
       key: 'aktif',
       render: (r) => r.aktif 
@@ -67,6 +80,17 @@ function openUnitModal(unit = null) {
         <label class="form-label">Kode Unit <span class="required">*</span></label>
         <input type="text" name="kode_unit" class="form-control" value="${unit?.kode_unit || ''}" required placeholder="Contoh: igd" ${isEdit ? 'disabled' : ''}>
         <small class="form-text text-muted" style="display: block; margin-top: 4px; color: #6c757d;">Kode unik untuk modul unit (hanya huruf kecil/angka tanpa spasi).</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori Unit <span class="required">*</span></label>
+        <select name="kategori_unit" class="form-control" required>
+          <option value="rawat_inap" ${unit?.kategori_unit === 'rawat_inap' || !unit ? 'selected' : ''}>🛏️ Rawat Inap (Umum)</option>
+          <option value="unit_khusus" ${unit?.kategori_unit === 'unit_khusus' ? 'selected' : ''}>🏥 Unit Khusus (Annisa, Perinatologi, ICU, OK, HD)</option>
+          <option value="igd" ${unit?.kategori_unit === 'igd' ? 'selected' : ''}>🚨 IGD (Unit Gawat Darurat)</option>
+          <option value="rawat_jalan" ${unit?.kategori_unit === 'rawat_jalan' ? 'selected' : ''}>🚶 Rawat Jalan</option>
+          <option value="farmasi" ${unit?.kategori_unit === 'farmasi' ? 'selected' : ''}>💊 Farmasi</option>
+          <option value="penunjang" ${unit?.kategori_unit === 'penunjang' ? 'selected' : ''}>🛠️ Penunjang / Medis & Non-Medis</option>
+        </select>
       </div>
       ${isEdit ? `
         <div class="form-group">

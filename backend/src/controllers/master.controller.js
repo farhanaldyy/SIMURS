@@ -16,7 +16,7 @@ async function getUnits(req, res, next) {
 
 async function createUnit(req, res, next) {
   try {
-    const { nama_unit, kode_unit } = req.body;
+    const { nama_unit, kode_unit, kategori_unit } = req.body;
     if (!nama_unit || !kode_unit) {
       return res.status(400).json({ success: false, message: 'Nama unit dan kode unit wajib diisi' });
     }
@@ -24,6 +24,7 @@ async function createUnit(req, res, next) {
       data: {
         nama_unit: nama_unit.toUpperCase().trim(),
         kode_unit: kode_unit.toUpperCase().trim(),
+        kategori_unit: kategori_unit ? kategori_unit.toLowerCase().trim() : 'rawat_inap',
         aktif: true
       }
     });
@@ -39,12 +40,13 @@ async function createUnit(req, res, next) {
 async function updateUnit(req, res, next) {
   try {
     const id = parseInt(req.params.id);
-    const { nama_unit, kode_unit, aktif } = req.body;
+    const { nama_unit, kode_unit, kategori_unit, aktif } = req.body;
     const unit = await prisma.unit.update({
       where: { id },
       data: {
         nama_unit: nama_unit ? nama_unit.toUpperCase().trim() : undefined,
         kode_unit: kode_unit ? kode_unit.toUpperCase().trim() : undefined,
+        kategori_unit: kategori_unit ? kategori_unit.toLowerCase().trim() : undefined,
         aktif: aktif !== undefined ? (aktif === 'true' || aktif === true) : undefined
       }
     });

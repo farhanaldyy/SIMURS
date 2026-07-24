@@ -53,11 +53,12 @@ model User {
 }
 
 model Unit {
-  id         Int      @id @default(autoincrement())
-  nama_unit  String   @db.VarChar(100)
-  kode_unit  String   @unique @db.VarChar(20)
-  aktif      Boolean  @default(true)
-  created_at DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  nama_unit     String   @db.VarChar(100)
+  kode_unit     String   @unique @db.VarChar(20)
+  kategori_unit String   @default("rawat_inap") @db.VarChar(50)
+  aktif         Boolean  @default(true)
+  created_at    DateTime @default(now())
 
   users                   User[]
   giziWaktuMakanans       GiziWaktuMakanan[]

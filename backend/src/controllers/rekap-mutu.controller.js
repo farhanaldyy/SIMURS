@@ -2,12 +2,13 @@ const rekapService = require('../services/rekap-mutu.service');
 
 async function getRekapData(req, res, next) {
   try {
-    const { kategori, tahun, bulanAwal, bulanAkhir } = req.query;
+    const { kategori, tahun, bulanAwal, bulanAkhir, unitId } = req.query;
     const data = await rekapService.getRekapMutuData({
       kategori: kategori || 'rawat_inap',
       tahun: tahun || 2026,
       bulanAwal: bulanAwal || 1,
-      bulanAkhir: bulanAkhir || 3
+      bulanAkhir: bulanAkhir || 3,
+      unitId: unitId || 'all'
     });
 
     res.json({
@@ -21,12 +22,13 @@ async function getRekapData(req, res, next) {
 
 async function exportExcel(req, res, next) {
   try {
-    const { kategori, tahun, bulanAwal, bulanAkhir } = req.query;
+    const { kategori, tahun, bulanAwal, bulanAkhir, unitId } = req.query;
     const wb = await rekapService.exportRekapMutuExcel({
       kategori: kategori || 'rawat_inap',
       tahun: tahun || 2026,
       bulanAwal: bulanAwal || 1,
-      bulanAkhir: bulanAkhir || 3
+      bulanAkhir: bulanAkhir || 3,
+      unitId: unitId || 'all'
     });
 
     const filename = `Rekap_Data_Mutu_${kategori || 'rawat_inap'}_${tahun || 2026}.xlsx`;
