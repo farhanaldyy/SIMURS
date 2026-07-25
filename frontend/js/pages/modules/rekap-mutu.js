@@ -449,7 +449,7 @@ function renderMatrixTables(container, data) {
           Unit dalam kategori ini belum memiliki entri indikator mutu pada periode yang dipilih, atau modul transaksi indikator spesifik unit sedang dalam tahap pengumpulan data.
         </div>
         <div style="display: inline-flex; gap: 8px; justify-content: center;">
-          <a href="#admin-units" class="btn" style="background: #0284c7; color: white; border: none; padding: 4px 12px; font-size: 0.76rem; border-radius: 5px; text-decoration: none; font-weight: 600;">
+          <a href="#/admin/units" class="btn" style="background: #0284c7; color: white; border: none; padding: 4px 12px; font-size: 0.76rem; border-radius: 5px; text-decoration: none; font-weight: 600;">
             ⚙️ Kelola Master Unit
           </a>
         </div>

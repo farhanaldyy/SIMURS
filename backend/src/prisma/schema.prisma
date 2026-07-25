@@ -255,6 +255,18 @@ model PeriodeAngkaKematianRanapSummary {
   @@map("periode_angka_kematian_ranap_summary")
 }
 
+model PeriodeAngkaKematianIgdSummary {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int
+  unit_id      Int      @default(0)
+  total_pasien Int      @default(0)
+  updated_at   DateTime @updatedAt
+
+  @@unique([periode_id, unit_id])
+  @@map("periode_angka_kematian_igd_summary")
+}
+
+
 model DoubleCheckHighAlert {
   id            Int      @id @default(autoincrement())
   periode_id    Int
@@ -431,6 +443,18 @@ model PasienTertahanIgd {
   @@index([periode_id, unit_id])
   @@map("pasien_tertahan_igd")
 }
+
+model PeriodePasienTertahanIgdSummary {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int
+  unit_id      Int      @default(0)
+  total_pasien Int      @default(0)
+  updated_at   DateTime @updatedAt
+
+  @@unique([periode_id, unit_id])
+  @@map("periode_pasien_tertahan_igd_summary")
+}
+
 
 model GelangIdentitas {
   id               Int           @id @default(autoincrement())

@@ -5,7 +5,18 @@ export default createGenericIndicatorPage({
   title: 'Angka Kematian IGD',
   subtitle: 'Pencatatan kasus kematian pasien < 8 jam di IGD',
   endpoint: '/angka-kematian-igd',
-  metricType: 'count',
+  metricType: 'compliance',
+  numeratorLabel: 'Pasien Meninggal (N)',
+  denominatorLabel: 'Total Data Pasien IGD (D)',
+
+  hasSummaryData: true,
+  summaryDataTitle: 'Parameter Populasi Pasien IGD',
+  summaryDataInfo: 'Masukkan total populasi/jumlah data seluruh pasien IGD pada periode ini sebagai denominator (D) rasio angka kematian IGD.',
+  summaryDataModalTitle: 'Update Parameter Total Data Pasien IGD',
+  summaryDataFields: [
+    { name: 'total_pasien', label: 'Total Data Pasien IGD', type: 'number', unit: 'Pasien' }
+  ],
+
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },

@@ -3,9 +3,20 @@ import { formatTime } from '../../utils/formatter.js';
 
 export default createGenericIndicatorPage({
   title: 'Pasien Tertahan IGD',
-  subtitle: 'Waktu tunggu pasien di IGD sebelum dipindahkan ke ruangan (> 6 jam atau 240 menit)',
+  subtitle: 'Pencatatan data pasien tertahan di IGD',
   endpoint: '/pasien-tertahan-igd',
-  metricType: 'average',
+  metricType: 'compliance',
+  numeratorLabel: 'Pasien Tidak Tertahan (N)',
+  denominatorLabel: 'Total Data Pasien IGD (D)',
+
+
+  hasSummaryData: true,
+  summaryDataTitle: 'Parameter Populasi Pasien IGD',
+  summaryDataInfo: 'Masukkan total populasi/jumlah data seluruh pasien IGD yang perlu rawat inap pada periode ini sebagai denominator (D) rasio pasien tertahan IGD.',
+  summaryDataModalTitle: 'Update Parameter Total Data Pasien IGD',
+  summaryDataFields: [
+    { name: 'total_pasien', label: 'Total Data Pasien IGD', type: 'number', unit: 'Pasien' }
+  ],
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
@@ -14,7 +25,8 @@ export default createGenericIndicatorPage({
     { label: 'Waktu Tunggu', key: 'waktu_tunggu_menit', render: (r) => `${r.waktu_tunggu_menit} Menit` },
     { label: 'Keterangan', key: 'keterangan' }
   ],
-  rowClass: (r) => r.waktu_tunggu_menit <= 240 ? '' : 'row-danger',
+
+
   beforeSubmit(formData) {
     const form = document.getElementById('modul-form');
     if (!form) return;

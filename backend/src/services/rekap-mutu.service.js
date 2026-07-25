@@ -1,8 +1,10 @@
 const prisma = require('../config/database');
 const ExcelJS = require('exceljs');
 
-// Configuration for Rawat Inap Indicators matching modul-rekap-mutu-rwi.ods & user specifications
-const RAWAT_INAP_INDICATORS = [
+const { AVAILABLE_INDICATORS } = require('../config/indicators.config');
+
+// Master List of Indicator Configurations for Rekap Mutu
+const ALL_INDICATOR_CONFIGS = [
   {
     no: 1,
     id: 'reaksi_transfusi',
@@ -164,7 +166,120 @@ const RAWAT_INAP_INDICATORS = [
       return { num, den };
     }
   },
+  {
+    no: 11,
+    id: 'emergency_response_time',
+    nama: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat ( ≤ 5 menit ) - Nama Modul: Emergency Response Time',
+    nama_modul: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat',
+    standar: '≤ 5 menit',
+    label_numerator: 'Total Pasien Tanggap ≤ 5 Menit (“N”)',
+    label_denominator: 'Total Populasi Pasien (“D”)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/emergency-response-time.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 12,
+    id: 'asesmen_awal_igd',
+    nama: 'Kelengkapan Asesmen Awal IGD ( 100% ) - Nama Modul: Asesmen Awal IGD',
+    nama_modul: 'Kelengkapan Asesmen Awal IGD',
+    standar: '100%',
+    label_numerator: 'Total Data (Ada)',
+    label_denominator: 'Total Data (Ada + Tidak Ada)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/asesmen-awal-igd.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 13,
+    id: 'gelang_identitas',
+    nama: 'Pemasangan Gelang Identitas ( 100% ) - Nama Modul: Gelang Identitas',
+    nama_modul: 'Pemasangan Gelang Identitas',
+    standar: '100%',
+    label_numerator: 'Total Data (Lengkap)',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/gelang-identitas.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 14,
+    id: 'serah_terima_pasien',
+    nama: 'Kesesuaian Pelaksanaan Serah Terima Pasien ( 100% ) - Nama Modul: Serah Terima Pasien',
+    nama_modul: 'Kesesuaian Pelaksanaan Serah Terima Pasien',
+    standar: '100%',
+    label_numerator: 'Total Data (Sesuai)',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/serah-terima-pasien.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 15,
+    id: 'pasien_tertahan_igd',
+    nama: 'Pasien Tertahan di IGD ( - ) - Nama Modul: Pasien Tertahan IGD',
+    nama_modul: 'Pasien Tertahan di IGD',
+    standar: '-',
+    label_numerator: 'Total Data Pasien Tertahan',
+    label_denominator: 'Total Data Populasi Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/pasien-tertahan-igd.service'),
+    extract: (summary) => {
+      const num = summary.jumlahTertahan !== undefined ? summary.jumlahTertahan : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 16,
+    id: 'angka_kematian_igd',
+    nama: 'Angka Kematian Pasien di IGD ( - ) - Nama Modul: Angka Kematian IGD',
+    nama_modul: 'Angka Kematian Pasien di IGD',
+    standar: '-',
+    label_numerator: 'Total Data Pasien Meninggal',
+    label_denominator: 'Total Data Populasi Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/angka-kematian-igd.service'),
+    extract: (summary) => {
+      const num = summary.jumlahKematian !== undefined ? summary.jumlahKematian : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  }
 ];
+
+function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
+  if (roomConfig && roomConfig.hasSaved) {
+    return ALL_INDICATOR_CONFIGS.filter(ind => roomConfig.set.has(ind.id));
+  }
+  const defaultIds = new Set(
+    AVAILABLE_INDICATORS
+      .filter(ai => ai.kategori_default && (ai.kategori_default.includes(room.kategori_unit) || ai.kategori_default.includes(kategori)))
+      .map(ai => ai.id)
+  );
+
+  if (defaultIds.size > 0) {
+    return ALL_INDICATOR_CONFIGS.filter(ind => defaultIds.has(ind.id));
+  }
+
+  return ALL_INDICATOR_CONFIGS;
+}
 
 const NAMA_BULAN = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -233,7 +348,6 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
   const isSemesterMode = semesterLabel !== null;
 
   // Determine indicators and units based on category
-  let indicatorConfigs = RAWAT_INAP_INDICATORS;
   let unitWhere = {
     kategori_unit: kategori,
     aktif: true,
@@ -286,9 +400,8 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
   const roomResults = await Promise.all(
     rooms.map(async (room) => {
       const roomConfig = roomConfigMap[room.id];
-      const activeIndicatorConfigs = (roomConfig && roomConfig.hasSaved)
-        ? RAWAT_INAP_INDICATORS.filter(ind => roomConfig.set.has(ind.id))
-        : RAWAT_INAP_INDICATORS;
+      const activeIndicatorConfigs = getActiveIndicatorsForRoom(room, roomConfig, kategori)
+        .map((ind, idx) => ({ ...ind, no: idx + 1 }));
 
       const indicators = await Promise.all(
         activeIndicatorConfigs.map(async (ind) => {
@@ -388,7 +501,9 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
   // Calculate Total MUTU RS (Aggregated across all rooms) ONLY for rawat_inap category
   let totalRs = [];
   if (kategori === 'rawat_inap') {
-    totalRs = indicatorConfigs.map(ind => {
+    const rawatInapInds = getActiveIndicatorsForRoom({ kategori_unit: 'rawat_inap' }, null, 'rawat_inap')
+      .map((ind, idx) => ({ ...ind, no: idx + 1 }));
+    totalRs = rawatInapInds.map(ind => {
       const monthlyData = {};
       let rsPeriodNum = 0;
       let rsPeriodDen = 0;

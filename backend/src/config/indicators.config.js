@@ -62,6 +62,42 @@ const AVAILABLE_INDICATORS = [
     nama: 'Kejadian Pasien Meninggal di Rawat Inap',
     standar: '0%',
     kategori_default: ['rawat_inap', 'unit_khusus']
+  },
+  {
+    id: 'emergency_response_time',
+    nama: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat',
+    standar: '≤ 5 menit',
+    kategori_default: ['igd']
+  },
+  {
+    id: 'asesmen_awal_igd',
+    nama: 'Kelengkapan Asesmen Awal IGD',
+    standar: '100%',
+    kategori_default: ['igd']
+  },
+  {
+    id: 'gelang_identitas',
+    nama: 'Pemasangan Gelang Identitas',
+    standar: '100%',
+    kategori_default: ['igd', 'rawat_inap', 'unit_khusus']
+  },
+  {
+    id: 'serah_terima_pasien',
+    nama: 'Kesesuaian Pelaksanaan Serah Terima Pasien',
+    standar: '100%',
+    kategori_default: ['igd', 'rawat_inap', 'unit_khusus']
+  },
+  {
+    id: 'pasien_tertahan_igd',
+    nama: 'Pasien Tertahan di IGD',
+    standar: '-',
+    kategori_default: ['igd']
+  },
+  {
+    id: 'angka_kematian_igd',
+    nama: 'Angka Kematian Pasien di IGD',
+    standar: '-',
+    kategori_default: ['igd']
   }
 ];
 

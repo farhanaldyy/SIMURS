@@ -7,7 +7,7 @@ const service = createGenericService('gelangIdentitas', {
       d.gelang_identitas === 'dilakukan' &&
       d.alergi === 'dilakukan' &&
       d.fall_risk === 'dilakukan' &&
-      d.dnr === 'dilakukan'
+      (d.dnr === 'dilakukan' || d.dnr === 'tidak_dilakukan' || d.dnr === 'tidak dilakukan')
     ).length;
     const persen = total > 0 ? ((patuh / total) * 100).toFixed(2) : 0;
     return {
@@ -20,3 +20,4 @@ const service = createGenericService('gelangIdentitas', {
 });
 
 module.exports = service;
+
