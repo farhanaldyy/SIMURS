@@ -63,6 +63,7 @@ const routes = {
   // Admin Panel
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },
   '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
+  '#/admin/unit-indicator-config':{ module: () => import('./pages/admin/unit-indicator-config.js'), title: 'Kelola Indikator Unit' },
   '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
   '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },

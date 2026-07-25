@@ -265,11 +265,33 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
     periodeMap[p.bulan] = p.id;
   });
 
+  // Fetch active indicator configs for each room from UnitIndicatorConfig
+  const allSavedConfigs = await prisma.unitIndicatorConfig.findMany({
+    where: {
+      unit_id: { in: rooms.map(r => r.id) }
+    }
+  });
+
+  const roomConfigMap = {};
+  allSavedConfigs.forEach(c => {
+    if (!roomConfigMap[c.unit_id]) {
+      roomConfigMap[c.unit_id] = { set: new Set(), hasSaved: true };
+    }
+    if (c.aktif) {
+      roomConfigMap[c.unit_id].set.add(c.indicator_id);
+    }
+  });
+
   // Process room data concurrently
   const roomResults = await Promise.all(
     rooms.map(async (room) => {
+      const roomConfig = roomConfigMap[room.id];
+      const activeIndicatorConfigs = (roomConfig && roomConfig.hasSaved)
+        ? RAWAT_INAP_INDICATORS.filter(ind => roomConfig.set.has(ind.id))
+        : RAWAT_INAP_INDICATORS;
+
       const indicators = await Promise.all(
-        indicatorConfigs.map(async (ind) => {
+        activeIndicatorConfigs.map(async (ind) => {
           const monthlyData = {};
           let totPeriodNum = 0;
           let totPeriodDen = 0;
@@ -363,14 +385,16 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
     })
   );
 
-  // Calculate Total MUTU RS (Aggregated across all rooms)
-  const totalRs = indicatorConfigs.map(ind => {
-    const monthlyData = {};
-    let rsPeriodNum = 0;
-    let rsPeriodDen = 0;
+  // Calculate Total MUTU RS (Aggregated across all rooms) ONLY for rawat_inap category
+  let totalRs = [];
+  if (kategori === 'rawat_inap') {
+    totalRs = indicatorConfigs.map(ind => {
+      const monthlyData = {};
+      let rsPeriodNum = 0;
+      let rsPeriodDen = 0;
 
-    let rsTw1Num = 0, rsTw1Den = 0;
-    let rsTw2Num = 0, rsTw2Den = 0;
+      let rsTw1Num = 0, rsTw1Den = 0;
+      let rsTw2Num = 0, rsTw2Den = 0;
 
     for (const bObj of bulanList) {
       const b = bObj.bulan;
@@ -436,6 +460,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
       semesterBreakdown
     };
   });
+  }
 
   return {
     kategori,
@@ -686,149 +711,151 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
     currentRow += 2;
   }
 
-  // Render TOTAL MUTU RS Summary Table
-  ws.mergeCells(currentRow, 2, currentRow, 3);
-  const rRsHeaderCell = ws.getCell(currentRow, 2);
-  rRsHeaderCell.value = 'TOTAL CAPAIAN MUTU RUMAH SAKIT';
-  rRsHeaderCell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
-  rRsHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
-  rRsHeaderCell.alignment = { vertical: 'middle', horizontal: 'left' };
-  applyDataBorder(rRsHeaderCell);
-  applyDataBorder(ws.getCell(currentRow, 3));
+  // Render TOTAL MUTU RS Summary Table (ONLY for rawat_inap category)
+  if (data.kategori === 'rawat_inap' && data.totalRs && data.totalRs.length > 0) {
+    ws.mergeCells(currentRow, 2, currentRow, 3);
+    const rRsHeaderCell = ws.getCell(currentRow, 2);
+    rRsHeaderCell.value = 'TOTAL CAPAIAN MUTU RUMAH SAKIT';
+    rRsHeaderCell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+    rRsHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
+    rRsHeaderCell.alignment = { vertical: 'middle', horizontal: 'left' };
+    applyDataBorder(rRsHeaderCell);
+    applyDataBorder(ws.getCell(currentRow, 3));
 
-  let colIdx = 4;
-  data.bulanList.forEach(b => {
-    const endCol = colIdx + 2;
-    const pal = getExcelMonthPalette(b.bulan);
-    ws.mergeCells(currentRow, colIdx, currentRow, endCol);
-    const bCell = ws.getCell(currentRow, colIdx);
-    bCell.value = `MUTU RS ${b.nama}`;
-    applyHeaderStyles(bCell, pal.headerBg);
-    colIdx += 3;
-  });
+    let colIdx = 4;
+    data.bulanList.forEach(b => {
+      const endCol = colIdx + 2;
+      const pal = getExcelMonthPalette(b.bulan);
+      ws.mergeCells(currentRow, colIdx, currentRow, endCol);
+      const bCell = ws.getCell(currentRow, colIdx);
+      bCell.value = `MUTU RS ${b.nama}`;
+      applyHeaderStyles(bCell, pal.headerBg);
+      colIdx += 3;
+    });
 
-  if (isSem) {
-    const tw1Label = data.bulanAwal === 1 ? 'TOTAL TRIWULAN I' : 'TOTAL TRIWULAN III';
-    const tw2Label = data.bulanAwal === 1 ? 'TOTAL TRIWULAN II' : 'TOTAL TRIWULAN IV';
+    if (isSem) {
+      const tw1Label = data.bulanAwal === 1 ? 'TOTAL TRIWULAN I' : 'TOTAL TRIWULAN III';
+      const tw2Label = data.bulanAwal === 1 ? 'TOTAL TRIWULAN II' : 'TOTAL TRIWULAN IV';
 
-    ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
-    applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = `${tw1Label} RS`;
-    colIdx += 3;
+      ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
+      applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = `${tw1Label} RS`;
+      colIdx += 3;
 
-    ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
-    applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = `${tw2Label} RS`;
-    colIdx += 3;
+      ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
+      applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = `${tw2Label} RS`;
+      colIdx += 3;
 
-    ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
-    applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF78350F', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = `${data.semesterLabel} RS`;
-  } else {
-    ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
-    const rsTwCell = ws.getCell(currentRow, colIdx);
-    rsTwCell.value = `${data.triwulanLabel} RS`;
-    applyHeaderStyles(rsTwCell, 'FF1E40AF', 'FFFFFFFF');
-  }
+      ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
+      applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF78350F', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = `${data.semesterLabel} RS`;
+    } else {
+      ws.mergeCells(currentRow, colIdx, currentRow, colIdx + 2);
+      const rsTwCell = ws.getCell(currentRow, colIdx);
+      rsTwCell.value = `${data.triwulanLabel} RS`;
+      applyHeaderStyles(rsTwCell, 'FF1E40AF', 'FFFFFFFF');
+    }
 
-  currentRow++;
+    currentRow++;
 
-  const rRsNo = ws.getCell(currentRow, 2);
-  const rRsInd = ws.getCell(currentRow, 3);
-  rRsNo.value = 'No'; rRsInd.value = 'Indikator Mutu';
-  applyHeaderStyles(rRsNo, 'FFD9D9D9'); applyHeaderStyles(rRsInd, 'FFD9D9D9');
-
-  colIdx = 4;
-  data.bulanList.forEach(b => {
-    const pal = getExcelMonthPalette(b.bulan);
-    const cNum = ws.getCell(currentRow, colIdx); const cDen = ws.getCell(currentRow, colIdx + 1); const cCap = ws.getCell(currentRow, colIdx + 2);
-    cNum.value = 'Tot N'; cDen.value = 'Tot D'; cCap.value = 'C';
-    applyHeaderStyles(cNum, pal.subBg); applyHeaderStyles(cDen, pal.subBg); applyHeaderStyles(cCap, pal.capBg);
-    colIdx += 3;
-  });
-
-  if (isSem) {
-    applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = 'Tot N';
-    applyHeaderStyles(ws.getCell(currentRow, colIdx + 1), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 1).value = 'Tot D';
-    applyHeaderStyles(ws.getCell(currentRow, colIdx + 2), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 2).value = 'C';
-    colIdx += 3;
-
-    applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = 'Tot N';
-    applyHeaderStyles(ws.getCell(currentRow, colIdx + 1), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 1).value = 'Tot D';
-    applyHeaderStyles(ws.getCell(currentRow, colIdx + 2), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 2).value = 'C';
-    colIdx += 3;
-
-    applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF92400E', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = 'Tot N';
-    applyHeaderStyles(ws.getCell(currentRow, colIdx + 1), 'FF92400E', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 1).value = 'Tot D';
-    applyHeaderStyles(ws.getCell(currentRow, colIdx + 2), 'FF78350F', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 2).value = 'C';
-  } else {
-    const rsTwNum = ws.getCell(currentRow, colIdx); const rsTwDen = ws.getCell(currentRow, colIdx + 1); const rsTwCap = ws.getCell(currentRow, colIdx + 2);
-    rsTwNum.value = 'Tot N'; rsTwDen.value = 'Tot D'; rsTwCap.value = 'C';
-    applyHeaderStyles(rsTwNum, 'FF1E3A8A', 'FFFFFFFF'); applyHeaderStyles(rsTwDen, 'FF1E3A8A', 'FFFFFFFF'); applyHeaderStyles(rsTwCap, 'FF1E40AF', 'FFFFFFFF');
-  }
-
-  currentRow++;
-
-  for (const ind of data.totalRs) {
-    const row = ws.getRow(currentRow);
-    row.getCell(2).value = ind.no;
-    row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
-    applyDataBorder(row.getCell(2));
-
-    row.getCell(3).value = `${ind.nama_modul} (Standar: ${ind.standar})`;
-    row.getCell(3).font = { bold: true };
-    row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
-    applyDataBorder(row.getCell(3));
+    const rRsNo = ws.getCell(currentRow, 2);
+    const rRsInd = ws.getCell(currentRow, 3);
+    rRsNo.value = 'No'; rRsInd.value = 'Indikator Mutu';
+    applyHeaderStyles(rRsNo, 'FFD9D9D9'); applyHeaderStyles(rRsInd, 'FFD9D9D9');
 
     colIdx = 4;
     data.bulanList.forEach(b => {
       const pal = getExcelMonthPalette(b.bulan);
-      const d = ind.monthlyData[b.bulan] || { numerator: 0, denominator: 0, capaian: 0 };
       const cNum = ws.getCell(currentRow, colIdx); const cDen = ws.getCell(currentRow, colIdx + 1); const cCap = ws.getCell(currentRow, colIdx + 2);
-
-      cNum.value = d.numerator; cDen.value = d.denominator; cCap.value = d.capaian; cCap.numFmt = '0.00';
-      cNum.font = { bold: true }; cDen.font = { bold: true }; cCap.font = { bold: true };
-      cNum.alignment = { horizontal: 'center', vertical: 'middle' }; cDen.alignment = { horizontal: 'center', vertical: 'middle' }; cCap.alignment = { horizontal: 'center', vertical: 'middle' };
-      cCap.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: pal.capBg } };
-      applyDataBorder(cNum); applyDataBorder(cDen); applyDataBorder(cCap);
+      cNum.value = 'Tot N'; cDen.value = 'Tot D'; cCap.value = 'C';
+      applyHeaderStyles(cNum, pal.subBg); applyHeaderStyles(cDen, pal.subBg); applyHeaderStyles(cCap, pal.capBg);
       colIdx += 3;
     });
 
-    if (isSem && ind.semesterBreakdown) {
-      const sb = ind.semesterBreakdown;
-      const tw1 = sb.tw1;
-      const cTw1N = ws.getCell(currentRow, colIdx); const cTw1D = ws.getCell(currentRow, colIdx + 1); const cTw1C = ws.getCell(currentRow, colIdx + 2);
-      cTw1N.value = tw1.numerator; cTw1D.value = tw1.denominator; cTw1C.value = tw1.capaian; cTw1C.numFmt = '0.00';
-      cTw1N.font = { bold: true }; cTw1D.font = { bold: true }; cTw1C.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cTw1N.alignment = { horizontal: 'center', vertical: 'middle' }; cTw1D.alignment = { horizontal: 'center', vertical: 'middle' }; cTw1C.alignment = { horizontal: 'center', vertical: 'middle' };
-      cTw1C.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
-      applyDataBorder(cTw1N); applyDataBorder(cTw1D); applyDataBorder(cTw1C);
+    if (isSem) {
+      applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = 'Tot N';
+      applyHeaderStyles(ws.getCell(currentRow, colIdx + 1), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 1).value = 'Tot D';
+      applyHeaderStyles(ws.getCell(currentRow, colIdx + 2), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 2).value = 'C';
       colIdx += 3;
 
-      const tw2 = sb.tw2;
-      const cTw2N = ws.getCell(currentRow, colIdx); const cTw2D = ws.getCell(currentRow, colIdx + 1); const cTw2C = ws.getCell(currentRow, colIdx + 2);
-      cTw2N.value = tw2.numerator; cTw2D.value = tw2.denominator; cTw2C.value = tw2.capaian; cTw2C.numFmt = '0.00';
-      cTw2N.font = { bold: true }; cTw2D.font = { bold: true }; cTw2C.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cTw2N.alignment = { horizontal: 'center', vertical: 'middle' }; cTw2D.alignment = { horizontal: 'center', vertical: 'middle' }; cTw2C.alignment = { horizontal: 'center', vertical: 'middle' };
-      cTw2C.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
-      applyDataBorder(cTw2N); applyDataBorder(cTw2D); applyDataBorder(cTw2C);
+      applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = 'Tot N';
+      applyHeaderStyles(ws.getCell(currentRow, colIdx + 1), 'FF1E3A8A', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 1).value = 'Tot D';
+      applyHeaderStyles(ws.getCell(currentRow, colIdx + 2), 'FF1E40AF', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 2).value = 'C';
       colIdx += 3;
 
-      const sem = sb.totalSemester;
-      const cSemN = ws.getCell(currentRow, colIdx); const cSemD = ws.getCell(currentRow, colIdx + 1); const cSemC = ws.getCell(currentRow, colIdx + 2);
-      cSemN.value = sem.numerator; cSemD.value = sem.denominator; cSemC.value = sem.capaian; cSemC.numFmt = '0.00';
-      cSemN.font = { bold: true }; cSemD.font = { bold: true }; cSemC.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cSemN.alignment = { horizontal: 'center', vertical: 'middle' }; cSemD.alignment = { horizontal: 'center', vertical: 'middle' }; cSemC.alignment = { horizontal: 'center', vertical: 'middle' };
-      cSemC.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF78350F' } };
-      applyDataBorder(cSemN); applyDataBorder(cSemD); applyDataBorder(cSemC);
+      applyHeaderStyles(ws.getCell(currentRow, colIdx), 'FF92400E', 'FFFFFFFF'); ws.getCell(currentRow, colIdx).value = 'Tot N';
+      applyHeaderStyles(ws.getCell(currentRow, colIdx + 1), 'FF92400E', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 1).value = 'Tot D';
+      applyHeaderStyles(ws.getCell(currentRow, colIdx + 2), 'FF78350F', 'FFFFFFFF'); ws.getCell(currentRow, colIdx + 2).value = 'C';
     } else {
-      const tot = ind.totalPeriode || { numerator: 0, denominator: 0, capaian: 0 };
-      const cTwNum = ws.getCell(currentRow, colIdx); const cTwDen = ws.getCell(currentRow, colIdx + 1); const cTwCap = ws.getCell(currentRow, colIdx + 2);
-      cTwNum.value = tot.numerator; cTwDen.value = tot.denominator; cTwCap.value = tot.capaian; cTwCap.numFmt = '0.00';
-      cTwNum.font = { bold: true }; cTwDen.font = { bold: true }; cTwCap.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cTwNum.alignment = { horizontal: 'center', vertical: 'middle' }; cTwDen.alignment = { horizontal: 'center', vertical: 'middle' }; cTwCap.alignment = { horizontal: 'center', vertical: 'middle' };
-      cTwCap.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
-      applyDataBorder(cTwNum); applyDataBorder(cTwDen); applyDataBorder(cTwCap);
+      const rsTwNum = ws.getCell(currentRow, colIdx); const rsTwDen = ws.getCell(currentRow, colIdx + 1); const rsTwCap = ws.getCell(currentRow, colIdx + 2);
+      rsTwNum.value = 'Tot N'; rsTwDen.value = 'Tot D'; rsTwCap.value = 'C';
+      applyHeaderStyles(rsTwNum, 'FF1E3A8A', 'FFFFFFFF'); applyHeaderStyles(rsTwDen, 'FF1E3A8A', 'FFFFFFFF'); applyHeaderStyles(rsTwCap, 'FF1E40AF', 'FFFFFFFF');
     }
 
     currentRow++;
+
+    for (const ind of data.totalRs) {
+      const row = ws.getRow(currentRow);
+      row.getCell(2).value = ind.no;
+      row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+      applyDataBorder(row.getCell(2));
+
+      row.getCell(3).value = `${ind.nama_modul} (Standar: ${ind.standar})`;
+      row.getCell(3).font = { bold: true };
+      row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+      applyDataBorder(row.getCell(3));
+
+      colIdx = 4;
+      data.bulanList.forEach(b => {
+        const pal = getExcelMonthPalette(b.bulan);
+        const d = ind.monthlyData[b.bulan] || { numerator: 0, denominator: 0, capaian: 0 };
+        const cNum = ws.getCell(currentRow, colIdx); const cDen = ws.getCell(currentRow, colIdx + 1); const cCap = ws.getCell(currentRow, colIdx + 2);
+
+        cNum.value = d.numerator; cDen.value = d.denominator; cCap.value = d.capaian; cCap.numFmt = '0.00';
+        cNum.font = { bold: true }; cDen.font = { bold: true }; cCap.font = { bold: true };
+        cNum.alignment = { horizontal: 'center', vertical: 'middle' }; cDen.alignment = { horizontal: 'center', vertical: 'middle' }; cCap.alignment = { horizontal: 'center', vertical: 'middle' };
+        cCap.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: pal.capBg } };
+        applyDataBorder(cNum); applyDataBorder(cDen); applyDataBorder(cCap);
+        colIdx += 3;
+      });
+
+      if (isSem && ind.semesterBreakdown) {
+        const sb = ind.semesterBreakdown;
+        const tw1 = sb.tw1;
+        const cTw1N = ws.getCell(currentRow, colIdx); const cTw1D = ws.getCell(currentRow, colIdx + 1); const cTw1C = ws.getCell(currentRow, colIdx + 2);
+        cTw1N.value = tw1.numerator; cTw1D.value = tw1.denominator; cTw1C.value = tw1.capaian; cTw1C.numFmt = '0.00';
+        cTw1N.font = { bold: true }; cTw1D.font = { bold: true }; cTw1C.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cTw1N.alignment = { horizontal: 'center', vertical: 'middle' }; cTw1D.alignment = { horizontal: 'center', vertical: 'middle' }; cTw1C.alignment = { horizontal: 'center', vertical: 'middle' };
+        cTw1C.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
+        applyDataBorder(cTw1N); applyDataBorder(cTw1D); applyDataBorder(cTw1C);
+        colIdx += 3;
+
+        const tw2 = sb.tw2;
+        const cTw2N = ws.getCell(currentRow, colIdx); const cTw2D = ws.getCell(currentRow, colIdx + 1); const cTw2C = ws.getCell(currentRow, colIdx + 2);
+        cTw2N.value = tw2.numerator; cTw2D.value = tw2.denominator; cTw2C.value = tw2.capaian; cTw2C.numFmt = '0.00';
+        cTw2N.font = { bold: true }; cTw2D.font = { bold: true }; cTw2C.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cTw2N.alignment = { horizontal: 'center', vertical: 'middle' }; cTw2D.alignment = { horizontal: 'center', vertical: 'middle' }; cTw2C.alignment = { horizontal: 'center', vertical: 'middle' };
+        cTw2C.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
+        applyDataBorder(cTw2N); applyDataBorder(cTw2D); applyDataBorder(cTw2C);
+        colIdx += 3;
+
+        const sem = sb.totalSemester;
+        const cSemN = ws.getCell(currentRow, colIdx); const cSemD = ws.getCell(currentRow, colIdx + 1); const cSemC = ws.getCell(currentRow, colIdx + 2);
+        cSemN.value = sem.numerator; cSemD.value = sem.denominator; cSemC.value = sem.capaian; cSemC.numFmt = '0.00';
+        cSemN.font = { bold: true }; cSemD.font = { bold: true }; cSemC.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cSemN.alignment = { horizontal: 'center', vertical: 'middle' }; cSemD.alignment = { horizontal: 'center', vertical: 'middle' }; cSemC.alignment = { horizontal: 'center', vertical: 'middle' };
+        cSemC.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF78350F' } };
+        applyDataBorder(cSemN); applyDataBorder(cSemD); applyDataBorder(cSemC);
+      } else {
+        const tot = ind.totalPeriode || { numerator: 0, denominator: 0, capaian: 0 };
+        const cTwNum = ws.getCell(currentRow, colIdx); const cTwDen = ws.getCell(currentRow, colIdx + 1); const cTwCap = ws.getCell(currentRow, colIdx + 2);
+        cTwNum.value = tot.numerator; cTwDen.value = tot.denominator; cTwCap.value = tot.capaian; cTwCap.numFmt = '0.00';
+        cTwNum.font = { bold: true }; cTwDen.font = { bold: true }; cTwCap.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cTwNum.alignment = { horizontal: 'center', vertical: 'middle' }; cTwDen.alignment = { horizontal: 'center', vertical: 'middle' }; cTwCap.alignment = { horizontal: 'center', vertical: 'middle' };
+        cTwCap.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
+        applyDataBorder(cTwNum); applyDataBorder(cTwDen); applyDataBorder(cTwCap);
+      }
+
+      currentRow++;
+    }
   }
 
   // Set column widths

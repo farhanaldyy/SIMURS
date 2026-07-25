@@ -155,6 +155,7 @@ export const ADMIN_GROUP = {
   items: [
     { label: 'Kelola User', hash: '#/admin/users' },
     { label: 'Kelola Unit', hash: '#/admin/units' },
+    { label: 'Kelola Indikator Unit', hash: '#/admin/unit-indicator-config' },
     { label: 'Kelola Periode', hash: '#/admin/periode' },
     { label: 'Audit Trail', hash: '#/admin/audit-log' },
   ],

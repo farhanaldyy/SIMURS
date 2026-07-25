@@ -61,6 +61,7 @@ model Unit {
   created_at    DateTime @default(now())
 
   users                   User[]
+  indicatorConfigs        UnitIndicatorConfig[]
   giziWaktuMakanans       GiziWaktuMakanan[]
   giziSisaMakanans        GiziSisaMakanan[]
   giziKesalahanDiets      GiziKesalahanDiet[]
@@ -1583,4 +1584,19 @@ model SimrsResponseTimeIt {
   @@index([periode_id])
   @@index([unit_id])
   @@map("simrs_response_time_it")
+}
+
+model UnitIndicatorConfig {
+  id           Int      @id @default(autoincrement())
+  unit_id      Int
+  indicator_id String   @db.VarChar(100)
+  aktif        Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  unit Unit @relation(fields: [unit_id], references: [id], onDelete: Cascade)
+
+  @@unique([unit_id, indicator_id])
+  @@index([unit_id])
+  @@map("unit_indicator_configs")
 }
