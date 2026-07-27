@@ -19,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
+// Serve static uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../../frontend')));
 

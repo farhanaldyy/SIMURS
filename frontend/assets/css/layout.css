@@ -29,28 +29,44 @@
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-lg) var(--space-md);
+  padding: var(--space-md);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .sidebar-logo img {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-sm);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.sidebar-logo > div {
+  min-width: 0;
+  flex: 1;
 }
 
 .sidebar-logo-text {
-  font-size: var(--font-size-lg);
+  font-size: 1rem;
   font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.02em;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-logo-sub {
-  font-size: var(--font-size-xs);
-  color: var(--color-sidebar-text);
+  font-size: 0.785rem;
+  color: #94a3b8;
   display: block;
-  font-weight: 400;
+  font-weight: 500;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Sidebar Navigation */

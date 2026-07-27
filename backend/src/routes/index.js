@@ -4,9 +4,10 @@ const router = require('express').Router();
 router.use('/auth', require('./auth'));
 
 // Master data
-router.use('/', require('./master'));
+router.use('/informasi-rs', require('./informasi-rs'));
 router.use('/master-tindakan', require('./modules/master-tindakan'));
 router.use('/master-poliklinik', require('./modules/master-poliklinik'));
+router.use('/', require('./master'));
 
 // Rawat Jalan / Outpatient modules
 router.use('/waktu-tunggu-poliklinik', require('./modules/waktu-tunggu-poliklinik'));

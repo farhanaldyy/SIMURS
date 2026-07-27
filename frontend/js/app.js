@@ -39,6 +39,7 @@ function checkPetugasWarning() {
 
 async function init() {
   Store.loadFromStorage();
+  await Store.loadHospitalInfo();
   const app = document.getElementById('app');
   const hash = window.location.hash || '#/login';
 

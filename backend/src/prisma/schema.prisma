@@ -1624,3 +1624,23 @@ model UnitIndicatorConfig {
   @@index([unit_id])
   @@map("unit_indicator_configs")
 }
+
+model InformasiRumahSakit {
+  id            Int      @id @default(autoincrement())
+  nama_rs       String   @default("RS Islam Kalimantan Muhammad Arsyad Al Banjari") @db.VarChar(150)
+  kode_rs       String?  @db.VarChar(50)
+  alamat        String?  @db.Text
+  telepon       String?  @db.VarChar(50)
+  email         String?  @db.VarChar(100)
+  website       String?  @db.VarChar(100)
+  logo_url      String?  @db.Text
+  nama_direktur String?  @db.VarChar(100)
+  nip_direktur  String?  @db.VarChar(50)
+  kota          String?  @db.VarChar(100)
+  deskripsi     String?  @db.Text
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("informasi_rumah_sakit")
+}
+

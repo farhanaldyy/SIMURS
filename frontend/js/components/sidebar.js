@@ -2,7 +2,24 @@
 import Store from '../store.js';
 import { NAV_GROUPS, ADMIN_GROUP } from '../config/modules.js';
 
-export function renderSidebar(container) {
+export function renderSidebar(container, forceRebuild = false) {
+  const hospitalInfo = Store.get('hospitalInfo');
+  const logoUrl = (hospitalInfo && hospitalInfo.logo_url) ? hospitalInfo.logo_url : 'assets/img/logo.png';
+  const hospitalName = (hospitalInfo && hospitalInfo.nama_rs) ? hospitalInfo.nama_rs : 'SIMURS';
+
+  const existingSidebar = container.querySelector('#sidebar');
+  if (existingSidebar && !forceRebuild) {
+    const logoImg = existingSidebar.querySelector('.sidebar-logo img');
+    const subText = existingSidebar.querySelector('.sidebar-logo-sub');
+    if (logoImg && logoImg.getAttribute('src') !== logoUrl) logoImg.src = logoUrl;
+    if (subText) {
+      subText.textContent = hospitalName;
+      subText.setAttribute('title', hospitalName);
+    }
+    updateActiveLink();
+    return;
+  }
+
   const user = Store.get('user');
   const role = user ? user.role : '';
   let allowed = [];
@@ -75,18 +92,35 @@ export function renderSidebar(container) {
       `;
     }).join('');
 
+  // Preserve scroll position if sidebar exists
+  const sidebarScrollTop = existingSidebar ? existingSidebar.scrollTop : 0;
+  const navScrollTop = container.querySelector('.sidebar-nav')?.scrollTop || 0;
+
   container.innerHTML = `
     <div class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <img src="assets/img/logo.png" alt="SIMURS Logo">
+        <img src="${logoUrl}" alt="${hospitalName} Logo" onerror="this.onerror=null; this.src='assets/img/logo.png';">
         <div>
-          <span class="sidebar-logo-text">SIMURS</span>
-          <span class="sidebar-logo-sub">Mutu Rumah Sakit</span>
+          <span class="sidebar-logo-text">SISTEM MUTU</span>
+          <span class="sidebar-logo-sub" title="${hospitalName}">${hospitalName}</span>
         </div>
       </div>
       <nav class="sidebar-nav">${groupsHTML}</nav>
     </div>
   `;
+
+  const newSidebar = container.querySelector('#sidebar');
+  if (newSidebar && sidebarScrollTop > 0) newSidebar.scrollTop = sidebarScrollTop;
+  const newNav = container.querySelector('.sidebar-nav');
+  if (newNav && navScrollTop > 0) newNav.scrollTop = navScrollTop;
+
+  // Listen for dynamic updates to hospital info
+  if (!container._hospitalInfoListenerBound) {
+    container._hospitalInfoListenerBound = true;
+    window.addEventListener('hospitalInfoChanged', () => {
+      renderSidebar(container);
+    });
+  }
 
   // Toggle groups
   container.querySelectorAll('.nav-group-title').forEach(title => {

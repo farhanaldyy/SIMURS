@@ -153,6 +153,7 @@ export const NAV_GROUPS = [
 export const ADMIN_GROUP = {
   title: '⚙️ Admin',
   items: [
+    { label: 'Informasi Rumah Sakit', hash: '#/admin/informasi-rs' },
     { label: 'Kelola User', hash: '#/admin/users' },
     { label: 'Kelola Unit', hash: '#/admin/units' },
     { label: 'Kelola Indikator Unit', hash: '#/admin/unit-indicator-config' },

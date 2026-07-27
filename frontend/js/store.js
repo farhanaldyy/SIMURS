@@ -6,7 +6,41 @@ const Store = {
   token: null,
   periodeList: [],
   unitList: [],
+  hospitalInfo: null,
   indicatorSummariesCache: null,
+
+  setHospitalInfo(info) {
+    const prev = this.hospitalInfo;
+    const changed = !prev || prev.logo_url !== info?.logo_url || prev.nama_rs !== info?.nama_rs;
+    this.hospitalInfo = info;
+    if (info) {
+      sessionStorage.setItem('simurs_hospital_info', JSON.stringify(info));
+    } else {
+      sessionStorage.removeItem('simurs_hospital_info');
+    }
+    if (changed) {
+      window.dispatchEvent(new CustomEvent('hospitalInfoChanged', { detail: info }));
+    }
+  },
+
+  async loadHospitalInfo() {
+    try {
+      const saved = sessionStorage.getItem('simurs_hospital_info');
+      if (saved) {
+        this.hospitalInfo = JSON.parse(saved);
+      }
+    } catch { /* ignore parse error */ }
+
+    try {
+      const { getInformasiRS } = await import('./api/informasi-rs.js');
+      const res = await getInformasiRS();
+      if (res && res.success && res.data) {
+        this.setHospitalInfo(res.data);
+      }
+    } catch (err) {
+      console.warn('Gagal memuat Informasi RS:', err);
+    }
+  },
 
   clearSummaryCache() {
     this.indicatorSummariesCache = null;

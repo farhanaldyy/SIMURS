@@ -284,7 +284,7 @@ export async function render(container) {
 
   // Reset Filter Button Handler
   btnReset.addEventListener('click', () => {
-    currentKategori = 'rawat_inap';
+    // Preserve currentKategori so tab position does not switch
     currentTahun = 2026;
     currentBulanAwal = 1;
     currentBulanAkhir = 3;

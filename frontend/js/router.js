@@ -61,6 +61,7 @@ const routes = {
   '#/kepatuhan-formularium-nasional': { module: () => import('./pages/modules/kepatuhan-formularium-nasional.js'), title: 'Kepatuhan Formularium Nasional' },
 
   // Admin Panel
+  '#/admin/informasi-rs':         { module: () => import('./pages/modules/informasi-rs.js'), title: 'Kelola Informasi Rumah Sakit' },
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },
   '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
   '#/admin/unit-indicator-config':{ module: () => import('./pages/admin/unit-indicator-config.js'), title: 'Kelola Indikator Unit' },
