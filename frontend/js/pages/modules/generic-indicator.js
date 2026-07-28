@@ -105,7 +105,7 @@ export function createGenericIndicatorPage(config) {
     }
 
     let targetMetric = (s.persen !== undefined && s.persen !== '-' && s.persen !== null) ? `${s.persen}%` : '-';
-    let labelMetric = 'Kepatuhan';
+    let labelMetric = config.metricLabel || 'Kepatuhan';
     let numeratorText = config.numeratorLabel || 'Patuh (N)';
     let denominatorText = config.denominatorLabel || 'Denominator (D)';
     let numerator2Text = config.numerator2Label || null;

@@ -328,6 +328,219 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
+  },
+  {
+    no: 21,
+    id: 'penundaan_operasi_elektif',
+    nama: 'Penundaan Operasi Elektif ( ≤ 5% ) - Nama Modul: Penundaan Operasi Elektif',
+    nama_modul: 'Penundaan Operasi Elektif',
+    standar: '≤ 5%',
+    label_numerator: 'Total Data Pasien Operasi Elektif',
+    label_denominator: 'Total Data Penundaan',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/penundaan-operasi.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 22,
+    id: 'informed_consent_pembedahaan',
+    nama: 'Kelengkapan Pengisian Inform Concent Pembedahan ( 100% ) - Nama Modul: Informed Consent Pembedahan',
+    nama_modul: 'Kelengkapan Pengisian Inform Concent Pembedahan',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/informed-consent-pembedahan.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 23,
+    id: 'asesmen_pra_bedah',
+    nama: 'Angka Kelengkapan Asesemen Pra Bedah ( 100% ) - Nama Modul: Asesmen Pra Bedah',
+    nama_modul: 'Angka Kelengkapan Asesemen Pra Bedah',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/asesmen-pra-bedah.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 24,
+    id: 'surgical_checklist_operasi',
+    nama: 'Kepatuhan Melakukan Proses TimeOut Pasien Pre Operasi ( 100% ) - Nama Modul: Surgical Safety Checklist Op',
+    nama_modul: 'Kepatuhan Melakukan Proses TimeOut Pasien Pre Operasi',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/surgical-checklist-operasi.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 25,
+    id: 'surgical_checklist_sc',
+    nama: 'Kepatuhan Melakukan Proses TimeOut Pasien Operasi SC ( 100% ) - Nama Modul: Surgical Safety Checklist SC',
+    nama_modul: 'Kepatuhan Melakukan Proses TimeOut Pasien Operasi SC',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/surgical-checklist-sc.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 26,
+    id: 'penandaan_lokasi_operasi',
+    nama: '100% Pasien Yang dioperasi Ada Marker (Sesuai Ketentuan) ( 100% ) - Nama Modul: Penandaan Lokasi Operasi',
+    nama_modul: '100% Pasien Yang dioperasi Ada Marker (Sesuai Ketentuan)',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/penandaan-lokasi-operasi.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : (summary.total || 0);
+      return { num, den };
+    }
+  },
+  {
+    no: 27,
+    id: 'kematian_meja_operasi',
+    nama: 'Kejadian Kematian di Meja Operasi ( 0% ) - Nama Modul: Mutu Kamar Operasi',
+    nama_modul: 'Kejadian Kematian di Meja Operasi',
+    standar: '0%',
+    label_numerator: 'Total Data Kejadian',
+    label_denominator: 'Total Data Operasi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-kamar-operasi.service'),
+    extraWhere: { tipe: 'kematian_meja_operasi' },
+    extract: (summary) => {
+      const num = summary.total !== undefined ? summary.total : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 28,
+    id: 'salah_sisi_operasi',
+    nama: 'Kejadian Operasi Salah Sisi ( 0% ) - Nama Modul: Mutu Kamar Operasi',
+    nama_modul: 'Kejadian Operasi Salah Sisi',
+    standar: '0%',
+    label_numerator: 'Total Data Kejadian',
+    label_denominator: 'Total Data Operasi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-kamar-operasi.service'),
+    extraWhere: { tipe: 'salah_sisi' },
+    extract: (summary) => {
+      const num = summary.total !== undefined ? summary.total : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 29,
+    id: 'operasi_salah_pasien',
+    nama: 'Kejadian Operasi Salah Pasien ( 0% ) - Nama Modul: Mutu Kamar Operasi',
+    nama_modul: 'Kejadian Operasi Salah Pasien',
+    standar: '0%',
+    label_numerator: 'Total Data Kejadian',
+    label_denominator: 'Total Data Operasi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-kamar-operasi.service'),
+    extraWhere: { tipe: 'salah_orang' },
+    extract: (summary) => {
+      const num = summary.total !== undefined ? summary.total : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 30,
+    id: 'operasi_salah_prosedur',
+    nama: 'Kejadian Operasi Salah Prosedur Tindakan ( 0% ) - Nama Modul: Mutu Kamar Operasi',
+    nama_modul: 'Kejadian Operasi Salah Prosedur Tindakan',
+    standar: '0%',
+    label_numerator: 'Total Data Kejadian',
+    label_denominator: 'Total Data Operasi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-kamar-operasi.service'),
+    extraWhere: { tipe: 'salah_prosedur' },
+    extract: (summary) => {
+      const num = summary.total !== undefined ? summary.total : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 31,
+    id: 'kelengkapan_ic_anestesi',
+    nama: 'Kelengkapan IC Tindakan Anestesi Sedasi ( 100% ) - Nama Modul: Informed Consent Anestesi',
+    nama_modul: 'Kelengkapan IC Tindakan Anestesi Sedasi',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/informed-consent-anestesi.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 32,
+    id: 'asesmen_pra_anestesi',
+    nama: 'Kelengkapan Asesmen Pre Anestesi Sedasi ( 100% ) - Nama Modul: Asesmen Pra Anestesi',
+    nama_modul: 'Kelengkapan Asesmen Pre Anestesi Sedasi',
+    standar: '100%',
+    label_numerator: 'Total Data Patuh',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/asesmen-pra-anestesi.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 33,
+    id: 'kelengkapan_laporan_anestesi',
+    nama: 'Kelengkapan Laporan Anestesi Sedasi ( 100% ) - Nama Modul: Mutu Kamar Operasi',
+    nama_modul: 'Kelengkapan Laporan Anestesi Sedasi',
+    standar: '100%',
+    label_numerator: 'Total Data Kelengkapan Laporan',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-kamar-operasi.service'),
+    extraWhere: { tipe: 'laporan_anestesi' },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
   }
 ];
 

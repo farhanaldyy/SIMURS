@@ -546,6 +546,7 @@ model PeriodeHdSummary {
 model PeriodePenundaanSummary {
   id            Int      @id @default(autoincrement())
   periode_id    Int      @unique
+  total_pasien  Int      @default(0)
   standar_menit Int      @default(60)
   updated_at    DateTime @updatedAt
 

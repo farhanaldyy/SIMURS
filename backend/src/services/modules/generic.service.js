@@ -46,7 +46,7 @@ function coerceTypes(data) {
       else if (key.startsWith('tanggal') && finalVal !== '') {
         data[key] = new Date(finalVal);
       }
-      else if (key.startsWith('jam') && key !== 'jam_mulai_selesai' && key !== 'jam_mulai' && key !== 'jam_selesai' && finalVal !== '') {
+      else if ((key.startsWith('jam') || key.endsWith('_jam_operasi') || key.includes('_jam_')) && key !== 'jam_mulai_selesai' && key !== 'jam_mulai' && key !== 'jam_selesai' && finalVal !== '') {
         const hasZ = finalVal.endsWith('Z');
         const cleanVal = hasZ ? finalVal.slice(0, -1) : finalVal;
         const timeStr = cleanVal.split(':').length === 2 ? `${cleanVal}:00` : cleanVal;

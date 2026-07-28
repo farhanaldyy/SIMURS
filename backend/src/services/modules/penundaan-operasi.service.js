@@ -1,13 +1,29 @@
 const { createGenericService } = require('./generic.service');
 const prisma = require('../../config/database');
 
-function hitungSelisihMenit(jam1, jam2) {
-  const j1 = typeof jam1 === 'string' ? jam1 : jam1.toTimeString().split(' ')[0];
-  const j2 = typeof jam2 === 'string' ? jam2 : jam2.toTimeString().split(' ')[0];
+function extractHHMM(jam) {
+  if (!jam) return '00:00';
+  if (jam instanceof Date) {
+    return `${String(jam.getHours()).padStart(2, '0')}:${String(jam.getMinutes()).padStart(2, '0')}`;
+  }
+  const str = String(jam);
+  if (str.includes('T')) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+  }
+  return str.substring(0, 5);
+}
 
-  const d1 = new Date(`2000-01-01T${j1}`);
-  const d2 = new Date(`2000-01-01T${j2}`);
-  let diff = (d2 - d1) / 60000;
+function hitungSelisihMenit(jam1, jam2) {
+  const time1 = extractHHMM(jam1);
+  const time2 = extractHHMM(jam2);
+
+  const [h1, m1] = time1.split(':').map(Number);
+  const [h2, m2] = time2.split(':').map(Number);
+
+  let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
   if (diff < 0) diff += 1440;
   return diff;
 }
@@ -17,7 +33,7 @@ const baseService = createGenericService('penundaanOperasi', {
   beforeCreate(data) {
     if (data.batal === true || data.batal === 'true') {
       data.waktu_tunggu_menit = 0;
-    } else {
+    } else if (data.jadwal_jam_operasi && data.jam_mulai_operasi) {
       data.waktu_tunggu_menit = Math.round(hitungSelisihMenit(data.jadwal_jam_operasi, data.jam_mulai_operasi));
     }
     return data;
@@ -32,27 +48,30 @@ const baseService = createGenericService('penundaanOperasi', {
   },
   async calculateSummary(data, where) {
     const total = data.length;
+    const pId = where && where.periode_id ? parseInt(where.periode_id) : null;
     
     // Find summary parameter for the period
-    const summary = await prisma.periodePenundaanSummary.findUnique({
-      where: { periode_id: where.periode_id }
-    });
-    const threshold = summary ? summary.standar_menit : 60;
+    const summary = pId ? await prisma.periodePenundaanSummary.findUnique({
+      where: { periode_id: pId }
+    }) : null;
+    const totalPasienInput = summary ? summary.total_pasien : 0;
 
-    // Compliance (PATUH N) is: not cancelled AND (wait time <= threshold OR hasIndikasiMedis)
-    const compliant = data.filter(d => {
-      const isBatal = d.batal === true;
-      const isWithinThreshold = d.waktu_tunggu_menit <= threshold;
-      const hasIndikasiMedis = d.indikasi_medis === true;
-      return !isBatal && (isWithinThreshold || hasIndikasiMedis);
-    }).length;
+    // Numerator (N): Data Penundaan (Count of delay incidents in table without medical indication exemption)
+    const delayedCount = data.filter(d => d.indikasi_medis !== true).length;
 
-    const persen = total > 0 ? ((compliant / total) * 100).toFixed(2) : 100;
+    const numerator = delayedCount;
+    let denominator = totalPasienInput;
+    if (denominator <= 0) {
+      denominator = total;
+    }
+
+    const persen = denominator > 0 ? parseFloat(((numerator / denominator) * 100).toFixed(2)) : 0;
     return {
       total,
-      numerator: compliant,
+      numerator,
+      denominator,
       persen,
-      standar: '≥ 95%'
+      standar: '≤ 5%'
     };
   }
 });
@@ -74,11 +93,16 @@ const service = {
 
     res.data = res.data.map(d => {
       const isBatal = d.batal === true;
-      const isWithinThreshold = d.waktu_tunggu_menit <= threshold;
+      let waktuTunggu = d.waktu_tunggu_menit;
+      if (!isBatal && d.jadwal_jam_operasi && d.jam_mulai_operasi) {
+        waktuTunggu = Math.round(hitungSelisihMenit(d.jadwal_jam_operasi, d.jam_mulai_operasi));
+      }
+      const isWithinThreshold = waktuTunggu <= threshold;
       const hasIndikasiMedis = d.indikasi_medis === true;
       const isPatuh = !isBatal && (isWithinThreshold || hasIndikasiMedis);
       return {
         ...d,
+        waktu_tunggu_menit: waktuTunggu,
         standar_menit: threshold,
         patuh: isPatuh
       };
@@ -92,7 +116,7 @@ const service = {
       where: { periode_id: parseInt(periodeId) }
     });
     if (!summary) {
-      summary = { periode_id: parseInt(periodeId), standar_menit: 60 };
+      summary = { periode_id: parseInt(periodeId), standar_menit: 60, total_pasien: 0 };
     }
     return summary;
   },
@@ -100,11 +124,12 @@ const service = {
   async upsertSummaryData(periodeId, body) {
     const pId = parseInt(periodeId);
     const standarMenit = parseInt(body.standar_menit || 60);
+    const totalPasien = parseInt(body.total_pasien || 0);
 
     return prisma.periodePenundaanSummary.upsert({
       where: { periode_id: pId },
-      update: { standar_menit: standarMenit },
-      create: { periode_id: pId, standar_menit: standarMenit }
+      update: { standar_menit: standarMenit, total_pasien: totalPasien },
+      create: { periode_id: pId, standar_menit: standarMenit, total_pasien: totalPasien }
     });
   }
 };

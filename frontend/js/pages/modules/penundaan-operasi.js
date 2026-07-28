@@ -7,12 +7,17 @@ export default createGenericIndicatorPage({
   endpoint: '/penundaan-operasi',
   ignoreUnit: true,
   metricType: 'compliance',
+  metricLabel: 'Persentase Penundaan',
+  numeratorLabel: 'Data Penundaan (N)',
+  denominatorLabel: 'Total Pasien (D)',
   hasSummaryData: true,
+  summaryDataTitle: 'Parameter Penundaan Operasi Elektif',
   summaryDataFields: [
+    { name: 'total_pasien', label: 'Total Pasien Operasi Elektif', type: 'number', unit: 'Pasien' },
     { name: 'standar_menit', label: 'Batas Menit Penundaan Operasi', type: 'number', unit: 'Menit' }
   ],
-  summaryDataInfo: 'Batas toleransi penundaan waktu pelaksanaan operasi elektif. Pelaksanaan > batas menit tanpa indikasi medis dianggap tertunda.',
-  summaryDataModalTitle: 'Edit Batas Menit Penundaan Operasi',
+  summaryDataInfo: 'Masukkan total populasi seluruh pasien operasi elektif pada periode ini sebagai Denominator (D). Batas menit penundaan digunakan untuk menentukan status penundaan per pasien (Standar Indikator ≤ 5%).',
+  summaryDataModalTitle: 'Edit Parameter Penundaan Operasi Elektif',
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
@@ -40,16 +45,18 @@ export default createGenericIndicatorPage({
 
     form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-    const jadwalH = form.querySelector('#jadwal_hour').value;
-    const jadwalM = form.querySelector('#jadwal_minute').value;
+    const isBatal = formData.batal === 'true' || formData.batal === true;
+
+    const jadwalH = form.querySelector('#jadwal_hour')?.value || '';
+    const jadwalM = form.querySelector('#jadwal_minute')?.value || '';
     const jadwalVal = (jadwalH && jadwalM) ? `${jadwalH}:${jadwalM}` : '';
     formData.jadwal_jam_operasi = jadwalVal;
     
     const jadwalInput = form.querySelector('#jadwal_jam_operasi');
     if (jadwalInput) jadwalInput.value = jadwalVal;
 
-    const mulaiH = form.querySelector('#mulai_hour').value;
-    const mulaiM = form.querySelector('#mulai_minute').value;
+    const mulaiH = form.querySelector('#mulai_hour')?.value || '';
+    const mulaiM = form.querySelector('#mulai_minute')?.value || '';
     const mulaiVal = (mulaiH && mulaiM) ? `${mulaiH}:${mulaiM}` : '';
     formData.jam_mulai_operasi = mulaiVal;
     
@@ -57,12 +64,12 @@ export default createGenericIndicatorPage({
     if (mulaiInput) mulaiInput.value = mulaiVal;
 
     if (!jadwalVal) {
-      form.querySelector('#jadwal_hour').classList.add('is-invalid');
-      form.querySelector('#jadwal_minute').classList.add('is-invalid');
+      form.querySelector('#jadwal_hour')?.classList.add('is-invalid');
+      form.querySelector('#jadwal_minute')?.classList.add('is-invalid');
     }
-    if (!mulaiVal) {
-      form.querySelector('#mulai_hour').classList.add('is-invalid');
-      form.querySelector('#mulai_minute').classList.add('is-invalid');
+    if (!isBatal && !mulaiVal) {
+      form.querySelector('#mulai_hour')?.classList.add('is-invalid');
+      form.querySelector('#mulai_minute')?.classList.add('is-invalid');
     }
   },
   fields: [

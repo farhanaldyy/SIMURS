@@ -12,7 +12,8 @@ const TYPES = [
   { key: 'kematian_meja_operasi', label: 'Kejadian Kematian di Meja Operasi' },
   { key: 'salah_sisi', label: 'Kejadian Operasi Salah Sisi' },
   { key: 'salah_orang', label: 'Kejadian Operasi Salah Orang' },
-  { key: 'salah_prosedur', label: 'Kejadian Operasi Salah Prosedur / Tindakan' }
+  { key: 'salah_prosedur', label: 'Kejadian Operasi Salah Prosedur / Tindakan' },
+  { key: 'laporan_anestesi', label: 'Kelengkapan Laporan Anestesi Sedasi' }
 ];
 
 const monthNames = [
@@ -26,9 +27,15 @@ function formatPeriod(periodId) {
   return `${monthNames[p.bulan]} ${p.tahun}`;
 }
 
-function calculateResult(totalKejadian, totalOperasi) {
+function calculateResult(totalKejadian, totalOperasi, type = '') {
   const tk = parseInt(totalKejadian || 0);
   const to = parseInt(totalOperasi || 0);
+  if (type === 'laporan_anestesi') {
+    if (to === 0) {
+      return tk === 0 ? '100.00%' : '0.00%';
+    }
+    return `${((tk / to) * 100).toFixed(2)}%`;
+  }
   if (to === 0) {
     return tk === 0 ? '100.00%' : '0.00%';
   }
@@ -93,10 +100,33 @@ function renderSummaryBar(type) {
     return;
   }
 
-  const result = calculateResult(record.total_kejadian, record.total_operasi);
+  const result = calculateResult(record.total_kejadian, record.total_operasi, type);
   const isTargetAchieved = result === '100.00%';
   const badgeClass = isTargetAchieved ? 'badge-success' : 'badge-danger';
   const badgeText = isTargetAchieved ? 'Tercapai' : 'Belum Tercapai';
+
+  if (type === 'laporan_anestesi') {
+    container.innerHTML = `
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="flex: 1; min-width: 150px;">
+          <div style="font-size: 0.85rem; color: var(--text-light);">Capaian ${activePeriodName}</div>
+          <div style="font-size: 1.5rem; font-weight: 700; color: ${isTargetAchieved ? 'var(--color-success)' : 'var(--color-danger)'};">${result}</div>
+        </div>
+        <div style="flex: 1; min-width: 120px;">
+          <div style="font-size: 0.85rem; color: var(--text-light);">Total Pasien</div>
+          <div style="font-size: 1.25rem; font-weight: 600;">${record.total_operasi}</div>
+        </div>
+        <div style="flex: 1; min-width: 120px;">
+          <div style="font-size: 0.85rem; color: var(--text-light);">Kelengkapan Laporan</div>
+          <div style="font-size: 1.25rem; font-weight: 600;">${record.total_kejadian}</div>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <span class="badge ${badgeClass}" style="font-size: 0.95rem; padding: 6px 12px;">${badgeText}</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = `
     <div style="display: flex; gap: 16px; flex-wrap: wrap; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
@@ -136,9 +166,26 @@ function renderTableBody(type) {
   sortRecordsByPeriod(typeRecords);
 
   const rows = typeRecords.map(r => {
-    const result = calculateResult(r.total_kejadian, r.total_operasi);
+    const result = calculateResult(r.total_kejadian, r.total_operasi, type);
     const isTargetAchieved = result === '100.00%';
     const canDelete = Store.canDelete();
+
+    if (type === 'laporan_anestesi') {
+      return `
+        <tr>
+          <td><strong>${formatPeriod(r.periode_id)}</strong></td>
+          <td style="text-align: center;">${r.total_operasi}</td>
+          <td style="text-align: center;">${r.total_kejadian}</td>
+          <td style="text-align: center; font-weight: bold; color: ${isTargetAchieved ? 'var(--color-success)' : 'var(--color-danger)'};">${result}</td>
+          <td style="text-align: center;">
+            <div style="display: flex; gap: 4px; justify-content: center;">
+              <button class="btn btn-outline btn-sm btn-edit-record" data-id="${r.id}" data-type="${type}">Edit</button>
+              ${canDelete ? `<button class="btn btn-danger btn-sm btn-delete-record" data-id="${r.id}">Hapus</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }
 
     return `
       <tr>
@@ -184,7 +231,26 @@ function openInputModal(type, record = null) {
   const initialKejadian = record ? record.total_kejadian : (state.activePeriodRecords[type]?.total_kejadian || 0);
   const initialOperasi = record ? record.total_operasi : (state.activePeriodRecords[type]?.total_operasi || 0);
 
-  const modalHTML = `
+  const isAnestesi = type === 'laporan_anestesi';
+
+  const modalHTML = isAnestesi ? `
+    <form id="kamar-operasi-form">
+      <div class="form-group">
+        <label class="form-label">Bulan / Periode</label>
+        <input type="text" class="form-control" value="${record ? formatPeriod(record.periode_id) : activePeriodName}" disabled>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Total Pasien <span class="required">*</span></label>
+        <input type="number" name="total_operasi" class="form-control" value="${initialOperasi}" min="0" required>
+        <small style="color: var(--text-light); margin-top: 4px; display: block;">Total seluruh pasien yang menjalani tindakan anestesi sedasi.</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kelengkapan Laporan <span class="required">*</span></label>
+        <input type="number" name="total_kejadian" class="form-control" value="${initialKejadian}" min="0" required>
+        <small style="color: var(--text-light); margin-top: 4px; display: block;">Jumlah laporan anestesi sedasi yang diisi secara lengkap.</small>
+      </div>
+    </form>
+  ` : `
     <form id="kamar-operasi-form">
       <div class="form-group">
         <label class="form-label">Bulan / Periode</label>
@@ -267,7 +333,7 @@ export const render = async (container) => {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
               <div>
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">${t.label}</h3>
-                <span class="badge badge-outline" style="margin-top: 4px; display: inline-block;">Target: 100% Keamanan</span>
+                <span class="badge badge-outline" style="margin-top: 4px; display: inline-block;">Target: ${t.key === 'laporan_anestesi' ? 'Standar 100%' : '100% Keamanan'}</span>
               </div>
               <button class="btn btn-primary btn-add-data" data-type="${t.key}">+ Input / Edit Data Bulan Ini</button>
             </div>
@@ -279,8 +345,8 @@ export const render = async (container) => {
                 <thead>
                   <tr>
                     <th>Bulan / Periode</th>
-                    <th style="text-align: center;">Total Kejadian</th>
-                    <th style="text-align: center;">Total Operasi</th>
+                    <th style="text-align: center;">${t.key === 'laporan_anestesi' ? 'Total Pasien' : 'Total Kejadian'}</th>
+                    <th style="text-align: center;">${t.key === 'laporan_anestesi' ? 'Kelengkapan Laporan' : 'Total Operasi'}</th>
                     <th style="text-align: center;">Persentase (Hasil)</th>
                     <th style="text-align: center; width: 100px;">Aksi</th>
                   </tr>
@@ -308,3 +374,4 @@ export const render = async (container) => {
 export const destroy = () => {
   window.removeEventListener('periodeChanged', handleFilterChange);
 };
+

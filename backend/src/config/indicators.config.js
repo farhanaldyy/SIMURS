@@ -122,6 +122,84 @@ const AVAILABLE_INDICATORS = [
     nama: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli)',
     standar: '-',
     kategori_default: ['rawat_jalan']
+  },
+  {
+    id: 'penundaan_operasi_elektif',
+    nama: 'Penundaan Operasi Elektif',
+    standar: '≤ 5%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'informed_consent_pembedahaan',
+    nama: 'Kelengkapan Pengisian Inform Concent Pembedahan',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'asesmen_pra_bedah',
+    nama: 'Angka Kelengkapan Asesemen Pra Bedah',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'surgical_checklist_operasi',
+    nama: 'Kepatuhan Melakukan Proses TimeOut Pasien Pre Operasi',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'surgical_checklist_sc',
+    nama: 'Kepatuhan Melakukan Proses TimeOut Pasien Operasi SC',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'penandaan_lokasi_operasi',
+    nama: '100% Pasien Yang dioperasi Ada Marker (Sesuai Ketentuan)',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'kematian_meja_operasi',
+    nama: 'Kejadian Kematian di Meja Operasi',
+    standar: '0%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'salah_sisi_operasi',
+    nama: 'Kejadian Operasi Salah Sisi',
+    standar: '0%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'operasi_salah_pasien',
+    nama: 'Kejadian Operasi Salah Pasien',
+    standar: '0%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'operasi_salah_prosedur',
+    nama: 'Kejadian Operasi Salah Prosedur Tindakan',
+    standar: '0%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'kelengkapan_ic_anestesi',
+    nama: 'Kelengkapan IC Tindakan Anestesi Sedasi',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'asesmen_pra_anestesi',
+    nama: 'Kelengkapan Asesmen Pre Anestesi Sedasi',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'kelengkapan_laporan_anestesi',
+    nama: 'Kelengkapan Laporan Anestesi Sedasi',
+    standar: '100%',
+    kategori_default: ['unit_khusus']
   }
 ];
 

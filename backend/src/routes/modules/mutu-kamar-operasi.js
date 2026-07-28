@@ -12,7 +12,7 @@ router.get('/summary', ctrl.getSummary);
 
 router.post('/', [
   body('periode_id').isInt().withMessage('Periode wajib dipilih'),
-  body('tipe').isIn(['kematian_meja_operasi', 'salah_sisi', 'salah_orang', 'salah_prosedur']).withMessage('Tipe indikator tidak valid'),
+  body('tipe').isIn(['kematian_meja_operasi', 'salah_sisi', 'salah_orang', 'salah_prosedur', 'laporan_anestesi']).withMessage('Tipe indikator tidak valid'),
   body('total_kejadian').isInt({ min: 0 }).withMessage('Total kejadian wajib berupa angka non-negatif'),
   body('total_operasi').isInt({ min: 0 }).withMessage('Total operasi wajib berupa angka non-negatif')
 ], validate, ctrl.upsert);

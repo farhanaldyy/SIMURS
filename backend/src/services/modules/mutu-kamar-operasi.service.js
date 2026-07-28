@@ -1,8 +1,14 @@
 const prisma = require('../../config/database');
 
-function calculateResult(totalKejadian, totalOperasi) {
+function calculateResult(totalKejadian, totalOperasi, tipe = '') {
   const tk = parseInt(totalKejadian || 0);
   const to = parseInt(totalOperasi || 0);
+  if (tipe === 'laporan_anestesi') {
+    if (to === 0) {
+      return tk === 0 ? 100 : 0;
+    }
+    return parseFloat(((tk / to) * 100).toFixed(2));
+  }
   if (to === 0) {
     return tk === 0 ? 100 : 0;
   }
@@ -129,7 +135,17 @@ const service = {
 
     const totalKejadian = record ? record.total_kejadian : 0;
     const totalOperasi = record ? record.total_operasi : 0;
-    const persen = calculateResult(totalKejadian, totalOperasi);
+    const persen = calculateResult(totalKejadian, totalOperasi, tipe);
+
+    if (tipe === 'laporan_anestesi') {
+      return {
+        total: totalOperasi,
+        numerator: totalKejadian,
+        denominator: totalOperasi,
+        persen,
+        standar: '100%'
+      };
+    }
 
     return {
       total: totalKejadian,
