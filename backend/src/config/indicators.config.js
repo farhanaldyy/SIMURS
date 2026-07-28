@@ -98,6 +98,30 @@ const AVAILABLE_INDICATORS = [
     nama: 'Angka Kematian Pasien di IGD',
     standar: '-',
     kategori_default: ['igd']
+  },
+  {
+    id: 'waktu_tunggu_poliklinik',
+    nama: 'Waktu Tunggu Rawat Jalan (Menit)',
+    standar: 'Menit',
+    kategori_default: ['rawat_jalan']
+  },
+  {
+    id: 'waktu_tunggu_poliklinik_jam',
+    nama: 'Waktu Tunggu Rawat Jalan (WT in Jam)',
+    standar: '≤ 1 Jam',
+    kategori_default: ['rawat_jalan']
+  },
+  {
+    id: 'waktu_tunggu_poliklinik_kepatuhan',
+    nama: 'Waktu Tunggu Rawat Jalan (≥ 80%)',
+    standar: '≥ 80%',
+    kategori_default: ['rawat_jalan']
+  },
+  {
+    id: 'waktu_tunggu_poliklinik_rata_rata',
+    nama: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli)',
+    standar: '-',
+    kategori_default: ['rawat_jalan']
   }
 ];
 

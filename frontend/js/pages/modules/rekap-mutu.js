@@ -506,26 +506,26 @@ function renderMatrixTables(container, data) {
                 ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
                   const pal = getMonthPalette(b.bulan);
                   return `
-                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 38px; min-width: 38px; max-width: 38px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 3px 1px;">N</th>
-                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 38px; min-width: 38px; max-width: 38px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 3px 1px;">D</th>
-                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 44px; min-width: 44px; max-width: 44px; font-size: 0.7rem; background: ${pal.capBg}; color: ${pal.textColor}; font-weight: 700; padding: 3px 1px;">C</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">N</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">D</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 58px; min-width: 58px; font-size: 0.7rem; background: ${pal.capBg}; color: ${pal.textColor}; font-weight: 700; padding: 4px 2px;">C</th>
                   `;
                 }).join('') : ''}
 
                 ${isSem ? `
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 40px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 40px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 46px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 40px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 40px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 46px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 42px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 42px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 48px; font-size: 0.7rem; background: #78350f; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 60px; min-width: 60px; font-size: 0.7rem; background: #78350f; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
                 ` : `
-                  <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 40px; min-width: 40px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 40px; min-width: 40px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #0f172a; width: 46px; min-width: 46px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #0f172a; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
                 `}
               </tr>
             </thead>
@@ -537,7 +537,7 @@ function renderMatrixTables(container, data) {
                 return `
                   <tr style="background: ${rowBg};">
                     <td style="position: sticky; left: 0; z-index: 5; background: ${rowBg}; text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #64748b; padding: 3px;">${ind.no}</td>
-                    <td style="position: sticky; left: 28px; z-index: 5; background: ${rowBg}; border-right: 2px solid #94a3b8; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">
+                    <td style="position: sticky; left: 28px; z-index: 5; background: ${rowBg}; border-right: 2px solid #94a3b8; border-bottom: 1px solid #e2e8f0; padding: 4px 8px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">
                       <div style="font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: normal;">${ind.nama_modul}</div>
                       <div style="font-size: 0.68rem; color: #64748b; margin-top: 1px;">Standar: ${ind.standar}</div>
                     </td>
@@ -545,31 +545,33 @@ function renderMatrixTables(container, data) {
                     ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
                       const pal = getMonthPalette(b.bulan);
                       const mData = ind.monthlyData[b.bulan] || { numerator: 0, denominator: 0, capaian: 0 };
+                      const numVal = mData.numerator !== null && mData.numerator !== undefined ? mData.numerator : '-';
+                      const denVal = mData.denominator !== null && mData.denominator !== undefined ? mData.denominator : '-';
                       return `
-                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; color: #334155; white-space: nowrap;">${mData.numerator}</td>
-                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; color: #334155; white-space: nowrap;">${mData.denominator}</td>
-                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: ${pal.textColor}; background: ${pal.capCellBg}; white-space: nowrap;">
+                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; color: #334155; white-space: nowrap;">${numVal}</td>
+                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; color: #334155; white-space: nowrap;">${denVal}</td>
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: ${pal.textColor}; background: ${pal.capCellBg}; white-space: nowrap;">
                           ${mData.capaian}
                         </td>
                       `;
                     }).join('') : ''}
 
                     ${isSem && sb ? `
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw1.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.numerator !== null && sb.tw1.numerator !== undefined ? sb.tw1.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw1.capaian}</td>
 
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw2.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.numerator !== null && sb.tw2.numerator !== undefined ? sb.tw2.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw2.capaian}</td>
 
-                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #78350f;">${sb.totalSemester.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.numerator !== null && sb.totalSemester.numerator !== undefined ? sb.totalSemester.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #78350f;">${sb.totalSemester.capaian}</td>
                     ` : `
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${tot.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.numerator !== null && tot.numerator !== undefined ? tot.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${tot.capaian}</td>
                     `}
                   </tr>
                 `;
@@ -628,28 +630,28 @@ function renderMatrixTables(container, data) {
                 ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
                   const pal = getMonthPalette(b.bulan);
                   return `
-                    <th style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; width: 38px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 3px 1px;">Tot N</th>
-                    <th style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; width: 38px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 3px 1px;">Tot D</th>
-                    <th style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; width: 44px; font-size: 0.7rem; background: ${pal.capBg}; color: ${pal.textColor}; font-weight: 700; padding: 3px 1px;">C</th>
+                    <th style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">Tot N</th>
+                    <th style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">Tot D</th>
+                    <th style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; width: 58px; min-width: 58px; font-size: 0.7rem; background: ${pal.capBg}; color: ${pal.textColor}; font-weight: 700; padding: 4px 2px;">C</th>
                   `;
                 }).join('') : ''}
 
                 ${isSem ? `
-                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 40px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 40px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #1e40af; width: 46px; font-size: 0.7rem; background: #1e40af; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #1e40af; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e40af; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
 
-                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 40px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 40px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #1e40af; width: 46px; font-size: 0.7rem; background: #1e40af; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #1e40af; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e40af; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
 
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 42px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 42px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 48px; font-size: 0.7rem; background: #78350f; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 60px; min-width: 60px; font-size: 0.7rem; background: #78350f; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
                 ` : `
-                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 40px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 3px 1px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 40px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 3px 1px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #1e40af; width: 46px; font-size: 0.7rem; background: #1e40af; color: #ffffff; font-weight: 700; padding: 3px 1px;">C</th>
+                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                  <th style="text-align: center; border-right: 1px solid #1d4ed8; border-bottom: 1px solid #1d4ed8; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                  <th style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #1e40af; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e40af; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
                 `}
               </tr>
             </thead>
@@ -661,7 +663,7 @@ function renderMatrixTables(container, data) {
                 return `
                   <tr style="background: ${rowBg};">
                     <td style="position: sticky; left: 0; z-index: 5; background: ${rowBg}; text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #64748b; padding: 3px;">${ind.no}</td>
-                    <td style="position: sticky; left: 28px; z-index: 5; background: ${rowBg}; border-right: 2px solid #3b82f6; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">
+                    <td style="position: sticky; left: 28px; z-index: 5; background: ${rowBg}; border-right: 2px solid #3b82f6; border-bottom: 1px solid #e2e8f0; padding: 4px 8px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">
                       <div style="font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: normal;">${ind.nama_modul}</div>
                       <div style="font-size: 0.68rem; color: #64748b; margin-top: 1px;">Standar: ${ind.standar}</div>
                     </td>
@@ -669,31 +671,33 @@ function renderMatrixTables(container, data) {
                     ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
                       const pal = getMonthPalette(b.bulan);
                       const mData = ind.monthlyData[b.bulan] || { numerator: 0, denominator: 0, capaian: 0 };
+                      const numVal = mData.numerator !== null && mData.numerator !== undefined ? mData.numerator : '-';
+                      const denVal = mData.denominator !== null && mData.denominator !== undefined ? mData.denominator : '-';
                       return `
-                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 600; color: #334155; white-space: nowrap;">${mData.numerator}</td>
-                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 600; color: #334155; white-space: nowrap;">${mData.denominator}</td>
-                        <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: ${pal.textColor}; background: ${pal.capCellBg}; white-space: nowrap;">
+                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 600; color: #334155; white-space: nowrap;">${numVal}</td>
+                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 600; color: #334155; white-space: nowrap;">${denVal}</td>
+                        <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: ${pal.textColor}; background: ${pal.capCellBg}; white-space: nowrap;">
                           ${mData.capaian}
                         </td>
                       `;
                     }).join('') : ''}
 
                     ${isSem && sb ? `
-                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw1.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw1.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #1e40af;">${sb.tw1.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw1.numerator !== null && sb.tw1.numerator !== undefined ? sb.tw1.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw1.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e40af;">${sb.tw1.capaian}</td>
 
-                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw2.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw2.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #1e40af;">${sb.tw2.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw2.numerator !== null && sb.tw2.numerator !== undefined ? sb.tw2.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${sb.tw2.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e40af;">${sb.tw2.capaian}</td>
 
-                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #78350f;">${sb.totalSemester.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.numerator !== null && sb.totalSemester.numerator !== undefined ? sb.totalSemester.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #78350f;">${sb.totalSemester.capaian}</td>
                     ` : `
-                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${tot.numerator}</td>
-                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${tot.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #e2e8f0; padding: 3px 2px; font-weight: 800; color: #ffffff; background: #1e40af;">${tot.capaian}</td>
+                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${tot.numerator !== null && tot.numerator !== undefined ? tot.numerator : '-'}</td>
+                      <td style="text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #1e3a8a; background: #eff6ff;">${tot.denominator}</td>
+                      <td style="text-align: center; border-right: 1px solid #1e40af; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e40af;">${tot.capaian}</td>
                     `}
                   </tr>
                 `;

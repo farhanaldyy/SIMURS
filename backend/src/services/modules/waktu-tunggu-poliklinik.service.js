@@ -57,16 +57,24 @@ const baseService = createGenericService('waktuTungguPoliklinik', {
 
   calculateSummary(data) {
     const total = data.length;
-    const totalPasien = data.reduce((sum, item) => sum + item.jumlah_pasien, 0);
-    const totalWaktuTunggu = data.reduce((sum, item) => sum + item.waktu_tunggu, 0);
+    const totalPasien = data.reduce((sum, item) => sum + (item.jumlah_pasien || 0), 0);
+    const totalWaktuTunggu = data.reduce((sum, item) => sum + (item.waktu_tunggu || 0), 0);
     const rataRata = total > 0 ? parseFloat((totalWaktuTunggu / total).toFixed(2)) : 0;
+    const totalPatuh = data.filter(item => item.waktu_tunggu <= 60).length;
+    const totalTidakPatuh = total - totalPatuh;
+    const menitPerPasien = totalPasien > 0 ? parseFloat((totalWaktuTunggu / totalPasien).toFixed(2)) : 0;
+    const wtInJam = parseFloat((totalWaktuTunggu / 60).toFixed(2));
     
     return {
       total,
       totalPasien,
       totalWaktuTunggu: parseFloat(totalWaktuTunggu.toFixed(2)),
       rataRata,
-      standar: '≤ 60 menit'
+      totalPatuh,
+      totalTidakPatuh,
+      menitPerPasien,
+      wtInJam,
+      standar: 'Menit'
     };
   }
 });

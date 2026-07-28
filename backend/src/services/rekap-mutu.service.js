@@ -261,21 +261,98 @@ const ALL_INDICATOR_CONFIGS = [
       const den = summary.denominator !== undefined ? summary.denominator : 0;
       return { num, den };
     }
+  },
+  {
+    no: 17,
+    id: 'waktu_tunggu_poliklinik',
+    nama: 'Waktu Tunggu Rawat Jalan (Menit) - Nama Modul: Waktu Tunggu Rawat Jalan',
+    nama_modul: 'Waktu Tunggu Rawat Jalan (Menit)',
+    standar: 'Menit',
+    label_numerator: 'Total Akumulasi Menit (“N”)',
+    label_denominator: 'Total Pasien (“D”)',
+    formula: 'Numerator / Denumerator',
+    service: require('./modules/waktu-tunggu-poliklinik.service'),
+    extract: (summary) => {
+      const num = summary.totalWaktuTunggu !== undefined ? summary.totalWaktuTunggu : 0;
+      const den = summary.totalPasien !== undefined ? summary.totalPasien : 0;
+      return { num, den };
+    },
+    calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
+  },
+  {
+    no: 18,
+    id: 'waktu_tunggu_poliklinik_jam',
+    nama: 'Waktu Tunggu Rawat Jalan (WT in Jam) - Nama Modul: Waktu Tunggu Rawat Jalan',
+    nama_modul: 'Waktu Tunggu Rawat Jalan (WT in Jam)',
+    standar: '≤ 1 Jam',
+    label_numerator: '-',
+    label_denominator: 'Konstanta 6 (“D”)',
+    formula: 'Capaian Menit / 6',
+    service: require('./modules/waktu-tunggu-poliklinik.service'),
+    isCalculatedFromMenit: true,
+    extract: (summary) => {
+      const num = null;
+      const den = 6;
+      return { num, den };
+    }
+  },
+  {
+    no: 19,
+    id: 'waktu_tunggu_poliklinik_kepatuhan',
+    nama: 'Waktu Tunggu Rawat Jalan (≥ 80%) - Nama Modul: Waktu Tunggu Rawat Jalan',
+    nama_modul: 'Waktu Tunggu Rawat Jalan (≥ 80%)',
+    standar: '≥ 80%',
+    label_numerator: 'Poli Sesuai Standar ≤60m (“N”)',
+    label_denominator: 'Total Poliklinik (“D”)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/waktu-tunggu-poliklinik.service'),
+    extract: (summary) => {
+      const num = summary.totalPatuh !== undefined ? summary.totalPatuh : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 20,
+    id: 'waktu_tunggu_poliklinik_rata_rata',
+    nama: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli) - Nama Modul: Waktu Tunggu Rawat Jalan',
+    nama_modul: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli)',
+    standar: '-',
+    label_numerator: 'Total Akumulasi Menit (“N”)',
+    label_denominator: 'Total Poliklinik (“D”)',
+    formula: 'Numerator / Denumerator',
+    service: require('./modules/waktu-tunggu-poliklinik.service'),
+    extract: (summary) => {
+      const num = summary.totalWaktuTunggu !== undefined ? summary.totalWaktuTunggu : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    },
+    calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
   }
 ];
 
 function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
   if (roomConfig && roomConfig.hasSaved) {
-    return ALL_INDICATOR_CONFIGS.filter(ind => roomConfig.set.has(ind.id));
+    const hasParentWaktuTunggu = roomConfig.set.has('waktu_tunggu_poliklinik') || roomConfig.set.has('waktu-tunggu-poliklinik');
+    return ALL_INDICATOR_CONFIGS.filter(ind => 
+      roomConfig.set.has(ind.id) || 
+      roomConfig.set.has(ind.id.replace(/_/g, '-')) ||
+      roomConfig.set.has(ind.id.replace(/-/g, '_')) ||
+      (hasParentWaktuTunggu && ind.id.startsWith('waktu_tunggu_poliklinik'))
+    );
   }
   const defaultIds = new Set(
     AVAILABLE_INDICATORS
       .filter(ai => ai.kategori_default && (ai.kategori_default.includes(room.kategori_unit) || ai.kategori_default.includes(kategori)))
-      .map(ai => ai.id)
+      .flatMap(ai => [ai.id, ai.id.replace(/_/g, '-'), ai.id.replace(/-/g, '_')])
   );
 
   if (defaultIds.size > 0) {
-    return ALL_INDICATOR_CONFIGS.filter(ind => defaultIds.has(ind.id));
+    return ALL_INDICATOR_CONFIGS.filter(ind => 
+      defaultIds.has(ind.id) || 
+      defaultIds.has(ind.id.replace(/_/g, '-')) || 
+      defaultIds.has(ind.id.replace(/-/g, '_'))
+    );
   }
 
   return ALL_INDICATOR_CONFIGS;
@@ -307,7 +384,10 @@ function getExcelMonthPalette(monthNum) {
   return EXCEL_MONTH_PALETTES[idx];
 }
 
-function calculateCapaian(numerator, denominator) {
+function calculateCapaian(numerator, denominator, ind = null) {
+  if (ind && typeof ind.calculateCapaian === 'function') {
+    return ind.calculateCapaian(numerator, denominator);
+  }
   if (!denominator || denominator <= 0) return 0;
   const floatVal = (numerator / denominator) * 100;
   return parseFloat(floatVal.toFixed(2));
@@ -426,7 +506,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
               const queryWhere = { periode_id: pid, unit_id: room.id, ...(ind.extraWhere || {}) };
               const summary = await ind.service.getSummary(queryWhere);
               const { num, den } = ind.extract(summary);
-              const capaian = calculateCapaian(num, den);
+              const capaian = calculateCapaian(num, den, ind);
 
               monthlyData[b] = {
                 numerator: num,
@@ -457,7 +537,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
           const totalPeriode = {
             numerator: totPeriodNum,
             denominator: totPeriodDen,
-            capaian: calculateCapaian(totPeriodNum, totPeriodDen)
+            capaian: calculateCapaian(totPeriodNum, totPeriodDen, ind)
           };
 
           // Semester sub-aggregates
@@ -467,9 +547,9 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
             const tw2Label = startBulan === 1 ? 'TOTAL TRIWULAN II' : 'TOTAL TRIWULAN IV';
 
             semesterBreakdown = {
-              tw1: { label: tw1Label, numerator: tw1Num, denominator: tw1Den, capaian: calculateCapaian(tw1Num, tw1Den) },
-              tw2: { label: tw2Label, numerator: tw2Num, denominator: tw2Den, capaian: calculateCapaian(tw2Num, tw2Den) },
-              totalSemester: { label: semesterLabel, numerator: totPeriodNum, denominator: totPeriodDen, capaian: calculateCapaian(totPeriodNum, totPeriodDen) }
+              tw1: { label: tw1Label, numerator: tw1Num, denominator: tw1Den, capaian: calculateCapaian(tw1Num, tw1Den, ind) },
+              tw2: { label: tw2Label, numerator: tw2Num, denominator: tw2Den, capaian: calculateCapaian(tw2Num, tw2Den, ind) },
+              totalSemester: { label: semesterLabel, numerator: totPeriodNum, denominator: totPeriodDen, capaian: calculateCapaian(totPeriodNum, totPeriodDen, ind) }
             };
           }
 
@@ -482,12 +562,60 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
             label_numerator: ind.label_numerator,
             label_denominator: ind.label_denominator,
             formula: ind.formula,
+            isCalculatedFromMenit: ind.isCalculatedFromMenit,
             monthlyData,
             totalPeriode,
             semesterBreakdown
           };
         })
       );
+
+      // Post-process indicators that calculate Capaian from Menit (e.g., WT in Jam = Capaian Menit / 6)
+      indicators.forEach(ind => {
+        if (ind.isCalculatedFromMenit) {
+          const menitInd = indicators.find(i => i.id === 'waktu_tunggu_poliklinik');
+          if (menitInd) {
+            bulanList.forEach(bObj => {
+              const b = bObj.bulan;
+              const mMenit = menitInd.monthlyData[b];
+              const capJam = mMenit ? parseFloat((mMenit.capaian / 6).toFixed(2)) : 0;
+              ind.monthlyData[b] = {
+                numerator: null,
+                denominator: 6,
+                capaian: capJam
+              };
+            });
+
+            const totCapJam = parseFloat((menitInd.totalPeriode.capaian / 6).toFixed(2));
+            ind.totalPeriode = {
+              numerator: null,
+              denominator: 6,
+              capaian: totCapJam
+            };
+
+            if (menitInd.semesterBreakdown && ind.semesterBreakdown) {
+              ind.semesterBreakdown.tw1 = {
+                label: menitInd.semesterBreakdown.tw1.label,
+                numerator: null,
+                denominator: 6,
+                capaian: parseFloat((menitInd.semesterBreakdown.tw1.capaian / 6).toFixed(2))
+              };
+              ind.semesterBreakdown.tw2 = {
+                label: menitInd.semesterBreakdown.tw2.label,
+                numerator: null,
+                denominator: 6,
+                capaian: parseFloat((menitInd.semesterBreakdown.tw2.capaian / 6).toFixed(2))
+              };
+              ind.semesterBreakdown.totalSemester = {
+                label: menitInd.semesterBreakdown.totalSemester.label,
+                numerator: null,
+                denominator: 6,
+                capaian: parseFloat((menitInd.semesterBreakdown.totalSemester.capaian / 6).toFixed(2))
+              };
+            }
+          }
+        }
+      });
 
       return {
         id: room.id,
@@ -524,7 +652,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
         }
       });
 
-      const totCapaian = calculateCapaian(totNum, totDen);
+      const totCapaian = calculateCapaian(totNum, totDen, ind);
       monthlyData[b] = {
         numerator: totNum,
         denominator: totDen,
@@ -549,7 +677,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
     const totalPeriode = {
       numerator: rsPeriodNum,
       denominator: rsPeriodDen,
-      capaian: calculateCapaian(rsPeriodNum, rsPeriodDen)
+      capaian: calculateCapaian(rsPeriodNum, rsPeriodDen, ind)
     };
 
     let semesterBreakdown = null;
@@ -558,9 +686,9 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
       const tw2Label = startBulan === 1 ? 'TOTAL TRIWULAN II' : 'TOTAL TRIWULAN IV';
 
       semesterBreakdown = {
-        tw1: { label: tw1Label, numerator: rsTw1Num, denominator: rsTw1Den, capaian: calculateCapaian(rsTw1Num, rsTw1Den) },
-        tw2: { label: tw2Label, numerator: rsTw2Num, denominator: rsTw2Den, capaian: calculateCapaian(rsTw2Num, rsTw2Den) },
-        totalSemester: { label: semesterLabel, numerator: rsPeriodNum, denominator: rsPeriodDen, capaian: calculateCapaian(rsPeriodNum, rsPeriodDen) }
+        tw1: { label: tw1Label, numerator: rsTw1Num, denominator: rsTw1Den, capaian: calculateCapaian(rsTw1Num, rsTw1Den, ind) },
+        tw2: { label: tw2Label, numerator: rsTw2Num, denominator: rsTw2Den, capaian: calculateCapaian(rsTw2Num, rsTw2Den, ind) },
+        totalSemester: { label: semesterLabel, numerator: rsPeriodNum, denominator: rsPeriodDen, capaian: calculateCapaian(rsPeriodNum, rsPeriodDen, ind) }
       };
     }
 
@@ -753,10 +881,8 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
       const row = ws.getRow(currentRow);
       row.getCell(2).value = ind.no;
       row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
-      applyDataBorder(row.getCell(2));
-
-      row.getCell(3).value = `${ind.nama_modul} (Standar: ${ind.standar})`;
-      row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+      const stdSuffix = (ind.standar && ind.standar !== '-' && !ind.nama_modul.includes(ind.standar)) ? ` (${ind.standar})` : '';
+      row.getCell(3).value = `${ind.nama_modul}${stdSuffix}`;
       applyDataBorder(row.getCell(3));
 
       colIdx = 4;
@@ -913,7 +1039,8 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
       row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
       applyDataBorder(row.getCell(2));
 
-      row.getCell(3).value = `${ind.nama_modul} (Standar: ${ind.standar})`;
+      const rsStdSuffix = (ind.standar && ind.standar !== '-' && !ind.nama_modul.includes(ind.standar)) ? ` (${ind.standar})` : '';
+      row.getCell(3).value = `${ind.nama_modul}${rsStdSuffix}`;
       row.getCell(3).font = { bold: true };
       row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
       applyDataBorder(row.getCell(3));
@@ -976,6 +1103,16 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
   // Set column widths
   ws.getColumn(1).width = 3; ws.getColumn(2).width = 6; ws.getColumn(3).width = 45;
   for (let c = 4; c <= totalCols; c++) { ws.getColumn(c).width = 12; }
+
+  // Set default font to Arial for all cells in the worksheet
+  ws.eachRow({ includeEmpty: false }, (row) => {
+    row.eachCell({ includeEmpty: false }, (cell) => {
+      cell.font = {
+        name: 'Arial',
+        ...(cell.font || {})
+      };
+    });
+  });
 
   return wb;
 }
