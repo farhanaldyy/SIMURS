@@ -9,6 +9,10 @@ router.use(verifyToken);
 
 router.get('/', ctrl.getAll);
 router.get('/summary', ctrl.getSummary);
+router.get('/summary-data', ctrl.getSummaryData);
+router.post('/summary-data', [
+  body('periode_id').isInt().withMessage('Periode wajib dipilih'),
+], validate, ctrl.upsertSummaryData);
 
 router.post('/', [
   body('periode_id').isInt().withMessage('Periode wajib dipilih'),

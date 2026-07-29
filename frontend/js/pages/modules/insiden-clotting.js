@@ -5,7 +5,17 @@ export default createGenericIndicatorPage({
   subtitle: 'Pencatatan kejadian pembekuan darah (clotting) saat proses hemodialisa',
   endpoint: '/insiden-clotting',
   ignoreUnit: true,
-  metricType: 'count',
+  metricType: 'compliance',
+  numeratorLabel: 'Total Kejadian (N)',
+  denominatorLabel: 'Total Pasien HD (D)',
+  metricLabel: 'Persentase',
+  hasSummaryData: true,
+  summaryDataTitle: 'Parameter Total Pasien HD',
+  summaryDataInfo: 'Masukkan total populasi/jumlah seluruh pasien HD pada periode ini sebagai denominator (D) rasio insiden clotting.',
+  summaryDataModalTitle: 'Update Parameter Total Pasien HD',
+  summaryDataFields: [
+    { name: 'total_pasien', label: 'Total Pasien HD', type: 'number', unit: 'Pasien' }
+  ],
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },

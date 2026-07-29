@@ -206,6 +206,24 @@ const AVAILABLE_INDICATORS = [
     nama: 'Kelengkapan Laporan Anestesi Sedasi',
     standar: '100%',
     kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'insiden-clotting-durante',
+    nama: 'Insiden Clotting Durante HD',
+    standar: '-',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'insiden-jarum-vena',
+    nama: 'Insiden Terlepaskan Jarum Vena Fistula Intra Dialysis',
+    standar: '0%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'jadwal-hemodialisa',
+    nama: 'Ketidakpatuhan Pasien Tentang Jadwal Hemodialisa',
+    standar: '-',
+    kategori_default: ['unit_khusus']
   }
 ];
 

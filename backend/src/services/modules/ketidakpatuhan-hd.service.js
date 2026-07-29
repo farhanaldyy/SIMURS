@@ -12,12 +12,13 @@ const baseService = createGenericService('ketidakpatuhanHd', {
     });
 
     const totalPasien = summary ? summary.total_pasien_hd : 0;
+    const persen = totalPasien > 0 ? parseFloat(((totalMissed / totalPasien) * 100).toFixed(2)) : 0;
 
     return {
       total: totalMissed,
       numerator: totalMissed,
       denominator: totalPasien,
-      persen: '-',
+      persen,
       standar: '-'
     };
   }

@@ -557,6 +557,54 @@ const ALL_INDICATOR_CONFIGS = [
       const den = summary.denominator !== undefined ? summary.denominator : 0;
       return { num, den };
     }
+  },
+  {
+    no: 34,
+    id: 'insiden-clotting-durante',
+    nama: 'Insiden Clotting Durante HD ( - ) - Nama Modul: Insiden Clotting Durante HD',
+    nama_modul: 'Insiden Clotting Durante HD',
+    standar: '-',
+    label_numerator: 'Total Data Kejadian (Clotting)',
+    label_denominator: 'Total Data Pasien HD',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/insiden-clotting.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 35,
+    id: 'insiden-jarum-vena',
+    nama: 'Insiden Terlepaskan Jarum Vena Fistula Intra Dialysis ( 0% ) - Nama Modul: Insiden Jarum Vena',
+    nama_modul: 'Insiden Terlepaskan Jarum Vena Fistula Intra Dialysis',
+    standar: '0%',
+    label_numerator: 'Total Data Insiden',
+    label_denominator: 'Total Data Pemasangan',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/insiden-jarum-vena.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 36,
+    id: 'jadwal-hemodialisa',
+    nama: 'Ketidakpatuhan Pasien Tentang Jadwal Hemodialisa ( - ) - Nama Modul: Ketidakpatuhan HD',
+    nama_modul: 'Ketidakpatuhan Pasien Tentang Jadwal Hemodialisa',
+    standar: '-',
+    label_numerator: 'Total Data Pasien Tidak Patuh',
+    label_denominator: 'Total Data Pasien HD',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/ketidakpatuhan-hd.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
   }
 ];
 
@@ -567,6 +615,8 @@ function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
       roomConfig.set.has(ind.id) || 
       roomConfig.set.has(ind.id.replace(/_/g, '-')) ||
       roomConfig.set.has(ind.id.replace(/-/g, '_')) ||
+      (ind.id === 'jadwal-hemodialisa' && (roomConfig.set.has('ketidakpatuhan_hd') || roomConfig.set.has('jadwal_hemodialisa'))) ||
+      (ind.id === 'insiden-clotting-durante' && (roomConfig.set.has('insiden_clotting') || roomConfig.set.has('insiden-clotting'))) ||
       (hasParentWaktuTunggu && ind.id.startsWith('waktu_tunggu_poliklinik'))
     );
   }

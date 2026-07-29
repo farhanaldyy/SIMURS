@@ -579,6 +579,15 @@ model InsidenClotting {
   @@map("insiden_clotting")
 }
 
+model PeriodeInsidenClottingSummary {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int      @unique
+  total_pasien Int      @default(0)
+  updated_at   DateTime @updatedAt
+
+  @@map("periode_insiden_clotting_summary")
+}
+
 model InsidenJarumVena {
   id               Int      @id @default(autoincrement())
   periode_id       Int
