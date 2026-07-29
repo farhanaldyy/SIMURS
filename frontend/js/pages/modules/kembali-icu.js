@@ -5,7 +5,17 @@ export default createGenericIndicatorPage({
   subtitle: 'Pencatatan pasien yang kembali ke ICU < 72 jam sejak keluar',
   endpoint: '/kembali-icu',
   ignoreUnit: true,
-  metricType: 'count',
+  metricType: 'compliance',
+  numeratorLabel: 'Total Kejadian (N)',
+  denominatorLabel: 'Total Pasien ICU (D)',
+  metricLabel: 'Persentase',
+  hasSummaryData: true,
+  summaryDataTitle: 'Parameter Total Pasien ICU',
+  summaryDataInfo: 'Masukkan total populasi/jumlah seluruh pasien ICU pada periode ini sebagai denominator (D) rasio pasien kembali ke ICU.',
+  summaryDataModalTitle: 'Update Parameter Total Pasien ICU',
+  summaryDataFields: [
+    { name: 'total_pasien', label: 'Total Pasien ICU', type: 'number', unit: 'Pasien' }
+  ],
   columns: [
     { label: 'Nama Pasien', key: 'nama_pasien' },
     { label: 'No RM', key: 'no_rm' },
@@ -21,3 +31,4 @@ export default createGenericIndicatorPage({
     { name: 'keterangan', label: 'Alasan Kembali ke ICU', type: 'text', required: true, row: 3 }
   ]
 });
+

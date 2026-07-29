@@ -136,7 +136,7 @@ async function exportExcel(req, res, next) {
         
         let hasil = `${sum.persen || 0}%`;
         if (sum.rataRata !== undefined) hasil = sum.rataRata;
-        else if (name.includes('Kematian') || name.includes('Kembali ICU') || name.includes('Clotting') || name === 'Insiden Keselamatan') {
+        else if (name.includes('Kematian') || name.includes('Clotting') || name === 'Insiden Keselamatan') {
           hasil = sum.total;
         }
 

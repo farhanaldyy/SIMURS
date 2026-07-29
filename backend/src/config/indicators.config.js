@@ -64,6 +64,12 @@ const AVAILABLE_INDICATORS = [
     kategori_default: ['rawat_inap', 'unit_khusus']
   },
   {
+    id: 'kembali-icu',
+    nama: 'Rata-rata Kembali Rawat Intensif < 72 jam',
+    standar: '-',
+    kategori_default: ['unit_khusus']
+  },
+  {
     id: 'emergency_response_time',
     nama: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat',
     standar: '≤ 5 menit',

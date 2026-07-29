@@ -168,6 +168,22 @@ const ALL_INDICATOR_CONFIGS = [
   },
   {
     no: 11,
+    id: 'kembali-icu',
+    nama: 'Rata-rata Kembali Rawat Intensif < 72 jam ( - ) - Nama Modul: Kembali ICU',
+    nama_modul: 'Rata-rata Kembali Rawat Intensif < 72 jam',
+    standar: '-',
+    label_numerator: 'Total Data Kembali ICU',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/kembali-icu.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 11,
     id: 'emergency_response_time',
     nama: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat ( ≤ 5 menit ) - Nama Modul: Emergency Response Time',
     nama_modul: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat',
@@ -766,11 +782,21 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
             };
           }
 
+          let displayName = ind.nama;
+          let displayModul = ind.nama_modul;
+
+          if (room && (room.nama_unit === 'ICU' || room.kode_unit === 'RK_ICU' || (room.nama_unit && room.nama_unit.toUpperCase().includes('ICU')))) {
+            if (ind.id === 'angka_kematian_ranap' || ind.id === 'angka-kematian-ranap') {
+              displayModul = 'Pasien Meninggal di ICU';
+              displayName = `Pasien Meninggal di ICU ( ${ind.standar} ) - Nama Modul: Angka Kematian Ranap`;
+            }
+          }
+
           return {
             no: ind.no,
             id: ind.id,
-            nama: ind.nama,
-            nama_modul: ind.nama_modul,
+            nama: displayName,
+            nama_modul: displayModul,
             standar: ind.standar,
             label_numerator: ind.label_numerator,
             label_denominator: ind.label_denominator,

@@ -517,6 +517,16 @@ model KembaliIcu {
   @@map("kembali_icu")
 }
 
+model PeriodeKembaliIcuSummary {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int      @unique
+  total_pasien Int      @default(0)
+  updated_at   DateTime @updatedAt
+
+  @@map("periode_kembali_icu_summary")
+}
+
+
 model KetidakpatuhanHd {
   id                   Int      @id @default(autoincrement())
   periode_id           Int

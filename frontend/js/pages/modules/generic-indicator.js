@@ -145,7 +145,7 @@ export function createGenericIndicatorPage(config) {
       ${(config.metricType === 'compliance' || config.metricType === 'incident_ratio') && s.denominator !== undefined ? `<div class="summary-item"><div class="summary-value">${s.denominator}</div><div class="summary-label">${denominatorText}</div></div>` : ''}
       ${showTargetMetric ? `<div class="summary-item"><div class="summary-value">${targetMetric}</div><div class="summary-label">${labelMetric}</div></div>` : ''}
       <div class="summary-item">
-        ${config.metricType === 'count' || config.metricType === 'incident_ratio' || s.standar === '0'
+        ${config.metricType === 'count' || config.metricType === 'incident_ratio' || s.standar === '0' || s.standar === '0%'
           ? `<span class="badge ${(s.total || 0) === 0 ? 'badge-success' : 'badge-danger'}">${(s.total || 0) === 0 ? '✓ Tercapai' : '✕ Tidak Tercapai'}</span>`
           : (s.persen === '-' || s.standar === '-' ? `<span class="badge badge-info">-</span>` : renderBadge(config.metricType === 'average' ? (s.rataRata || 0) : (s.persen || 0), s.standar || '100'))
         }
