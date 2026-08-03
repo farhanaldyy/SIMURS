@@ -7,17 +7,22 @@ function coerceTypes(data) {
       const trimmed = val.trim();
       let finalVal = trimmed;
 
-      // Coerce space-separated enum values to underscored ones for Prisma
-      if (trimmed === 'tidak dilakukan') {
-        finalVal = 'tidak_dilakukan';
-      } else if (trimmed === 'tidak ada peluang') {
-        finalVal = 'tidak_ada_peluang';
-      } else if (trimmed === 'tidak sesuai') {
-        finalVal = 'tidak_sesuai';
-      } else if (trimmed === 'Tidak Sesuai') {
-        finalVal = 'Tidak_Sesuai';
-      } else if (trimmed === 'tidak ada') {
-        finalVal = 'tidak_ada';
+      // Do NOT convert spaces to underscores for free-text fields
+      const isFreeText = key.includes('deskripsi') || key.includes('catatan') || key.includes('keterangan') || key.includes('detail') || key === 'nama_pasien' || key === 'no_rm' || key === 'diagnosis' || key === 'alasan' || key === 'solusi' || key === 'pemberian_antiplatelet';
+
+      // Coerce space-separated enum values to underscored ones for Prisma (only on non-free-text fields)
+      if (!isFreeText) {
+        if (trimmed === 'tidak dilakukan') {
+          finalVal = 'tidak_dilakukan';
+        } else if (trimmed === 'tidak ada peluang') {
+          finalVal = 'tidak_ada_peluang';
+        } else if (trimmed === 'tidak sesuai') {
+          finalVal = 'tidak_sesuai';
+        } else if (trimmed === 'Tidak Sesuai') {
+          finalVal = 'Tidak_Sesuai';
+        } else if (trimmed === 'tidak ada') {
+          finalVal = 'tidak_ada';
+        }
       }
 
       // Coerce booleans

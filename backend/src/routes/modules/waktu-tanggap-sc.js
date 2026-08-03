@@ -8,6 +8,11 @@ const ctrl = require('../../controllers/modules/waktu-tanggap-sc.controller');
 router.use(verifyToken);
 router.get('/', ctrl.getAll);
 router.get('/summary', ctrl.getSummary);
+router.get('/summary-data', ctrl.getSummaryData);
+router.post('/summary-data', [
+  body('periode_id').isInt().withMessage('Periode ID wajib disertakan'),
+  body('standar_menit').optional().isInt().withMessage('Batas waktu harus berupa angka'),
+], validate, ctrl.upsertSummaryData);
 
 router.post('/', [
   body('periode_id').isInt(), body('unit_id').isInt(),

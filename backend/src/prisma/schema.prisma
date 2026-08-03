@@ -319,6 +319,16 @@ model WaktuTanggapSc {
   @@map("waktu_tanggap_sc")
 }
 
+model PeriodeWaktuTanggapScSummary {
+  id            Int      @id @default(autoincrement())
+  periode_id    Int      @unique
+  standar_menit Int      @default(30)
+  total_pasien  Int      @default(0)
+  updated_at    DateTime @updatedAt
+
+  @@map("periode_waktu_tanggap_sc_summary")
+}
+
 model IdentifikasiPasien {
   id                   Int              @id @default(autoincrement())
   periode_id           Int
@@ -586,6 +596,30 @@ model PeriodeInsidenClottingSummary {
   updated_at   DateTime @updatedAt
 
   @@map("periode_insiden_clotting_summary")
+}
+
+model InsidenPasienJatuhHd {
+  id                 Int      @id @default(autoincrement())
+  periode_id         Int
+  tanggal_kejadian   DateTime @db.Date
+  nama_pasien        String   @db.VarChar(100)
+  no_rm              String   @db.VarChar(20)
+  deskripsi_kejadian String?  @db.Text
+  created_by         Int
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@index([periode_id])
+  @@map("insiden_pasien_jatuh_hd")
+}
+
+model PeriodeInsidenPasienJatuhHdSummary {
+  id           Int      @id @default(autoincrement())
+  periode_id   Int      @unique
+  total_pasien Int      @default(0)
+  updated_at   DateTime @updatedAt
+
+  @@map("periode_insiden_pasien_jatuh_hd_summary")
 }
 
 model InsidenJarumVena {

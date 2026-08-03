@@ -42,6 +42,7 @@ router.use('/asesmen-awal-igd', require('./modules/asesmen-awal-igd'));
 router.use('/pasien-tertahan-igd', require('./modules/pasien-tertahan-igd'));
 router.use('/ketidakpatuhan-hd', require('./modules/ketidakpatuhan-hd'));
 router.use('/insiden-clotting', require('./modules/insiden-clotting'));
+router.use('/insiden-pasien-jatuh-hd', require('./modules/insiden-pasien-jatuh-hd'));
 router.use('/insiden-jarum-vena', require('./modules/insiden-jarum-vena'));
 router.use('/penundaan-operasi', require('./modules/penundaan-operasi'));
 router.use('/informed-consent-pembedahan', require('./modules/informed-consent-pembedahan'));

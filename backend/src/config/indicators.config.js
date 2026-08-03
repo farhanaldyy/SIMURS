@@ -224,6 +224,18 @@ const AVAILABLE_INDICATORS = [
     nama: 'Ketidakpatuhan Pasien Tentang Jadwal Hemodialisa',
     standar: '-',
     kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'waktu-tanggap-sc',
+    nama: 'Waktu Tanggap Operasi Seksio Sesarea Emergency',
+    standar: '≥ 80%',
+    kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'insiden-pasien-jatuh-hd',
+    nama: 'Insiden Pasien Jatuh Hemodialisis',
+    standar: '0%',
+    kategori_default: ['unit_khusus']
   }
 ];
 

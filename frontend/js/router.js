@@ -36,6 +36,7 @@ const routes = {
   // Hemodialisa (HD)
   '#/ketidakpatuhan-hd':          { module: () => import('./pages/modules/ketidakpatuhan-hd.js'), title: 'Ketidakpatuhan Pasien HD' },
   '#/insiden-clotting':           { module: () => import('./pages/modules/insiden-clotting.js'), title: 'Insiden Clotting Durante HD' },
+  '#/insiden-pasien-jatuh-hd':    { module: () => import('./pages/modules/insiden-pasien-jatuh-hd.js'), title: 'Insiden Pasien Jatuh Hemodialisis' },
   '#/insiden-jarum-vena':         { module: () => import('./pages/modules/insiden-jarum-vena.js'), title: 'Insiden Jarum Vena Fistula' },
   
   // Operasi & Anestesi

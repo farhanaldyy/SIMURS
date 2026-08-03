@@ -44,6 +44,7 @@ async function getSummary(req, res, next) {
       prisma.kembaliIcu.count({ where: { periode_id: where.periode_id } }),
       prisma.ketidakpatuhanHd.count({ where: { periode_id: where.periode_id } }),
       prisma.insidenClotting.count({ where: { periode_id: where.periode_id } }),
+      prisma.insidenPasienJatuhHd.count({ where: { periode_id: where.periode_id } }),
       prisma.insidenJarumVena.count({ where: { periode_id: where.periode_id } }),
       prisma.penundaanOperasi.count({ where: { periode_id: where.periode_id } }),
       prisma.informedConsent.count({ where }),
@@ -136,6 +137,7 @@ const services = {
   
   'Ketidakpatuhan Pasien HD': { service: require('../services/modules/ketidakpatuhan-hd.service'), category: 'Hemodialisa' },
   'Insiden Clotting Durante HD': { service: require('../services/modules/insiden-clotting.service'), category: 'Hemodialisa' },
+  'Insiden Pasien Jatuh HD': { service: require('../services/modules/insiden-pasien-jatuh-hd.service'), category: 'Hemodialisa' },
   'Insiden Jarum Vena HD': { service: require('../services/modules/insiden-jarum-vena.service'), category: 'Hemodialisa' },
   
   'Penundaan Operasi Elektif': { service: require('../services/modules/penundaan-operasi.service'), category: 'Operasi & Anestesi' },

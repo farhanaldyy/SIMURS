@@ -47,6 +47,7 @@ export const NAV_GROUPS = [
     items: [
       { label: 'Ketidakpatuhan Pasien HD', hash: '#/ketidakpatuhan-hd' },
       { label: 'Insiden Clotting HD', hash: '#/insiden-clotting' },
+      { label: 'Insiden Pasien Jatuh HD', hash: '#/insiden-pasien-jatuh-hd' },
       { label: 'Insiden Jarum Vena HD', hash: '#/insiden-jarum-vena' },
     ],
   },

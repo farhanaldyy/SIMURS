@@ -181,7 +181,7 @@ function renderConfigForm(container) {
         <!-- Search Input & Counter -->
         <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px;">
           <div style="position: relative; flex: 1; max-width: 320px;">
-            <input type="text" id="search-indicator" placeholder="🔍 Cari nama / ID indikator..." value="${state.searchQuery}" style="width: 100%; height: 32px; font-size: 0.78rem; padding: 2px 10px 2px 28px; border: 1px solid #cbd5e1; border-radius: 5px; background: #f8fafc;">
+            <input type="text" id="search-indicator" placeholder="Cari nama / ID indikator..." value="${state.searchQuery}" style="width: 100%; height: 32px; font-size: 0.78rem; padding: 2px 10px 2px 28px; border: 1px solid #cbd5e1; border-radius: 5px; background: #f8fafc;">
             <span style="position: absolute; left: 8px; top: 6px; font-size: 0.8rem; color: #94a3b8;">🔍</span>
           </div>
 

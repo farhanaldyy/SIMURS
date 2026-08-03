@@ -5,11 +5,16 @@ const baseService = createGenericService('insidenJarumVena', {
   ignoreUnitId: true,
   async calculateSummary(data, where) {
     const totalIncidents = data.length;
-    
-    // Find summary for the period
-    const summary = await prisma.periodeJarumVenaSummary.findUnique({
-      where: { periode_id: where.periode_id }
-    });
+    let totalPemasangan = 0;
+
+    if (where && where.periode_id) {
+      const summary = await prisma.periodeJarumVenaSummary.findUnique({
+        where: { periode_id: parseInt(where.periode_id, 10) }
+      });
+      if (summary) {
+        totalPemasangan = summary.total_pemasangan_bulan || 0;
+      }
+    }
 
     const persen = totalPemasangan > 0 ? parseFloat(((totalIncidents / totalPemasangan) * 100).toFixed(2)) : 0;
 

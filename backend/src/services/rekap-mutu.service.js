@@ -605,6 +605,38 @@ const ALL_INDICATOR_CONFIGS = [
       const den = summary.denominator !== undefined ? summary.denominator : 0;
       return { num, den };
     }
+  },
+  {
+    no: 37,
+    id: 'waktu-tanggap-sc',
+    nama: 'Waktu Tanggap Operasi Seksio Sesarea Emergency ( ≥ 80% ) - Nama Modul: Waktu Tanggap SC Emergency',
+    nama_modul: 'Waktu Tanggap Operasi Seksio Sesarea Emergency',
+    standar: '≥ 80%',
+    label_numerator: 'Total Data Tepat Waktu (≤ Standar)',
+    label_denominator: 'Total Pasien SC Emergency',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/waktu-tanggap-sc.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : (summary.total || 0);
+      return { num, den };
+    }
+  },
+  {
+    no: 38,
+    id: 'insiden-pasien-jatuh-hd',
+    nama: 'Insiden Pasien Jatuh Hemodialisis ( 0% ) - Nama Modul: Insiden Pasien Jatuh HD',
+    nama_modul: 'Insiden Pasien Jatuh Hemodialisis',
+    standar: '0%',
+    label_numerator: 'Total Kejadian Pasien Jatuh HD',
+    label_denominator: 'Total Pasien HD',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/insiden-pasien-jatuh-hd.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : (summary.total || 0);
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
   }
 ];
 
