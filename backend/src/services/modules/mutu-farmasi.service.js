@@ -171,7 +171,11 @@ const service = {
         numerator: totalTunggu,
         denominator: totalObat,
         persen,
-        standar: '-' // no specific standard target
+        standar: '-',
+        val1,
+        val2,
+        val3,
+        val4
       };
     } else if (tipe === 'rata_waktu_tunggu') {
       return {
@@ -180,7 +184,9 @@ const service = {
         denominator: 0,
         persen: 0,
         rataRata: record ? `Racikan: ${val1} Menit, Non-Racikan: ${val2} Menit` : undefined,
-        standar: 'Racikan < 60m, Non-Racikan < 30m'
+        standar: 'Racikan < 60m, Non-Racikan < 30m',
+        val1,
+        val2
       };
     }
 

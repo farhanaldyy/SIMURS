@@ -93,6 +93,7 @@ router.use('/laboratorium-kesalahan-input', require('./modules/laboratorium-kesa
 router.use('/laboratorium-kerusakan-sampel', require('./modules/laboratorium-kerusakan-sampel'));
 router.use('/laboratorium-kepatuhan-identifikasi', require('./modules/laboratorium-kepatuhan-identifikasi'));
 router.use('/laboratorium-ekspertisi-dokter', require('./modules/laboratorium-ekspertisi-dokter'));
+router.use('/laboratorium-kesalahan-penyerahan', require('./modules/laboratorium-kesalahan-penyerahan'));
 
 // Farmasi modules
 router.use('/mutu-farmasi', require('./modules/mutu-farmasi'));

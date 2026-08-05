@@ -126,6 +126,7 @@ export const NAV_GROUPS = [
       { label: 'Tidak Adanya Kerusakan Sampel', hash: '#/laboratorium-kerusakan-sampel' },
       { label: 'Kepatuhan Identifikasi Pasien', hash: '#/laboratorium-kepatuhan-identifikasi' },
       { label: 'Data Ekspertisi Oleh Dokter', hash: '#/laboratorium-ekspertisi-dokter' },
+      { label: 'Tidak Adanya Kesalahan Penyerahan Hasil Lab', hash: '#/laboratorium-kesalahan-penyerahan' },
     ],
   },
   {

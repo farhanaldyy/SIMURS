@@ -236,6 +236,132 @@ const AVAILABLE_INDICATORS = [
     nama: 'Insiden Pasien Jatuh Hemodialisis',
     standar: '0%',
     kategori_default: ['unit_khusus']
+  },
+  {
+    id: 'tidaktersedia-obat-rawat-jalan',
+    nama: 'Angka Kejadian Ketidaktersediaan Obat di Farmasi Rawat Jalan',
+    standar: '≤ 5%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'tidaktersedia-obat-rawat-inap',
+    nama: 'Angka Kejadian Ketidaktersediaan Obat di Farmasi Rawat Inap',
+    standar: '≤ 5%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'salah-obat-rajal',
+    nama: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien Rawat Jalan',
+    standar: '0%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'salah-obat-ranap',
+    nama: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien Rawat Inap',
+    standar: '0%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'salah-obat-igd',
+    nama: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien IGD',
+    standar: '0%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'total-salah-obat',
+    nama: 'Total Kesalahan Pemberian Obat Pasien Rawat Jalan, Inap dan IGD',
+    standar: '0%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'tunggu-obat-racik',
+    nama: 'Waktu Tunggu Obat Racikan',
+    standar: '≤ 60 Menit',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'rata-tunggu-racikan',
+    nama: 'Rata-rata Waktu Tunggu Obat Racikan Dalam Menit',
+    standar: '-',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'tunggu-obat-nonracik',
+    nama: 'Waktu Tunggu Obat Non Racikan',
+    standar: '≤ 30 Menit',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'rata-tunggu-nonracikan',
+    nama: 'Rata-rata Waktu Tunggu Obat Non Racikan Dalam Menit',
+    standar: '-',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'kepatuhan-formula-nasional',
+    nama: 'Kepatuhan Penggunaan Formularium Nasional',
+    standar: '≥ 80%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'double-check-obat-farmasi',
+    nama: 'Kepatuhan Pelaksanaan Double Check Obat High Alert',
+    standar: '≥ 80%',
+    kategori_default: ['farmasi']
+  },
+  {
+    id: 'hasil-kritis-lab',
+    nama: 'Pelaporan Hasil Kritis Laboratorium  ≤ 30 menit',
+    standar: '100%',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'waktu-tunggu-lab-kurangdari',
+    nama: 'Waktu Tunggu Hasil Pemeriksaan Laboratorium Klinik',
+    standar: '<= 140 Menit',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'waktu-tunggu-lab-lebihdari',
+    nama: 'Waktu Tunggu Hasil Pemeriksaan Laboratorium Klinik',
+    standar: '>= 140 Menit',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'dalam-menit-perpasien',
+    nama: 'Jumlah Dalam Menit Perpasien',
+    standar: '-',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'kerusakan-sample-lab',
+    nama: 'Tidak Adanya Kerusakan Sampel di Laboratorium',
+    standar: '100%',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'kesalahan-input-lab',
+    nama: 'Tidak Adanya Kesalahan Input Data Hasil Pemeriksaan Lab',
+    standar: '100%',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'kepatuhan-identifikasi-lab',
+    nama: 'Kepatuhan Identifikasi Pasien',
+    standar: '100%',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'ekpertisi-dokter-lab',
+    nama: 'Ekspertisi Oleh Dokter Spesialis Patologi Klinik',
+    standar: '100%',
+    kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'kesalahan-penyerahan-hasil-lab',
+    nama: 'Tidak Adanya Kesalahan Penyerahan Hasil Laboratorium',
+    standar: '100%',
+    kategori_default: ['penunjang', 'laboratorium']
   }
 ];
 
