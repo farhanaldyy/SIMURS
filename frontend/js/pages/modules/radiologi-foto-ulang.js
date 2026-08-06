@@ -100,39 +100,43 @@ const page = createGenericIndicatorPage({
     const standar = s.standar || '0%';
     
     return `
-      <div class="summary-card-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; width: 100%;">
-        <div class="summary-item"><div class="summary-value">${total}</div><div class="summary-label">Total Data</div></div>
-        <div class="summary-item"><div class="summary-value">${totalKejadian}</div><div class="summary-label">Total Kejadian</div></div>
-        <div class="summary-item"><div class="summary-value">${totalPemeriksaan}</div><div class="summary-label">Total Pemeriksaan</div></div>
-        <div class="summary-item"><div class="summary-value">${persen}%</div><div class="summary-label">Persentase</div></div>
-        <div class="summary-item">
+      <div style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; width: 100%;">
+        <div class="summary-item" style="margin: 0;"><div class="summary-value">${total}</div><div class="summary-label">Total Data</div></div>
+        <div class="summary-item" style="margin: 0;"><div class="summary-value">${totalKejadian}</div><div class="summary-label">Total Kejadian</div></div>
+        <div class="summary-item" style="margin: 0;"><div class="summary-value">${totalPemeriksaan}</div><div class="summary-label">Total Pemeriksaan</div></div>
+        <div class="summary-item" style="margin: 0;"><div class="summary-value">${persen}%</div><div class="summary-label">Persentase</div></div>
+        <div class="summary-item" style="margin: 0;">
           ${renderBadge(persen, standar)}
-          <div class="summary-label" style="margin-top:8px">Standar: ${standar}</div>
+          <div class="summary-label" style="margin-top:6px">Standar: ${standar}</div>
         </div>
       </div>
 
-      <div class="summary-item" style="border-top-color: var(--color-danger); padding: var(--space-md); text-align: left; margin: 0;">
-        <h5 style="margin-top: 0; margin-bottom: 16px; font-weight: 600; font-size: 1rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Rincian Kejadian</h5>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px;">
-          <div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Over Exposure</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">${totalOver}</div>
+      <div style="grid-column: 1 / -1; width: 100%; background: var(--color-bg-card, #ffffff); border: 1px solid var(--color-border, #e2e8f0); border-left: 4px solid var(--color-danger, #ef4444); border-radius: var(--radius-sm, 6px); padding: 12px 16px; margin-top: 4px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.8rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+            <span style="font-size: 0.95rem;">⚠️</span> Rincian Kejadian Foto Ulang
           </div>
-          <div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Under Exposure</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">${totalUnder}</div>
-          </div>
-          <div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Positioning</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">${totalPos}</div>
-          </div>
-          <div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Artefac</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">${totalArt}</div>
-          </div>
-          <div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Equitmen</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">${totalEquit}</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1; justify-content: flex-end;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-bg, #f8fafc); border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px; font-size: 0.82rem;">
+              <span style="color: var(--color-text-secondary); font-weight: 500;">Over Exposure:</span>
+              <strong style="font-weight: 700; color: ${totalOver > 0 ? 'var(--color-danger, #ef4444)' : 'var(--color-text)'};">${totalOver}</strong>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-bg, #f8fafc); border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px; font-size: 0.82rem;">
+              <span style="color: var(--color-text-secondary); font-weight: 500;">Under Exposure:</span>
+              <strong style="font-weight: 700; color: ${totalUnder > 0 ? 'var(--color-danger, #ef4444)' : 'var(--color-text)'};">${totalUnder}</strong>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-bg, #f8fafc); border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px; font-size: 0.82rem;">
+              <span style="color: var(--color-text-secondary); font-weight: 500;">Positioning:</span>
+              <strong style="font-weight: 700; color: ${totalPos > 0 ? 'var(--color-danger, #ef4444)' : 'var(--color-text)'};">${totalPos}</strong>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-bg, #f8fafc); border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px; font-size: 0.82rem;">
+              <span style="color: var(--color-text-secondary); font-weight: 500;">Artefac:</span>
+              <strong style="font-weight: 700; color: ${totalArt > 0 ? 'var(--color-danger, #ef4444)' : 'var(--color-text)'};">${totalArt}</strong>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--color-bg, #f8fafc); border: 1px solid var(--color-border, #e2e8f0); border-radius: 6px; font-size: 0.82rem;">
+              <span style="color: var(--color-text-secondary); font-weight: 500;">Equitmen:</span>
+              <strong style="font-weight: 700; color: ${totalEquit > 0 ? 'var(--color-danger, #ef4444)' : 'var(--color-text)'};">${totalEquit}</strong>
+            </div>
           </div>
         </div>
       </div>

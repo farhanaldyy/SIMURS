@@ -999,24 +999,126 @@ const ALL_INDICATOR_CONFIGS = [
       const den = totPasien;
       return { num, den };
     }
+  },
+  {
+    no: 60,
+    id: 'waktu-tunggu-sesuai-foto-thorax',
+    nama: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Sesuai Jadwal) ( ≤ 3 Jam ) - Nama Modul: Waktu Tunggu Foto Thorax Sesuai Jadwal',
+    nama_modul: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Sesuai Jadwal)',
+    standar: '< 3 Jam',
+    label_numerator: 'Total Data Waktu',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator',
+    service: require('./modules/radiologi-thorax-sesuai-jadwal.service'),
+    extract: (summary) => {
+      const num = summary.total_waktu !== undefined ? summary.total_waktu : 0;
+      const den = summary.total_pasien !== undefined ? summary.total_pasien : 0;
+      return { num, den };
+    },
+    calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
+  },
+  {
+    no: 61,
+    id: 'waktu-tunggu-diluar-foto-thorax',
+    nama: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Diluar Jadwal) ( - ) - Nama Modul: Waktu Tunggu Foto Thorax Diluar Jadwal',
+    nama_modul: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Diluar Jadwal)',
+    standar: '> 3 Jam',
+    label_numerator: 'Total Data Waktu',
+    label_denominator: 'Total Data Pasien',
+    formula: 'Numerator / Denumerator',
+    service: require('./modules/radiologi-thorax-luar-jadwal.service'),
+    extract: (summary) => {
+      const num = summary.total_waktu !== undefined ? summary.total_waktu : 0;
+      const den = summary.total_pasien !== undefined ? summary.total_pasien : 0;
+      return { num, den };
+    },
+    calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
+  },
+  {
+    no: 62,
+    id: 'kepatuhan-identifikasi-pasien-radiologi',
+    nama: 'Kepatuhan Identifikasi Pasien Radiologi ( 100% ) - Nama Modul: Kepatuhan Identifikasi Pasien Radiologi',
+    nama_modul: 'Kepatuhan Identifikasi Pasien Radiologi',
+    standar: '100%',
+    label_numerator: 'Total Data (Di Lakukan)',
+    label_denominator: 'Total Data (Di Lakukan) + (Tidak Dilakukan)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/radiologi-identifikasi-pasien.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 63,
+    id: 'kelengkapan-form-radiologi',
+    nama: 'Kelengkapan Pengisian Form Info Tindakan Radiologi ( ≥ 85% ) - Nama Modul: Kelengkapan Form Info Tindakan Radiologi',
+    nama_modul: 'Kelengkapan Pengisian Form Info Tindakan Radiologi',
+    standar: '≥ 85%',
+    label_numerator: 'Total Kepatuhan Pengisian',
+    label_denominator: 'Total Pemeriksaan',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/radiologi-info-tindakan.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 64,
+    id: 'foto-ulang-pasien-radiologi',
+    nama: 'Kejadian Foto Ulang Pasien ( - ) - Nama Modul: Kejadian Foto Ulang Pasien',
+    nama_modul: 'Kejadian Foto Ulang Pasien',
+    standar: '-',
+    label_numerator: 'Total Kejadian',
+    label_denominator: 'Total Pemeriksaan',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/radiologi-foto-ulang.service'),
+    extract: (summary) => {
+      const num = summary.total_kejadian !== undefined ? summary.total_kejadian : 0;
+      const den = summary.total_pemeriksaan !== undefined ? summary.total_pemeriksaan : 0;
+      return { num, den };
+    }
   }
 ];
 
 function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
   if (roomConfig && roomConfig.hasSaved) {
     const hasParentWaktuTunggu = roomConfig.set.has('waktu_tunggu_poliklinik') || roomConfig.set.has('waktu-tunggu-poliklinik');
-    return ALL_INDICATOR_CONFIGS.filter(ind => 
-      roomConfig.set.has(ind.id) || 
-      roomConfig.set.has(ind.id.replace(/_/g, '-')) ||
-      roomConfig.set.has(ind.id.replace(/-/g, '_')) ||
-      (ind.id === 'jadwal-hemodialisa' && (roomConfig.set.has('ketidakpatuhan_hd') || roomConfig.set.has('jadwal_hemodialisa'))) ||
-      (ind.id === 'insiden-clotting-durante' && (roomConfig.set.has('insiden_clotting') || roomConfig.set.has('insiden-clotting'))) ||
-      (hasParentWaktuTunggu && ind.id.startsWith('waktu_tunggu_poliklinik'))
-    );
+    return ALL_INDICATOR_CONFIGS.filter(ind => {
+      const isSavedActive = roomConfig.set.has(ind.id) || 
+        roomConfig.set.has(ind.id.replace(/_/g, '-')) ||
+        roomConfig.set.has(ind.id.replace(/-/g, '_')) ||
+        (ind.id === 'jadwal-hemodialisa' && (roomConfig.set.has('ketidakpatuhan_hd') || roomConfig.set.has('jadwal_hemodialisa'))) ||
+        (ind.id === 'insiden-clotting-durante' && (roomConfig.set.has('insiden_clotting') || roomConfig.set.has('insiden-clotting'))) ||
+        (hasParentWaktuTunggu && ind.id.startsWith('waktu_tunggu_poliklinik'));
+
+      if (isSavedActive) return true;
+
+      if (roomConfig.allKnownIds && !roomConfig.allKnownIds.has(ind.id) && !roomConfig.allKnownIds.has(ind.id.replace(/_/g, '-')) && !roomConfig.allKnownIds.has(ind.id.replace(/-/g, '_'))) {
+        const ai = AVAILABLE_INDICATORS.find(a => a.id === ind.id || a.id.replace(/_/g, '-') === ind.id.replace(/_/g, '-'));
+        if (ai && ai.kategori_default) {
+          const roomNama = (room.nama_unit || room.nama || '').toLowerCase();
+          return ai.kategori_default.includes(room.kategori_unit) || 
+                 ai.kategori_default.includes(kategori) || 
+                 ai.kategori_default.some(k => roomNama.includes(k));
+        }
+      }
+      return false;
+    });
   }
+
   const defaultIds = new Set(
     AVAILABLE_INDICATORS
-      .filter(ai => ai.kategori_default && (ai.kategori_default.includes(room.kategori_unit) || ai.kategori_default.includes(kategori)))
+      .filter(ai => {
+        if (!ai.kategori_default) return false;
+        const roomNama = (room.nama_unit || room.nama || '').toLowerCase();
+        return ai.kategori_default.includes(room.kategori_unit) || 
+               ai.kategori_default.includes(kategori) ||
+               ai.kategori_default.some(k => roomNama.includes(k));
+      })
       .flatMap(ai => [ai.id, ai.id.replace(/_/g, '-'), ai.id.replace(/-/g, '_')])
   );
 
@@ -1142,8 +1244,9 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
   const roomConfigMap = {};
   allSavedConfigs.forEach(c => {
     if (!roomConfigMap[c.unit_id]) {
-      roomConfigMap[c.unit_id] = { set: new Set(), hasSaved: true };
+      roomConfigMap[c.unit_id] = { set: new Set(), allKnownIds: new Set(), hasSaved: true };
     }
+    roomConfigMap[c.unit_id].allKnownIds.add(c.indicator_id);
     if (c.aktif) {
       roomConfigMap[c.unit_id].set.add(c.indicator_id);
     }

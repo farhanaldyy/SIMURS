@@ -362,9 +362,40 @@ const AVAILABLE_INDICATORS = [
     nama: 'Tidak Adanya Kesalahan Penyerahan Hasil Laboratorium',
     standar: '100%',
     kategori_default: ['penunjang', 'laboratorium']
+  },
+  {
+    id: 'waktu-tunggu-sesuai-foto-thorax',
+    nama: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Sesuai Jadwal)',
+    standar: '< 3 Jam',
+    kategori_default: ['penunjang', 'radiologi']
+  },
+  {
+    id: 'waktu-tunggu-diluar-foto-thorax',
+    nama: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Diluar Jadwal)',
+    standar: '> 3 Jam',
+    kategori_default: ['penunjang', 'radiologi']
+  },
+  {
+    id: 'kepatuhan-identifikasi-pasien-radiologi',
+    nama: 'Kepatuhan Identifikasi Pasien Radiologi',
+    standar: '100%',
+    kategori_default: ['penunjang', 'radiologi']
+  },
+  {
+    id: 'kelengkapan-form-radiologi',
+    nama: 'Kelengkapan Pengisian Form Info Tindakan Radiologi',
+    standar: '≥ 85%',
+    kategori_default: ['penunjang', 'radiologi']
+  },
+  {
+    id: 'foto-ulang-pasien-radiologi',
+    nama: 'Kejadian Foto Ulang Pasien',
+    standar: '-',
+    kategori_default: ['penunjang', 'radiologi']
   }
 ];
 
 module.exports = {
   AVAILABLE_INDICATORS
 };
+
