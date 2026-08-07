@@ -1,19 +1,21 @@
 # PANDUAN MENAMBAH MODUL INDIKATOR BARU (SIMURS)
 
-Panduan ini menjelaskan langkah demi langkah untuk menambahkan modul indikator mutu baru ke dalam sistem SIMURS menggunakan arsitektur generik terbaru (Backend & Frontend) guna mempercepat pengembangan dan menjaga konsistensi kode.
+Panduan ini menjelaskan langkah demi langkah untuk menambahkan modul indikator mutu baru ke dalam sistem SIMURS menggunakan arsitektur generik terbaru (Backend & Frontend) serta registrasi sentral guna mempercepat pengembangan, menjaga konsistensi kode, dan mengintegrasikan modul ke fitur **Dashboard**, **Rekap Data Mutu Matrix**, serta **Impor/Ekspor Excel**.
 
 ---
 
 ## 🛠️ Ringkasan Alur Kerja
 
 ```
-DATABASE                     BACKEND & REGISTRASI SENTRAL              FRONTEND
-┌────────────────────────┐   ┌─────────────────────────────────────┐   ┌────────────────────────┐
-│ 1. Schema Prisma       │ ─>│ 2. Buat Service (Generic Service)   │ ─>│ 6. Tambah di           │
-│    (Definisi Model)    │   │ 3. Buat Controller (Generic Ctrl)   │   │    config/modules.js   │
-│                        │   │ 4. Buat Route & Daftarkan ke index  │   │ 7. Tambah di router.js │
-│    npx prisma db push  │   │ 5. Daftarkan di Dashboard & Laporan │   │ 8. Buat Halaman JS     │
-└────────────────────────┘   └─────────────────────────────────────┘   └────────────────────────┘
+DATABASE                     BACKEND & REGISTRASI SENTRAL                      FRONTEND
+┌────────────────────────┐   ┌─────────────────────────────────────────────┐   ┌────────────────────────┐
+│ 1. Schema Prisma       │ ─>│ 2. Buat Service (Generic Service)           │ ─>│ 7. Tambah di           │
+│    (Definisi Model &   │   │ 3. Buat Controller (Generic Ctrl)           │   │    config/modules.js   │
+│     Composite Index)   │   │ 4. Buat Route & Daftarkan ke index.js       │   │ 8. Tambah di router.js │
+│                        │   │ 5. Daftarkan di indicators.config.js         │   │ 9. Buat Halaman JS     │
+│    npx prisma db push  │   │ 6. Daftarkan di rekap-mutu.service.js,      │   │    (createGeneric      │
+│                        │   │    dashboard & laporan controller           │   │     IndicatorPage)     │
+└────────────────────────┘   └─────────────────────────────────────────────┘   └────────────────────────┘
 ```
 
 ---
@@ -27,28 +29,31 @@ simurs/
 ├── backend/
 │   ├── src/
 │   │   ├── prisma/
-│   │   │   └── schema.prisma                # [Ubah] Tambah model tabel baru
+│   │   │   └── schema.prisma                    # [Ubah] Tambah model tabel baru & composite index
+│   │   ├── config/
+│   │   │   └── indicators.config.js             # [Ubah] Daftarkan ke AVAILABLE_INDICATORS
 │   │   ├── routes/
-│   │   │   ├── index.js                     # [Ubah] Daftarkan rute API baru
+│   │   │   ├── index.js                         # [Ubah] Daftarkan rute API baru
 │   │   │   └── modules/
-│   │   │       └── indikator-baru.js        # [Baru] Validasi express-validator & rute
+│   │   │       └── indikator-baru.js            # [Baru] Validasi express-validator & rute
 │   │   ├── controllers/
-│   │   │   ├── dashboard.controller.js      # [Ubah] Daftarkan hitungan dashboard & summary
-│   │   │   ├── laporan.controller.js        # [Ubah] Daftarkan service untuk ekspor Excel
+│   │   │   ├── dashboard.controller.js          # [Ubah] Daftarkan hitungan dashboard & summary
+│   │   │   ├── laporan.controller.js            # [Ubah] Daftarkan service untuk ekspor & impor Excel
 │   │   │   └── modules/
 │   │   │       └── indikator-baru.controller.js # [Baru] Controller generik (3 baris kode!)
 │   │   └── services/
+│   │       ├── rekap-mutu.service.js            # [Ubah] Daftarkan ke ALL_INDICATOR_CONFIGS & extract
 │   │       └── modules/
 │   │           └── indikator-baru.service.js    # [Baru] Service logic mewarisi Generic Service
 │   │
 │   └── frontend/
 │       └── js/
 │           ├── config/
-│           │   └── modules.js               # [Ubah] Tambah modul ke sidebar navigation & permission
-│           ├── router.js                    # [Ubah] Daftarkan hash URL & dynamic import
+│           │   └── modules.js                   # [Ubah] Tambah modul ke NAV_GROUPS
+│           ├── router.js                        # [Ubah] Daftarkan hash URL & dynamic import
 │           └── pages/
 │               └── modules/
-│                   └── indikator-baru.js    # [Baru] UI page berbasis createGenericIndicatorPage
+│                   └── indikator-baru.js        # [Baru] UI page berbasis createGenericIndicatorPage
 ```
 
 ---
@@ -59,37 +64,35 @@ simurs/
 Buka file `backend/src/prisma/schema.prisma` dan tambahkan model indikator baru di bagian bawah file.
 
 > [!IMPORTANT]
-> Setiap tabel indikator wajib berelasi dengan:
-> * `Periode` (`periode_id`)
-> * `Unit` (`unit_id`) - kecuali jika indikator bersifat global/mengabaikan unit (`ignoreUnit`).
-> * `User` (`created_by` sebagai pembuat record)
+> Setiap tabel indikator wajib:
+> * Berelasi dengan `Periode` (`periode_id`), `Unit` (`unit_id`), dan `User` (`created_by`).
+> * Memiliki composite index `@@index([periode_id, unit_id])` untuk performa query database terbaik.
 
 **Contoh Template Model:**
 ```prisma
 model IndikatorBaru {
-  id            Int      @id @default(autoincrement())
-  periode_id    Int
-  unit_id       Int
-  tanggal       DateTime @db.Date
-  nama_pasien   String   @db.VarChar(100)
-  no_rm         String   @db.VarChar(20)
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  tanggal             DateTime @db.Date
+  nama_pasien         String   @db.VarChar(100)
+  no_rm               String   @db.VarChar(20)
   
   // Field spesifik indikator Anda:
-  jumlah_pemeriksaan Int
+  jumlah_pemeriksaan  Int
   kepatuhan_pengisian Int
   kriteria_status     String   // e.g. "dilakukan" / "tidak_dilakukan"
   
-  created_by    Int
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  created_by          Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
 
   // Relasi
-  periode       Periode  @relation(fields: [periode_id], references: [id])
-  unit          Unit     @relation(fields: [unit_id], references: [id])
-  user          User     @relation(fields: [created_by], references: [id])
+  periode             Periode  @relation(fields: [periode_id], references: [id])
+  unit                Unit     @relation(fields: [unit_id], references: [id])
+  user                User     @relation(fields: [created_by], references: [id])
 
-  @@index([periode_id])
-  @@index([unit_id])
+  @@index([periode_id, unit_id])
   @@map("indikator_baru") // Nama tabel fisik di database MySQL
 }
 ```
@@ -102,16 +105,16 @@ npx prisma db push --schema=src/prisma/schema.prisma
 
 ---
 
-## 💻 TAHAP 2: BACKEND (API ENDPOINTS)
+## 💻 TAHAP 2: BACKEND (SERVICES, CONTROLLER & ROUTES)
 
 ### 1. Buat Service Baru Menggunakan Generic Service
-Buat file `backend/src/services/modules/indikator-baru.service.js`. Kita mengimpor `createGenericService` untuk menghindari penulisan query CRUD manual.
+Buat file `backend/src/services/modules/indikator-baru.service.js`. Impor `createGenericService` untuk menghindari penulisan query CRUD manual.
 
 > [!NOTE]
 > **Coerce Types Otomatis:** `generic.service.js` secara otomatis melakukan casting/konversi tipe data sebelum menyimpan data ke DB:
 > * Menormalkan nilai enum dengan spasi (e.g. `"tidak dilakukan"` menjadi `"tidak_dilakukan"`).
 > * Mengubah string `"true"` / `"false"` menjadi boolean riil `true` / `false`.
-> * Mengubah string angka menjadi integer secara otomatis untuk field yang berakhiran `_id`, diawali dengan `jumlah_` atau `total_`, berakhiran `_kolf`, serta kata kunci khusus seperti `usia` dan `selisih_menit`.
+> * Mengubah string angka menjadi integer/float secara otomatis untuk field yang berakhiran `_id`, diawali dengan `jumlah_` atau `total_`, berakhiran `_kolf`, serta kata kunci khusus seperti `usia` dan `selisih_menit`.
 > * Mengonversi field berawalan `tanggal` dan `jam` menjadi tipe `Date`.
 
 ```javascript
@@ -219,14 +222,45 @@ router.use('/indikator-baru', require('./modules/indikator-baru'));
 
 ---
 
-## 📊 TAHAP 3: REGISTRASI SENTRAL BACKEND (DASHBOARD & LAPORAN)
+## 📊 TAHAP 3: REGISTRASI SENTRAL BACKEND (CONFIG, REKAP MUTU, DASHBOARD & LAPORAN)
 
-Agar indikator baru terintegrasi ke dalam sistem pelaporan pusat SIMURS, Anda **wajib** melakukan registrasi berikut:
+Agar indikator baru terintegrasi secara penuh ke dalam seluruh fitur pusat SIMURS (**Dashboard**, **Rekap Data Mutu Matrix**, **Ekspor Excel**, **Template Impor Excel**), Anda **wajib** melakukan registrasi berikut:
 
-### 1. Daftarkan di Dashboard Controller (`backend/src/controllers/dashboard.controller.js`)
-* Tambahkan variabel model Prisma ke array destructured di fungsi `getSummary` (sekitar line 11-25):
+### 1. Daftarkan di Config Indikator (`backend/src/config/indicators.config.js`)
+Tambahkan objek konfigurasi baru ke array `AVAILABLE_INDICATORS`:
+```javascript
+  {
+    id: 'indikator_baru',
+    nama: 'Kepatuhan Pengisian Indikator Baru',
+    standar: '≥ 85%',
+    kategori_default: ['penunjang', 'radiologi'] // Kategori default unit
+  },
+```
+
+### 2. Daftarkan di Service Rekap Mutu (`backend/src/services/rekap-mutu.service.js`)
+Tambahkan objek konfigurasi baru ke array `ALL_INDICATOR_CONFIGS`:
+```javascript
+  {
+    no: 83,
+    id: 'indikator_baru',
+    nama: 'Kepatuhan Pengisian Indikator Baru ( ≥ 85% ) - Nama Modul: Indikator Baru',
+    nama_modul: 'Kepatuhan Pengisian Indikator Baru',
+    standar: '≥ 85%',
+    label_numerator: 'Total Kepatuhan Pengisian (N)',
+    label_denominator: 'Total Jumlah Pemeriksaan (D)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/indikator-baru.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+```
+
+### 3. Daftarkan di Dashboard Controller (`backend/src/controllers/dashboard.controller.js`)
+* Tambahkan count model ke array destructured di fungsi `getSummary`:
   ```javascript
-  // Contoh:
   const [
     ...,
     indikatorBaru
@@ -235,24 +269,24 @@ Agar indikator baru terintegrasi ke dalam sistem pelaporan pusat SIMURS, Anda **
     prisma.indikatorBaru.count({ where }),
   ]);
   ```
-* Tambahkan ke objek `totalRecords` di dalam response JSON (sekitar line 77-92):
+* Tambahkan ke objek `totalRecords`:
   ```javascript
   totalRecords: {
     ...,
     indikatorBaru
   }
   ```
-* Impor service baru di objek `services` (sekitar line 97-170):
+* Impor service baru di objek `services`:
   ```javascript
-  'Nama Indikator Lengkap': { service: require('../services/modules/indikator-baru.service'), category: 'Kategori Anda' },
+  'Indikator Baru Pelayanan': { service: require('../services/modules/indikator-baru.service'), category: 'Kategori Anda' },
   ```
 
-### 2. Daftarkan di Laporan Controller (`backend/src/controllers/laporan.controller.js`)
-* Impor service baru di objek `services` (sekitar line 5-71):
+### 4. Daftarkan di Laporan Controller (`backend/src/controllers/laporan.controller.js`)
+* Impor service baru di objek `services`:
   ```javascript
-  'Nama Indikator Lengkap': { service: require('../services/modules/indikator-baru.service'), table: 'indikatorBaru', category: 'Kategori Anda' },
+  'Indikator Baru Pelayanan': { service: require('../services/modules/indikator-baru.service'), table: 'indikatorBaru', category: 'Kategori Anda' },
   ```
-* Jika indikator memiliki formula kalkulasi pencapaian khusus untuk diekspor ke Excel, tambahkan kondisi pemetaan di bagian loop `exportExcel` (sekitar line 164-193):
+* Jika indikator memiliki formula kalkulasi khusus saat diekspor ke Excel, tambahkan kondisi pemetaan pada loop `exportExcel`:
   ```javascript
   } else if (cfg.table === 'indikatorBaru') {
     const jp = r.jumlah_pemeriksaan || 0;
@@ -260,19 +294,20 @@ Agar indikator baru terintegrasi ke dalam sistem pelaporan pusat SIMURS, Anda **
     hasilVal = jp > 0 ? `${parseFloat(((kp / jp) * 100).toFixed(2))}%` : '0%';
   }
   ```
+* Daftarkan definisi sampel sheet di fungsi `downloadTemplate` agar template Excel otomatis menyertakan sheet untuk impor massal modul ini.
 
 ---
 
 ## 🎨 TAHAP 4: FRONTEND (USER INTERFACE)
 
-### 1. Daftarkan di Modul Sidebar Navigation
-Buka file `frontend/js/config/modules.js`. Cari kelompok menu yang sesuai (contoh: **Mutu Radiologi**) lalu daftarkan item baru:
+### 1. Daftarkan di Sidebar Navigation (`frontend/js/config/modules.js`)
+Cari kelompok menu yang sesuai di array `NAV_GROUPS` (contoh: **Mutu Radiologi**) lalu daftarkan item baru:
 ```javascript
       { label: 'Indikator Baru', hash: '#/indikator-baru' },
 ```
 
-### 2. Daftarkan Rute di Router Frontend
-Buka file `frontend/js/router.js`. Masukkan rute hash URL baru beserta dynamic module loading-nya ke objek `routes`:
+### 2. Daftarkan Rute di Router Frontend (`frontend/js/router.js`)
+Masukkan rute hash URL baru beserta dynamic module loading-nya ke objek `routes`:
 ```javascript
   '#/indikator-baru': { module: () => import('./pages/modules/indikator-baru.js'), title: 'Indikator Baru Pelayanan' },
 ```
@@ -359,10 +394,11 @@ export default page;
 ## ✅ VERIFIKASI AKHIR
 
 Setelah semua kode ditulis, jalankan pengujian berikut untuk memastikan modul berfungsi dengan baik:
-1. Jalankan restart server Node.js jika perlu.
+1. Restart server Node.js backend.
 2. Login sebagai akun **Admin** ke dashboard SIMURS.
 3. Buka menu **Kelola Pengguna** lalu edit akun Petugas atau PIC Mutu yang akan menguji modul.
 4. Pastikan menu **Indikator Baru** kini terdaftar di checklist hak akses modul, centang modul tersebut, lalu simpan.
 5. Login menggunakan akun Petugas / PIC Mutu tersebut.
 6. Pastikan menu baru muncul di sidebar dan form input data dapat berjalan normal untuk menyimpan, mengedit, maupun menghapus data.
-7. Buka menu **Cetak Laporan** dan ekspor file Excel untuk periode saat ini, pastikan data indikator baru terekspor dengan benar di sheet khusus dan terakumulasi di sheet "Ringkasan Mutu".
+7. Buka menu **Rekap Data Mutu** untuk memverifikasi pencapaian indikator terakumulasi di matrix bulanan/triwulan/semester.
+8. Buka menu **Cetak Laporan** dan ekspor file Excel untuk periode saat ini, pastikan data indikator baru terekspor dengan benar di sheet khusus dan terakumulasi di sheet "Ringkasan Mutu".
