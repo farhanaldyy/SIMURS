@@ -30,6 +30,8 @@ const service = createGenericService('simrsResponseTimeIt', {
   calculateSummary(data) {
     const totalData = data.length;
     const totalResponseTimeMenit = data.reduce((acc, curr) => acc + (parseInt(curr.response_time_menit) || 0), 0);
+    const countGe15 = data.filter(d => (parseInt(d.response_time_menit) || 0) >= 15).length;
+    const numWaktuMenanggapi = Math.max(0, totalData - countGe15);
     
     // Total Jam = total response time / 60 (menit)
     const totalJam = parseFloat((totalResponseTimeMenit / 60).toFixed(2));
@@ -45,6 +47,12 @@ const service = createGenericService('simrsResponseTimeIt', {
 
     return {
       total: totalData,
+      totalData,
+      totalResponseTimeMenit,
+      countGe15,
+      numWaktuMenanggapi,
+      numerator: numWaktuMenanggapi,
+      denominator: totalData,
       totalJam,
       hasilResponseTime,
       presentase,

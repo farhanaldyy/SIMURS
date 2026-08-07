@@ -1359,6 +1359,41 @@ const ALL_INDICATOR_CONFIGS = [
       const den = summary.denominator !== undefined ? summary.denominator : 0;
       return { num, den };
     }
+  },
+  {
+    no: 82,
+    id: 'simrs-waktu-menanggapi',
+    nama: 'Kecepatan Waktu Menanggapi Kerusakan SIMRS ( ≤ 15 Menit ) - Nama Modul: SIMRS Response Time IT',
+    nama_modul: 'Kecepatan Waktu Menanggapi Kerusakan SIMRS',
+    standar: '≤ 15 Menit',
+    label_numerator: 'Total Data (< 15 Menit)',
+    label_denominator: 'Total Data',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/simrs-response-time-it.service'),
+    extract: (summary) => {
+      const num = summary.numWaktuMenanggapi !== undefined 
+        ? summary.numWaktuMenanggapi 
+        : Math.max(0, (summary.total || 0) - (summary.countGe15 || 0));
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 83,
+    id: 'simrs-persentase-pelaksanaan',
+    nama: 'Persentase Pelaksanaan Maintenance Perangkat Keras ( - ) - Nama Modul: SIMRS Response Time IT',
+    nama_modul: 'Persentase Pelaksanaan Maintenance Perangkat Keras',
+    standar: '-',
+    label_numerator: 'Total Response Time (Menit)',
+    label_denominator: 'Total Data',
+    formula: 'Numerator / Denumerator',
+    service: require('./modules/simrs-response-time-it.service'),
+    calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0,
+    extract: (summary) => {
+      const num = summary.totalResponseTimeMenit !== undefined ? summary.totalResponseTimeMenit : 0;
+      const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
   }
 ];
 
@@ -1381,7 +1416,7 @@ function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
         if (ai && ai.kategori_default) {
           const roomNama = (room.nama_unit || room.nama || '').toLowerCase().replace(/\s+/g, '_');
           const roomNamaRaw = (room.nama_unit || room.nama || '').toLowerCase();
-          const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi'];
+          const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi', 'simrs'];
           const hasUnitSpecificTag = ai.kategori_default.some(k => unitSpecificTags.includes(k));
 
           if (hasUnitSpecificTag) {
@@ -1402,7 +1437,7 @@ function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
         if (!ai.kategori_default) return false;
         const roomNama = (room.nama_unit || room.nama || '').toLowerCase().replace(/\s+/g, '_');
         const roomNamaRaw = (room.nama_unit || room.nama || '').toLowerCase();
-        const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi'];
+        const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi', 'simrs'];
         const hasUnitSpecificTag = ai.kategori_default.some(k => unitSpecificTags.includes(k));
 
         if (hasUnitSpecificTag) {

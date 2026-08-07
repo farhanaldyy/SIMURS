@@ -494,6 +494,18 @@ const AVAILABLE_INDICATORS = [
     nama: 'Kesesuain Prosedur Sterilisasi Alat-Alat Medis',
     standar: '100%',
     kategori_default: ['penunjang', 'laundry']
+  },
+  {
+    id: 'simrs-waktu-menanggapi',
+    nama: 'Kecepatan Waktu Menanggapi Kerusakan SIMRS',
+    standar: '≤ 15 Menit',
+    kategori_default: ['penunjang', 'simrs']
+  },
+  {
+    id: 'simrs-persentase-pelaksanaan',
+    nama: 'Persentase Pelaksanaan Maintenance Perangkat Keras',
+    standar: '-',
+    kategori_default: ['penunjang', 'simrs']
   }
 ];
 
