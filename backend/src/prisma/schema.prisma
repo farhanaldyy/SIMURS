@@ -90,6 +90,7 @@ model Unit {
   laboratoriumKepatuhanIdentifikasis LaboratoriumKepatuhanIdentifikasi[]
   laboratoriumEkspertisiDokters  LaboratoriumEkspertisiDokter[]
   simrsResponseTimeIts           SimrsResponseTimeIt[]
+  masterTindakans                MasterTindakan[]
 
   @@map("units")
 }
@@ -988,6 +989,7 @@ enum TindakanKebersihanTangan {
 
 model MasterTindakan {
   id                         Int                         @id @default(autoincrement())
+  unit_id                    Int?
   nama                       String                      @db.VarChar(100)
   nilai                      Float                       @default(0)
 
@@ -1002,8 +1004,11 @@ model MasterTindakan {
 
   created_at                 DateTime                    @default(now())
   updated_at                 DateTime                    @updatedAt
+
+  unit                       Unit?                       @relation(fields: [unit_id], references: [id])
   kepatuhanKebersihanTangans KepatuhanKebersihanTangan[]
 
+  @@index([unit_id])
   @@map("master_tindakan")
 }
 

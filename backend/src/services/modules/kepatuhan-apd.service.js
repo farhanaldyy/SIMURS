@@ -61,14 +61,15 @@ const service = {
   async getAll(where, page, limit) {
     const res = await baseService.getAll(where, page, limit);
     const masterList = await prisma.masterTindakan.findMany();
-    const tindakanMap = {};
-    masterList.forEach(m => { 
-      if (m.nama) tindakanMap[m.nama.trim().toLowerCase()] = m; 
-    });
 
     res.data = res.data.map(d => {
       const tKey = d.tindakan ? d.tindakan.trim().toLowerCase() : '';
-      const masterObj = tindakanMap[tKey];
+      let masterObj = null;
+      if (tKey) {
+        masterObj = masterList.find(m => m.nama?.trim().toLowerCase() === tKey && m.unit_id === d.unit_id) ||
+                    masterList.find(m => m.nama?.trim().toLowerCase() === tKey && !m.unit_id) ||
+                    masterList.find(m => m.nama?.trim().toLowerCase() === tKey);
+      }
 
       return {
         ...d,

@@ -22,7 +22,13 @@ async function getAll(where, page, limit) {
   const skip = (page && limit) ? (page - 1) * limit : undefined;
   const take = limit ? limit : undefined;
   const [data, total] = await Promise.all([
-    prisma.masterTindakan.findMany({ where, skip, take, orderBy: { nama: 'asc' } }),
+    prisma.masterTindakan.findMany({ 
+      where, 
+      skip, 
+      take, 
+      orderBy: { nama: 'asc' },
+      include: { unit: { select: { id: true, nama_unit: true, kode_unit: true } } }
+    }),
     prisma.masterTindakan.count({ where }),
   ]);
   return { data, total };
@@ -41,7 +47,8 @@ const apdKeys = [
 async function create(body, userId) {
   const data = {
     nama: body.nama,
-    nilai: parseFloat(body.nilai) || 0
+    nilai: parseFloat(body.nilai) || 0,
+    unit_id: body.unit_id ? parseInt(body.unit_id) : null
   };
   apdKeys.forEach(k => {
     if (body[k] !== undefined) {
@@ -49,7 +56,10 @@ async function create(body, userId) {
     }
   });
 
-  const record = await prisma.masterTindakan.create({ data });
+  const record = await prisma.masterTindakan.create({ 
+    data,
+    include: { unit: { select: { id: true, nama_unit: true, kode_unit: true } } }
+  });
   await logAudit(userId, 'master_tindakan', record.id, 'create', null, record);
   return record;
 }
@@ -58,6 +68,7 @@ async function update(id, body, userId) {
   const data = {};
   if (body.nama !== undefined) data.nama = body.nama;
   if (body.nilai !== undefined) data.nilai = parseFloat(body.nilai) || 0;
+  if (body.unit_id !== undefined) data.unit_id = body.unit_id ? parseInt(body.unit_id) : null;
   apdKeys.forEach(k => {
     if (body[k] !== undefined) {
       data[k] = body[k] === true || body[k] === 'true';
@@ -69,7 +80,11 @@ async function update(id, body, userId) {
     oldRecord = await prisma.masterTindakan.findUnique({ where: { id } });
   }
 
-  const record = await prisma.masterTindakan.update({ where: { id }, data });
+  const record = await prisma.masterTindakan.update({ 
+    where: { id }, 
+    data,
+    include: { unit: { select: { id: true, nama_unit: true, kode_unit: true } } }
+  });
   await logAudit(userId, 'master_tindakan', id, 'update', oldRecord, record);
   return record;
 }

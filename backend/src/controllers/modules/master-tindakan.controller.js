@@ -11,6 +11,17 @@ async function getAll(req, res, next) {
     if (search) {
       where.nama = { contains: search };
     }
+    if (req.query.unit_id) {
+      const uId = parseInt(req.query.unit_id);
+      if (req.query.strict_unit === 'true') {
+        where.unit_id = uId;
+      } else {
+        where.OR = [
+          { unit_id: uId },
+          { unit_id: null }
+        ];
+      }
+    }
 
     const result = await service.getAll(where, page, limit);
     res.json({

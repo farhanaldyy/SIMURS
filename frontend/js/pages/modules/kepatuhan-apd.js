@@ -1,3 +1,4 @@
+import Store from '../../store.js';
 import { createGenericIndicatorPage } from './generic-indicator.js';
 import { renderBadge } from '../../components/indicator-badge.js';
 import { api } from '../../api/client.js';
@@ -14,15 +15,23 @@ const apdItemsList = [
   { name: 'cover_shoes', reqKey: 'apd_cover_shoes', abbr: 'CS', label: 'Cover Shoes' }
 ];
 
-async function loadMasterTindakanOptions() {
-  const res = await api.get('/master-tindakan?all=true');
+async function loadMasterTindakanOptions(unitId = null) {
+  let url = '/master-tindakan?all=true';
+  if (unitId) {
+    url += `&unit_id=${unitId}`;
+  }
+  const res = await api.get(url);
   if (res.success) {
     masterTindakanOptions = res.data;
   }
 }
 
 function getRequiredItemsForRecord(r) {
-  const master = r.master_tindakan || masterTindakanOptions.find(m => m.nama?.trim().toLowerCase() === r.tindakan?.trim().toLowerCase());
+  const tKey = r.tindakan ? r.tindakan.trim().toLowerCase() : '';
+  const master = r.master_tindakan || 
+    masterTindakanOptions.find(m => m.nama?.trim().toLowerCase() === tKey && m.unit_id === r.unit_id) ||
+    masterTindakanOptions.find(m => m.nama?.trim().toLowerCase() === tKey && !m.unit_id) ||
+    masterTindakanOptions.find(m => m.nama?.trim().toLowerCase() === tKey);
   if (!master) return apdItemsList;
   const reqs = apdItemsList.filter(item => master[item.reqKey] === true);
   return reqs.length > 0 ? reqs : apdItemsList;
@@ -207,7 +216,8 @@ const pageObj = createGenericIndicatorPage({
 
 const originalRender = pageObj.render;
 pageObj.render = async (container) => {
-  await loadMasterTindakanOptions();
+  const activeUnitId = Store.unitAktif?.id || Store.user?.unit_id || null;
+  await loadMasterTindakanOptions(activeUnitId);
   await originalRender(container);
 
   // Bind change event to update APD requirements tag in modal form dynamically

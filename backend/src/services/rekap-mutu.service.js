@@ -2274,6 +2274,7 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
 }
 
 module.exports = {
+  ALL_INDICATOR_CONFIGS,
   getRekapMutuData,
   exportRekapMutuExcel,
 };

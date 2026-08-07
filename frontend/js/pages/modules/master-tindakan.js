@@ -5,10 +5,25 @@ import { showModal, closeModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
 import { validateRequired, showFormErrors, validateForm } from '../../utils/validator.js';
 
-let state = { data: [], search: '', page: 1, limit: 10, totalPages: 1 };
+let state = { data: [], search: '', unit_id: '', page: 1, limit: 10, totalPages: 1 };
+let unitsList = [];
+
+async function loadUnits() {
+  try {
+    const res = await api.get('/units');
+    if (res.success) {
+      unitsList = res.data || [];
+    }
+  } catch (err) {
+    console.error('Error loading units for Master Tindakan:', err);
+  }
+}
 
 async function loadData() {
-  const endpoint = `/master-tindakan?page=${state.page}&limit=${state.limit}&search=${encodeURIComponent(state.search)}`;
+  let endpoint = `/master-tindakan?page=${state.page}&limit=${state.limit}&search=${encodeURIComponent(state.search)}`;
+  if (state.unit_id) {
+    endpoint += `&unit_id=${state.unit_id}&strict_unit=true`;
+  }
   const res = await api.get(endpoint);
   if (res.success) {
     state.data = res.data;
@@ -33,6 +48,11 @@ const apdList = [
 function renderTindakanTable() {
   const columns = [
     { label: 'No', width: '50px', align: 'center', render: (_, i) => (state.page - 1) * state.limit + i + 1 },
+    { 
+      label: 'Unit / Ruangan', 
+      width: '160px', 
+      render: (r) => r.unit ? `<span class="badge badge-info" style="font-size:0.75rem;">${r.unit.nama_unit}</span>` : `<span class="badge badge-secondary" style="font-size:0.75rem;">Semua Unit (Global)</span>` 
+    },
     { label: 'Nama Tindakan', key: 'nama' },
     { 
       label: 'Nilai Tindakan', 
@@ -126,6 +146,12 @@ function renderPagination() {
 function openTindakanModal(tindakan = null) {
   const isEdit = !!tindakan;
 
+  const unitOptionsHTML = unitsList.map(u => `
+    <option value="${u.id}" ${tindakan && String(tindakan.unit_id) === String(u.id) ? 'selected' : ''}>
+      ${u.nama_unit}
+    </option>
+  `).join('');
+
   const checkboxesHTML = apdList.map(item => {
     const checked = tindakan ? (tindakan[item.key] === true) : false;
     return `
@@ -139,6 +165,14 @@ function openTindakanModal(tindakan = null) {
   const modalHTML = `
     <form id="tindakan-form">
       <div class="form-group">
+        <label class="form-label">Unit / Ruangan</label>
+        <select name="unit_id" class="form-control">
+          <option value="">-- Semua Unit (Global) --</option>
+          ${unitOptionsHTML}
+        </select>
+        <small style="color: var(--color-text-muted, #64748b); font-size: 0.8rem;">Pilih unit jika tindakan ini hanya berlaku khusus untuk unit/ruangan tersebut.</small>
+      </div>
+      <div class="form-group" style="margin-top: 12px;">
         <label class="form-label">Nama Tindakan <span class="required">*</span></label>
         <input type="text" name="nama" class="form-control" value="${tindakan?.nama || ''}" required placeholder="Contoh: Operasi Caesar SC">
       </div>
@@ -175,6 +209,7 @@ function openTindakanModal(tindakan = null) {
 
       // Parse float value & APD checkboxes
       formData.nilai = parseFloat(formData.nilai);
+      formData.unit_id = formData.unit_id ? parseInt(formData.unit_id) : null;
       apdList.forEach(item => {
         formData[item.key] = form.querySelector(`input[name="${item.key}"]`)?.checked || false;
       });
@@ -216,15 +251,25 @@ async function handleDeleteTindakan(id) {
 }
 
 export const render = async (container) => {
+  await loadUnits();
+
+  const unitFilterOptionsHTML = unitsList.map(u => `
+    <option value="${u.id}">${u.nama_unit}</option>
+  `).join('');
+
   container.innerHTML = `
     <div class="module-page">
       <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
         <div>
           <h1 class="page-title">Master Tindakan</h1>
-          <p class="page-subtitle">Daftar standardisasi tindakan dan nilainya di SIMURS</p>
+          <p class="page-subtitle">Daftar standardisasi tindakan dan nilainya di SIMURS per Unit</p>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="search-tindakan" class="form-control" placeholder="Cari tindakan..." style="width: 240px;" value="${state.search}">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <select id="filter-unit-tindakan" class="form-control" style="width: 180px;">
+            <option value="">Semua Unit</option>
+            ${unitFilterOptionsHTML}
+          </select>
+          <input type="text" id="search-tindakan" class="form-control" placeholder="Cari tindakan..." style="width: 200px;" value="${state.search}">
           <button class="btn btn-primary" id="btn-add-tindakan">+ Tambah Tindakan</button>
         </div>
       </div>
@@ -234,6 +279,16 @@ export const render = async (container) => {
   `;
 
   document.getElementById('btn-add-tindakan').addEventListener('click', () => openTindakanModal());
+
+  const filterUnitSelect = document.getElementById('filter-unit-tindakan');
+  if (filterUnitSelect) {
+    filterUnitSelect.value = state.unit_id;
+    filterUnitSelect.addEventListener('change', (e) => {
+      state.unit_id = e.target.value;
+      state.page = 1;
+      loadData();
+    });
+  }
 
   const searchInput = document.getElementById('search-tindakan');
   let searchTimeout;

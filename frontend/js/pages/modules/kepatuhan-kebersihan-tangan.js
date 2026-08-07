@@ -1,3 +1,4 @@
+import Store from '../../store.js';
 import { createGenericIndicatorPage } from './generic-indicator.js';
 import { renderBadge } from '../../components/indicator-badge.js';
 import { showToast } from '../../components/toast.js';
@@ -5,12 +6,27 @@ import { api } from '../../api/client.js';
 
 let masterTindakanOptions = [];
 
-async function loadMasterTindakanOptions() {
-  const res = await api.get('/master-tindakan?all=true');
+async function loadMasterTindakanOptions(unitId = null) {
+  let url = '/master-tindakan?all=true';
+  if (unitId) {
+    url += `&unit_id=${unitId}`;
+  }
+  const res = await api.get(url);
   if (res.success) {
     masterTindakanOptions = res.data;
   }
 }
+
+window.handleUnitChangeMasterTindakan = async function(unitSelect) {
+  const unitId = unitSelect ? unitSelect.value : null;
+  await loadMasterTindakanOptions(unitId);
+  const searchInput = document.getElementById('search-tindakan-master');
+  if (searchInput) {
+    window.handleSearchTindakanMaster(searchInput);
+  } else {
+    window.handleSearchTindakanMaster({ value: '' });
+  }
+};
 
 window.handleSearchTindakanMaster = function(inputEl) {
   const selectEl = document.getElementById('select-tindakan-master');
@@ -24,7 +40,7 @@ window.handleSearchTindakanMaster = function(inputEl) {
 
   const optionsHTML = filtered.map(item => `
     <option value="${item.id}" ${String(currentSelected) === String(item.id) ? 'selected' : ''}>
-      ${item.nama} (Nilai: ${item.nilai})
+      ${item.nama} (Nilai: ${item.nilai}${item.unit ? ` - ${item.unit.nama_unit}` : ''})
     </option>
   `).join('');
 
@@ -278,7 +294,8 @@ const pageObj = createGenericIndicatorPage({
 
 const originalRender = pageObj.render;
 pageObj.render = async (container) => {
-  await loadMasterTindakanOptions();
+  const activeUnitId = Store.unitAktif?.id || Store.user?.unit_id || null;
+  await loadMasterTindakanOptions(activeUnitId);
   await originalRender(container);
 };
 
