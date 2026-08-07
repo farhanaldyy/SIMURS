@@ -67,6 +67,7 @@ const routes = {
   '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
   '#/admin/unit-indicator-config':{ module: () => import('./pages/admin/unit-indicator-config.js'), title: 'Kelola Indikator Unit' },
   '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
+  '#/admin/import-data':          { module: () => import('./pages/admin/import-data.js'), title: 'Import Data Massal' },
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
   '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },
   '#/master-poliklinik':          { module: () => import('./pages/modules/master-poliklinik.js'), title: 'Master Poliklinik' },
@@ -203,10 +204,13 @@ async function handleRoute(contentContainer) {
   } catch (err) {
     console.error('Route error:', err);
     contentContainer.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
-        <h3>Gagal memuat halaman</h3>
-        <p>${err.message}</p>
+      <div class="empty-state" style="padding: 40px; text-align: center;">
+        <div class="empty-state-icon" style="font-size: 3em; margin-bottom: 16px;">⚠️</div>
+        <h3 style="margin-bottom: 10px;">Gagal Memuat Halaman</h3>
+        <p style="color: var(--color-text-secondary); max-width: 480px; margin: 0 auto 20px auto; font-size: 0.95rem; line-height: 1.5;">
+          Gagal terhubung ke server atau terjadi kesalahan saat memuat halaman. Silakan periksa koneksi jaringan atau pastikan server backend sedang berjalan.
+        </p>
+        <button class="btn btn-primary" onclick="window.location.reload()">🔄 Coba Muat Ulang</button>
       </div>
     `;
   }

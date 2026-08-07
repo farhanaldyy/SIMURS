@@ -109,6 +109,7 @@ const serviceToHash = {
   'Tidak Adanya Kejadian Linen Hilang': '#/laundry-linen-hilang',
 
   // Radiologi
+  'Jadwal Dokter Radiologi': '#/radiologi-jadwal-dokter',
   'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': '#/radiologi-thorax-sesuai-jadwal',
   'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': '#/radiologi-thorax-luar-jadwal',
   'Kejadian Foto Ulang Pasien': '#/radiologi-foto-ulang',
@@ -124,6 +125,7 @@ const serviceToHash = {
   'Tidak adanya kerusakan sampel di laboratorium': '#/laboratorium-kerusakan-sampel',
   'Kepatuhan Identifikasi Pasien Laboratorium': '#/laboratorium-kepatuhan-identifikasi',
   'Data Ekspertisi Oleh Dokter Laboratorium': '#/laboratorium-ekspertisi-dokter',
+  'Tidak Adanya Kesalahan Penyerahan Hasil Lab': '#/laboratorium-kesalahan-penyerahan',
 
   // Farmasi
   'Kepatuhan Pelaksanaan Double Check Obat High Alert': '#/mutu-farmasi',
@@ -214,6 +216,8 @@ function renderReportTable() {
         achieved = currentVal >= targetVal;
       } else if (s.standar.includes('>')) {
         achieved = currentVal > targetVal;
+      } else if (targetVal === 0 || s.standar === '0%' || s.standar === '0') {
+        achieved = currentVal <= targetVal;
       } else {
         achieved = currentVal >= targetVal;
       }
@@ -285,6 +289,31 @@ async function downloadExcelFile() {
   }
 }
 
+async function downloadTemplateFile() {
+  showToast('Menyiapkan template Excel...', 'info');
+  try {
+    const token = Store.get('token');
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch('/api/laporan/template-excel', { headers });
+    if (!res.ok) throw new Error('Gagal mengunduh template');
+
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = 'Template_Import_SIMURS.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('Template Excel berhasil diunduh', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal mengekspor template Excel', 'error');
+  }
+}
+
 async function handleImport(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -292,7 +321,7 @@ async function handleImport(e) {
   const formData = new FormData();
   formData.append('file', file);
 
-  showToast('Mengimpor data Excel...', 'info');
+  showToast('Memvalidasi & mengimpor data Excel...', 'info');
 
   try {
     const token = Store.get('token');
@@ -308,6 +337,11 @@ async function handleImport(e) {
     const data = await res.json();
     if (data.success) {
       showToast(data.message || 'Data Excel berhasil diimpor!', 'success');
+      if (data.errors && data.errors.length > 0) {
+        setTimeout(() => {
+          showToast(`Catatan Import: ${data.errors[0]}`, 'warning');
+        }, 1500);
+      }
       loadData();
     } else {
       showToast(data.message || 'Gagal mengimpor data', 'error');
@@ -395,17 +429,6 @@ export const render = async (container) => {
         </div>
       </div>
 
-      ${Store.isAdmin() ? `
-        <div class="card" style="margin-bottom: 24px; padding: 24px;">
-          <h3 style="margin-top: 0; margin-bottom: 8px;">Migrasi Data (Import Excel)</h3>
-          <p style="color: var(--text-light); margin-bottom: 16px; font-size: 0.9rem;">
-            Unggah file rekap manual (.xlsx) untuk memigrasikan data lama ke dalam periode aktif.
-          </p>
-          <input type="file" id="input-import-excel" accept=".xlsx" style="display: none;">
-          <button class="btn btn-outline" onclick="document.getElementById('input-import-excel').click()">📥 Pilih File & Import</button>
-        </div>
-      ` : ''}
-
       <div class="card" style="padding: 24px;">
         <h3 style="margin-top: 0; margin-bottom: 16px;">Pratinjau Kepatuhan Indikator</h3>
         <div class="table-wrapper">
@@ -482,6 +505,11 @@ export const render = async (container) => {
     }
     window.print();
   });
+
+  const btnTemplate = document.getElementById('btn-download-template');
+  if (btnTemplate) {
+    btnTemplate.addEventListener('click', downloadTemplateFile);
+  }
 
   const importInput = document.getElementById('input-import-excel');
   if (importInput) {

@@ -141,49 +141,68 @@ const service = {
   },
 
   async getSummary(where) {
-    const { periode_id, tipe } = where;
-    if (!periode_id || !tipe) {
+    let tipe = where.tipe;
+    if (!tipe && (where.indicator_id || where.id)) {
+      const indId = where.indicator_id || where.id;
+      if (indId === 'rm-dokumen') tipe = 'kelengkapan_ranap';
+      else if (indId === 'rm-pengisian-dok') tipe = 'pengembalian_rm';
+      else if (indId === 'rm-antrian-online') tipe = 'antrian_online';
+      else if (indId === 'rm-coding-rwi-rwj') tipe = 'ketepatan_coding';
+      else if (indId === 'rm-jkn') tipe = 'mobile_jkn';
+    }
+
+    if (!tipe) {
       return { total: 0, numerator: 0, denominator: 0, persen: 0, standar: '100%' };
     }
 
-    const record = await prisma.mutuRekamMedis.findUnique({
-      where: { periode_id: parseInt(periode_id) }
-    });
+    let records = [];
+    if (where.periode_id) {
+      if (typeof where.periode_id === 'number' || typeof where.periode_id === 'string') {
+        const rec = await prisma.mutuRekamMedis.findUnique({
+          where: { periode_id: parseInt(where.periode_id) }
+        });
+        if (rec) records.push(rec);
+      } else if (typeof where.periode_id === 'object') {
+        records = await prisma.mutuRekamMedis.findMany({
+          where: { periode_id: where.periode_id }
+        });
+      }
+    } else {
+      records = await prisma.mutuRekamMedis.findMany({});
+    }
 
     let num = 0;
     let den = 0;
-    let pct = 0;
     let standar = '100%';
 
     if (tipe === 'antrian_online') {
-      standar = '>= 85%';
+      standar = '≥ 85%';
     } else if (tipe === 'mobile_jkn') {
-      standar = '>= 30%';
+      standar = '≥ 30%';
+    } else if (tipe === 'pengembalian_rm') {
+      standar = '1x24 Jam';
     }
 
-    if (record) {
+    records.forEach(record => {
       if (tipe === 'kelengkapan_ranap') {
-        num = record.kelengkapan_ranap_num;
-        den = record.kelengkapan_ranap_den;
-        pct = record.kelengkapan_ranap_pct;
+        num += record.kelengkapan_ranap_num || 0;
+        den += record.kelengkapan_ranap_den || 0;
       } else if (tipe === 'pengembalian_rm') {
-        num = record.pengembalian_num;
-        den = record.pengembalian_den;
-        pct = record.pengembalian_pct;
+        num += record.pengembalian_num || 0;
+        den += record.pengembalian_den || 0;
       } else if (tipe === 'antrian_online') {
-        num = record.antrian_online_num;
-        den = record.antrian_online_den;
-        pct = record.antrian_online_pct;
+        num += record.antrian_online_num || 0;
+        den += record.antrian_online_den || 0;
       } else if (tipe === 'ketepatan_coding') {
-        num = record.coding_num;
-        den = record.coding_den;
-        pct = record.coding_pct;
+        num += record.coding_num || 0;
+        den += record.coding_den || 0;
       } else if (tipe === 'mobile_jkn') {
-        num = record.mobile_jkn_num;
-        den = record.mobile_jkn_den;
-        pct = record.mobile_jkn_pct;
+        num += record.mobile_jkn_num || 0;
+        den += record.mobile_jkn_den || 0;
       }
-    }
+    });
+
+    const pct = den > 0 ? parseFloat(((num / den) * 100).toFixed(2)) : 0;
 
     return {
       total: den,

@@ -191,6 +191,7 @@ const services = {
   'Tidak Adanya Kejadian Linen Hilang': { service: require('../services/modules/laundry-linen-hilang.service'), category: 'Laundry' },
 
   // Radiologi
+  'Jadwal Dokter Radiologi': { service: require('../services/modules/radiologi-jadwal-dokter.service'), category: 'Radiologi' },
   'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': { service: require('../services/modules/radiologi-thorax-sesuai-jadwal.service'), category: 'Radiologi' },
   'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': { service: require('../services/modules/radiologi-thorax-luar-jadwal.service'), category: 'Radiologi' },
   'Kejadian Foto Ulang Pasien': { service: require('../services/modules/radiologi-foto-ulang.service'), category: 'Radiologi' },
@@ -206,6 +207,7 @@ const services = {
   'Tidak adanya kerusakan sampel di laboratorium': { service: require('../services/modules/laboratorium-kerusakan-sampel.service'), category: 'Laboratorium' },
   'Kepatuhan Identifikasi Pasien Laboratorium': { service: require('../services/modules/laboratorium-kepatuhan-identifikasi.service'), category: 'Laboratorium' },
   'Data Ekspertisi Oleh Dokter Laboratorium': { service: require('../services/modules/laboratorium-ekspertisi-dokter.service'), category: 'Laboratorium' },
+  'Tidak Adanya Kesalahan Penyerahan Hasil Lab': { service: require('../services/modules/laboratorium-kesalahan-penyerahan.service'), category: 'Laboratorium' },
   
   // SIMRS
   'Response Time SIMRS IT': { service: require('../services/modules/simrs-response-time-it.service'), category: 'SIMRS' },

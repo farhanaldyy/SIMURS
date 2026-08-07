@@ -373,7 +373,7 @@ async function loadData() {
     container.innerHTML = `
       <div class="card" style="padding: 20px; text-align: center; border: 1px solid #fde8e8; background: #fdf2f2; border-radius: 8px;">
         <div style="color: #9b1c1c; font-weight: 700; margin-bottom: 6px;">⚠️ Terjadi Kesalahan Koneksi</div>
-        <div style="color: #771d1d; font-size: 0.8rem; margin-bottom: 12px;">${err.message || 'Gagal terhubung ke server.'}</div>
+        <div style="color: #771d1d; font-size: 0.8rem; margin-bottom: 12px;">Gagal terhubung ke server. Silakan periksa koneksi jaringan atau pastikan server backend sedang berjalan.</div>
         <button id="btn-retry-load" class="btn" style="background: #9b1c1c; color: white; border: none; padding: 4px 12px; font-size: 0.78rem; border-radius: 4px; cursor: pointer;">
           🔄 Coba Lagi
         </button>

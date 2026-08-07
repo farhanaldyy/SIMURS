@@ -1081,6 +1081,284 @@ const ALL_INDICATOR_CONFIGS = [
       const den = summary.total_pemeriksaan !== undefined ? summary.total_pemeriksaan : 0;
       return { num, den };
     }
+  },
+  {
+    no: 65,
+    id: 'waktu-gizi-pasien',
+    nama: 'Ketepatan Waktu Pemberian Makan Pada Pasien ( ≥ 90% ) - Nama Modul: Ketepatan Waktu Pemberian Makan Pada Pasien',
+    nama_modul: 'Ketepatan Waktu Pemberian Makan Pada Pasien',
+    standar: '≥ 90%',
+    label_numerator: 'Total Ketepatan',
+    label_denominator: 'Total Porsi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/gizi-waktu-makanan.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 66,
+    id: 'salah-gizi-diet',
+    nama: 'Tidak Adanya Kejadian Salah Pemberian Diet Pasien ( 100% ) - Nama Modul: Tidak Adanya Kejadian Salah Pemberian Diet Pasien',
+    nama_modul: 'Tidak Adanya Kejadian Salah Pemberian Diet Pasien',
+    standar: '100%',
+    label_numerator: 'Total Benar',
+    label_denominator: 'Total Porsi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/gizi-kesalahan-diet.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 67,
+    id: 'sisa-gizi-pasien',
+    nama: 'Sisa Makanan Yang Tidak Termakan Oleh Pasien ( ≤ 20% ) - Nama Modul: Sisa Makanan Yang Tidak Termakan Oleh Pasien',
+    nama_modul: 'Sisa Makanan Yang Tidak Termakan Oleh Pasien',
+    standar: '≤ 20%',
+    label_numerator: 'Total Sisa',
+    label_denominator: 'Total Porsi',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/gizi-sisa-makanan.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 68,
+    id: 'simrs-gizi-identifikasi',
+    nama: 'Penulisan Pasien Di SIMRS Sesuai Ruangan, Bed, RM, Diet Pasien ( ≥ 85% ) - Nama Modul: Penulisan Pasien Di SIMRS Sesuai Ruangan, Bed, RM, Diet Pasien',
+    nama_modul: 'Penulisan Pasien Di SIMRS Sesuai Ruangan, Bed, RM, Diet Pasien',
+    standar: '≥ 85%',
+    label_numerator: 'Total Sesuai',
+    label_denominator: 'Total Pasien Ranap',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/gizi-identifikasi-pasien.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 69,
+    id: 'rm-dokumen',
+    nama: 'Kelengkapan Dokumen Rekam Medis Pasien Ranap ( 100% ) - Nama Modul: Kelengkapan Dokumen Rekam Medis Pasien Ranap',
+    nama_modul: 'Kelengkapan Dokumen Rekam Medis Pasien Ranap',
+    standar: '100%',
+    label_numerator: 'Numerator (Lengkap)',
+    label_denominator: 'Denumerator (Total RM)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-rekam-medis.service'),
+    extraWhere: { tipe: 'kelengkapan_ranap' },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 70,
+    id: 'rm-pengisian-dok',
+    nama: 'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam ( 1x24 Jam ) - Nama Modul: Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam',
+    nama_modul: 'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam',
+    standar: '1x24 Jam',
+    label_numerator: 'Numerator (Tepat)',
+    label_denominator: 'Denumerator (Total RM)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-rekam-medis.service'),
+    extraWhere: { tipe: 'pengembalian_rm' },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 71,
+    id: 'rm-antrian-online',
+    nama: 'Pemberian Informasi Antrian Online ( 85% ) - Nama Modul: Pemberian Informasi Antrian Online',
+    nama_modul: 'Pemberian Informasi Antrian Online',
+    standar: '85%',
+    label_numerator: 'Numerator (Diinfo)',
+    label_denominator: 'Denumerator (Total Antrian)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-rekam-medis.service'),
+    extraWhere: { tipe: 'antrian_online' },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 72,
+    id: 'rm-coding-rwi-rwj',
+    nama: 'Ketepatan Coding Rawat Inap & Rawat Jalan ( 100% ) - Nama Modul: Ketepatan Coding Rawat Inap & Rawat Jalan',
+    nama_modul: 'Ketepatan Coding Rawat Inap & Rawat Jalan',
+    standar: '100%',
+    label_numerator: 'Numerator (Tepat)',
+    label_denominator: 'Denumerator (Total Berkas)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-rekam-medis.service'),
+    extraWhere: { tipe: 'ketepatan_coding' },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 73,
+    id: 'rm-jkn',
+    nama: 'Antrian Mobile JKN ( 30% ) - Nama Modul: Antrian Mobile JKN',
+    nama_modul: 'Antrian Mobile JKN',
+    standar: '30%',
+    label_numerator: 'Numerator (Mobile JKN)',
+    label_denominator: 'Denumerator (Total Antrian)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/mutu-rekam-medis.service'),
+    extraWhere: { tipe: 'mobile_jkn' },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 74,
+    id: 'rehab-drop-pasien',
+    nama: 'Kejadian Drop Out Pasien Terhadap Pelayanan Rehabilitasi Medis ( ≤ 50% ) - Nama Modul: Kejadian Drop Out Pasien Terhadap Pelayanan Rehabilitasi Medis',
+    nama_modul: 'Kejadian Drop Out Pasien Terhadap Pelayanan Rehabilitasi Medis',
+    standar: '≤ 50%',
+    label_numerator: 'Total Drop Out',
+    label_denominator: 'Total Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/rehab-drop-out.service'),
+    extract: (summary) => {
+      const num = summary.total_drop_out !== undefined ? summary.total_drop_out : (summary.numerator || 0);
+      const den = summary.total_pasien !== undefined ? summary.total_pasien : (summary.denominator || 0);
+      return { num, den };
+    }
+  },
+  {
+    no: 75,
+    id: 'rehab-kesalahan-tindakan',
+    nama: 'Tidak Adanya Kejadian Kesalahan Tindakan Rehabilitasi Medis ( 100% ) - Nama Modul: Tidak Adanya Kejadian Kesalahan Tindakan Rehabilitasi Medis',
+    nama_modul: 'Tidak Adanya Kejadian Kesalahan Tindakan Rehabilitasi Medis',
+    standar: '100%',
+    label_numerator: 'Total Kesalahan',
+    label_denominator: 'Total Pasien',
+    formula: '(Denumerator - Numerator) / Denumerator * 100',
+    service: require('./modules/rehab-kesalahan-tindakan.service'),
+    extract: (summary) => {
+      const num = summary.total_kesalahan !== undefined ? summary.total_kesalahan : 0;
+      const den = summary.total_pasien !== undefined ? summary.total_pasien : (summary.denominator || 0);
+      return { num, den };
+    },
+    calculateCapaian: (num, den) => den > 0 ? parseFloat((((den - num) / den) * 100).toFixed(2)) : 100
+  },
+  {
+    no: 76,
+    id: 'rehab-waktu-tunggu',
+    nama: 'Waktu Tunggu Pelayanan Rawat Jalan Rehabilitasi Medis ( ≤ 60 menit ) - Nama Modul: Waktu Tunggu Pelayanan Rawat Jalan Rehabilitasi Medis',
+    nama_modul: 'Waktu Tunggu Pelayanan Rawat Jalan Rehabilitasi Medis',
+    standar: '≤ 60 menit',
+    label_numerator: 'Total Tunggu < 60 Menit',
+    label_denominator: 'Total Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/rehab-waktu-tunggu.service'),
+    extract: (summary) => {
+      const num = summary.total_waktu_tunggu_lt_60 !== undefined ? summary.total_waktu_tunggu_lt_60 : 0;
+      const den = summary.total_pasien !== undefined ? summary.total_pasien : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 77,
+    id: 'rehab-identifikasi',
+    nama: 'Kepatuhan Identifikasi Pasien ( 100% ) - Nama Modul: Kepatuhan Identifikasi Pasien',
+    nama_modul: 'Kepatuhan Identifikasi Pasien',
+    standar: '100%',
+    label_numerator: 'Total Pasien dikurang (-) Total Ketidakpatuhan',
+    label_denominator: 'Total Pasien',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/rehab-kepatuhan-identitas.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : ((summary.total_pasien || 0) - (summary.total_ketidakpatuhan || 0));
+      const den = summary.total_pasien !== undefined ? summary.total_pasien : (summary.denominator || 0);
+      return { num, den };
+    }
+  },
+  {
+    no: 78,
+    id: 'laundry-linen-hilang',
+    nama: 'Tidak Adanya Kejadian Linen Yang Hilang ( 100% ) - Nama Modul: Tidak Adanya Kejadian Linen Yang Hilang',
+    nama_modul: 'Tidak Adanya Kejadian Linen Yang Hilang',
+    standar: '100%',
+    label_numerator: 'Total Linen Dikembalikan',
+    label_denominator: 'Total Linen Diambil',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/laundry-linen-hilang.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 79,
+    id: 'laundry-waktu-linen',
+    nama: 'Ketepatan Waktu Penyediaan Linen Untuk Ruang Rawat Inap ( 100% ) - Nama Modul: Ketepatan Waktu Penyediaan Linen',
+    nama_modul: 'Ketepatan Waktu Penyediaan Linen Untuk Ruang Rawat Inap',
+    standar: '100%',
+    label_numerator: 'Total Tepat Waktu (Numerator)',
+    label_denominator: 'Denumerator',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/laundry-ketepatan-linen.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 80,
+    id: 'laundry-waktu-instrumen-op',
+    nama: 'Ketepatan Waktu Penyediaan Instrumen Operasi Siap Pakai Ke Kamar Bedah ( 100% ) - Nama Modul: Ketepatan Waktu Penyediaan Instrumen Operasi',
+    nama_modul: 'Ketepatan Waktu Penyediaan Instrumen Operasi Siap Pakai Ke Kamar Bedah',
+    standar: '100%',
+    label_numerator: 'Numerator',
+    label_denominator: 'Denumerator',
+    formula: 'Numerator / Denumerator * 100',
+    service: { getSummary: async () => ({ numerator: 0, denominator: 0, total: 0 }) },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 81,
+    id: 'laundry-sterilisasi',
+    nama: 'Kesesuain Prosedur Sterilisasi Alat-Alat Medis ( 100% ) - Nama Modul: Kesesuain Prosedur Sterilisasi Alat-Alat Medis',
+    nama_modul: 'Kesesuain Prosedur Sterilisasi Alat-Alat Medis',
+    standar: '100%',
+    label_numerator: 'Numerator',
+    label_denominator: 'Denumerator',
+    formula: 'Numerator / Denumerator * 100',
+    service: { getSummary: async () => ({ numerator: 0, denominator: 0, total: 0 }) },
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
   }
 ];
 
@@ -1093,6 +1371,7 @@ function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
         roomConfig.set.has(ind.id.replace(/-/g, '_')) ||
         (ind.id === 'jadwal-hemodialisa' && (roomConfig.set.has('ketidakpatuhan_hd') || roomConfig.set.has('jadwal_hemodialisa'))) ||
         (ind.id === 'insiden-clotting-durante' && (roomConfig.set.has('insiden_clotting') || roomConfig.set.has('insiden-clotting'))) ||
+        (ind.id === 'laundry-waktu-linen' && (roomConfig.set.has('laundry-ketepatan-linen') || roomConfig.set.has('laundry_ketepatan_linen'))) ||
         (hasParentWaktuTunggu && ind.id.startsWith('waktu_tunggu_poliklinik'));
 
       if (isSavedActive) return true;
@@ -1100,10 +1379,17 @@ function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
       if (roomConfig.allKnownIds && !roomConfig.allKnownIds.has(ind.id) && !roomConfig.allKnownIds.has(ind.id.replace(/_/g, '-')) && !roomConfig.allKnownIds.has(ind.id.replace(/-/g, '_'))) {
         const ai = AVAILABLE_INDICATORS.find(a => a.id === ind.id || a.id.replace(/_/g, '-') === ind.id.replace(/_/g, '-'));
         if (ai && ai.kategori_default) {
-          const roomNama = (room.nama_unit || room.nama || '').toLowerCase();
+          const roomNama = (room.nama_unit || room.nama || '').toLowerCase().replace(/\s+/g, '_');
+          const roomNamaRaw = (room.nama_unit || room.nama || '').toLowerCase();
+          const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi'];
+          const hasUnitSpecificTag = ai.kategori_default.some(k => unitSpecificTags.includes(k));
+
+          if (hasUnitSpecificTag) {
+            return ai.kategori_default.some(k => roomNama.includes(k) || roomNamaRaw.includes(k.replace(/_/g, ' ')));
+          }
+
           return ai.kategori_default.includes(room.kategori_unit) || 
-                 ai.kategori_default.includes(kategori) || 
-                 ai.kategori_default.some(k => roomNama.includes(k));
+                 ai.kategori_default.includes(kategori);
         }
       }
       return false;
@@ -1114,10 +1400,17 @@ function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
     AVAILABLE_INDICATORS
       .filter(ai => {
         if (!ai.kategori_default) return false;
-        const roomNama = (room.nama_unit || room.nama || '').toLowerCase();
+        const roomNama = (room.nama_unit || room.nama || '').toLowerCase().replace(/\s+/g, '_');
+        const roomNamaRaw = (room.nama_unit || room.nama || '').toLowerCase();
+        const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi'];
+        const hasUnitSpecificTag = ai.kategori_default.some(k => unitSpecificTags.includes(k));
+
+        if (hasUnitSpecificTag) {
+          return ai.kategori_default.some(k => roomNama.includes(k) || roomNamaRaw.includes(k.replace(/_/g, ' ')));
+        }
+
         return ai.kategori_default.includes(room.kategori_unit) || 
-               ai.kategori_default.includes(kategori) ||
-               ai.kategori_default.some(k => roomNama.includes(k));
+               ai.kategori_default.includes(kategori);
       })
       .flatMap(ai => [ai.id, ai.id.replace(/_/g, '-'), ai.id.replace(/-/g, '_')])
   );

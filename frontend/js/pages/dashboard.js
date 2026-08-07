@@ -125,8 +125,16 @@ async function loadDashboard() {
     let achieved = false;
     let hasilPercent = s.persen;
     let hasilText = `${s.persen || 0}%`;
-    const isNegativeIndicator = (name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || name.includes('Kembali ICU') || name.includes('Clotting') || name.includes('Ketidakpatuhan') || name === 'Insiden Keselamatan';
-    let isNoData = s.total === 0 && !isNegativeIndicator;
+    const isNegativeIndicator = (name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') || 
+      name.includes('Kembali ICU') || 
+      name.includes('Clotting') || 
+      name.includes('Ketidakpatuhan') || 
+      name === 'Insiden Keselamatan' ||
+      name.includes('Jarum Vena') ||
+      name.includes('Penundaan Operasi') ||
+      name.includes('Drop Out') ||
+      name.includes('Foto Ulang');
+    let isNoData = s.total === 0 && !isNegativeIndicator && s.standar !== '-';
 
     if (name === 'Insiden Keselamatan') {
       hasilPercent = s.total === 0 ? 100 : 0;
@@ -174,6 +182,8 @@ async function loadDashboard() {
         achieved = currentVal >= targetVal;
       } else if (s.standar.includes('>')) {
         achieved = currentVal > targetVal;
+      } else if (targetVal === 0 || s.standar === '0%' || s.standar === '0') {
+        achieved = currentVal <= targetVal;
       } else {
         achieved = currentVal >= targetVal;
       }

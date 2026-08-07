@@ -410,82 +410,316 @@ async function exportExcel(req, res, next) {
   }
 }
 
-// Importer function for migrasi data
+// Download official template excel format matching database schema for all registered indicators
+async function downloadTemplate(req, res, next) {
+  try {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Instructions
+    const instructions = [
+      { 'PETUNJUK PENGISIAN TEMPLATE IMPORT SIMURS': '1. Jangan mengubah nama sheet dan nama kolom pada header baris pertama.' },
+      { 'PETUNJUK PENGISIAN TEMPLATE IMPORT SIMURS': '2. Format Tanggal wajib: YYYY-MM-DD (contoh: 2026-08-01).' },
+      { 'PETUNJUK PENGISIAN TEMPLATE IMPORT SIMURS': '3. Kolom Pilihan / Checklist diisi "dilakukan" atau "tidak dilakukan" / "Ya" atau "Tidak".' },
+      { 'PETUNJUK PENGISIAN TEMPLATE IMPORT SIMURS': '4. Hapus baris contoh sebelum mengunggah file yang sudah diisi.' },
+    ];
+    const wsInstructions = XLSX.utils.json_to_sheet(instructions);
+    XLSX.utils.book_append_sheet(wb, wsInstructions, 'PETUNJUK_PENGISIAN');
+
+    const templateDefinitions = [
+      {
+        name: 'Risiko Jatuh',
+        sample: [{ 'Nama Pasien': 'Budi Santoso', 'No RM': 'RM-100234', 'Usia': 45, 'Asesmen Awal': 'dilakukan', 'Asesmen Ulang': 'dilakukan', 'Intervensi': 'dilakukan', 'Edukasi': 'dilakukan' }]
+      },
+      {
+        name: 'Insiden Keselamatan',
+        sample: [{ 'Tanggal Kejadian': '2026-08-01', 'Jam Kejadian': '10:30', 'Nama Pasien': 'Siti Aminah', 'No RM': 'RM-100235', 'Deskripsi Insiden': 'Pasien hampir terpeleset', 'Jenis Insiden': 'KNC' }]
+      },
+      {
+        name: 'Identifikasi Pasien',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Ahmad Fauzi', 'No RM': 'RM-100236', 'Pemberian Obat': 'dilakukan', 'Nutrisi NGT': 'dilakukan', 'Pemberian Darah': 'dilakukan', 'Tindakan Keperawatan': 'dilakukan' }]
+      },
+      {
+        name: 'Reaksi Transfusi',
+        sample: [{ 'Nama Pasien': 'Rina Wijaya', 'No RM': 'RM-100237', 'Ada Reaksi': 'Tidak', 'Jumlah Permintaan Kolf': 2, 'Darah Masuk Kolf': 2, 'Keterangan': 'Lancar' }]
+      },
+      {
+        name: 'Gelang Identitas',
+        sample: [{ 'Nama Pasien': 'Dewi Lestari', 'No RM': 'RM-100238', 'Gelang Identitas': 'dilakukan', 'Alergi': 'dilakukan', 'Fall Risk': 'dilakukan', 'Dnr': 'dilakukan', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Serah Terima Pasien',
+        sample: [{ 'Nama Pasien': 'Hendra Setiawan', 'No RM': 'RM-100239', 'Akun': 'Sesuai', 'Keluhan': 'Sesuai', 'Ttv': 'Sesuai', 'Penunjang': 'Sesuai', 'Konsul': 'Sesuai', 'Tindakan': 'Sesuai', 'Obat': 'Sesuai', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Angka Kematian Ranap',
+        sample: [{ 'Nama Pasien': 'Sudirman', 'No RM': 'RM-100240', 'Tanggal Masuk': '2026-08-01', 'Jam Masuk': '08:00', 'Tanggal Keluar': '2026-08-03', 'Jam Keluar': '14:00', 'Keterangan': 'Meninggal > 48 jam' }]
+      },
+      {
+        name: 'Double Check High Alert',
+        sample: [{ 'Nama Pasien': 'Nurul Hidayah', 'No RM': 'RM-100241', 'Diagnosis': 'Diabetes Mellitus', 'Nama Obat': 'Insulin', 'Nama Penyerah': 'Suster Bambang', 'Nama Penerima': 'Suster Ana', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Visit Dokter Spesialis',
+        sample: [{ 'Nama Dpjp': 'dr. Sp.PD', 'Nama Pasien': 'Joko Widodo', 'No RM': 'RM-100242', 'Jam Mulai Selesai': '09:00 - 11:00', 'Jam Visit': '09:30', 'Kategori Visit': 'sesuai_jam' }]
+      },
+      {
+        name: 'Kembali ICU < 72 Jam',
+        sample: [{ 'Nama Pasien': 'Bambang Tri', 'No RM': 'RM-100243', 'Diagnosis': 'Gagal Napas', 'Dpjp': 'dr. Sp.An', 'Keterangan': 'Penyebab perburukan' }]
+      },
+      {
+        name: 'Alur Klinis',
+        sample: [{ 'Nama Pasien': 'Siti Rahma', 'No RM': 'RM-100244', 'Diagnosis': 'DHF', 'Ruangan': 'Mawar 01', 'Bulan': 'Agustus', 'Los': 'sesuai', 'Penunjang': 'sesuai', 'Obat': 'sesuai' }]
+      },
+      {
+        name: 'Waktu Tanggap SC',
+        sample: [{ 'Nama Pasien': 'Eka Putri', 'No RM': 'RM-100245', 'Diagnosis': 'GDM', 'Jam Ditentukan Operasi': '13:00', 'Jam Sayatan Pertama': '13:25', 'Selisih Menit': 25 }]
+      },
+      {
+        name: 'Emergency Response Time',
+        sample: [{ 'Nama Pasien': 'Fajar Nugraha', 'No RM': 'RM-100246', 'Jam Datang': '10:00', 'Jam Dilayani Dokter': '10:04', 'Respon Time Menit': 4, 'Triase': 'P1' }]
+      },
+      {
+        name: 'Asesmen Awal IGD',
+        sample: [{ 'Nama Pasien': 'Gita Gutawa', 'No RM': 'RM-100247', 'Anamnesis': 'ada', 'Ttv': 'ada', 'Tb': 'ada', 'Bb': 'ada', 'Diagnosis': 'ada', 'Terapi': 'ada' }]
+      },
+      {
+        name: 'Pasien Tertahan IGD',
+        sample: [{ 'Nama Pasien': 'Hadi Sucipto', 'No RM': 'RM-100248', 'Jam Masuk': '08:00', 'Jam Pindah Ruangan': '11:30', 'Waktu Tunggu Menit': 210, 'Keterangan': 'Ruangan Penuh' }]
+      },
+      {
+        name: 'Ketidakpatuhan Pasien HD',
+        sample: [{ 'Nama Pasien': 'Iwan Fals', 'No RM': 'RM-100249', 'Jadwal Hd Per Minggu': '2x Seminggu', 'Hari Tidak Datang': 'Rabu', 'Alasan': 'Sakit Kepala' }]
+      },
+      {
+        name: 'Insiden Clotting Durante HD',
+        sample: [{ 'Tanggal Kejadian': '2026-08-01', 'Nama Pasien': 'Joko Susilo', 'No RM': 'RM-100250', 'Deskripsi Insiden': 'Clotting pada dialiser', 'Pemberian Antiplatelet': 'Heparin 5000 IU' }]
+      },
+      {
+        name: 'Insiden Pasien Jatuh HD',
+        sample: [{ 'Tanggal Kejadian': '2026-08-01', 'Nama Pasien': 'Kartika Sari', 'No RM': 'RM-100251', 'Deskripsi Kejadian': 'Terpeleset saat turun dari tempat tidur' }]
+      },
+      {
+        name: 'Insiden Jarum Vena HD',
+        sample: [{ 'Tanggal Kejadian': '2026-08-01', 'Nama Pasien': 'Lukman Hakim', 'No RM': 'RM-100252', 'Perawat Pemasang': 'Br. Dedi', 'Penyebab': 'Vena rapuh' }]
+      },
+      {
+        name: 'Penundaan Operasi Elektif',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Mega Wati', 'No RM': 'RM-100253', 'Dpjp': 'dr. Sp.B', 'Jadwal Jam Operasi': '09:00', 'Jam Mulai Operasi': '09:45', 'Waktu Tunggu Menit': 45, 'Batal': 'Tidak', 'Indikasi Medis': 'Tidak' }]
+      },
+      {
+        name: 'Informed Consent Bedah',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Nanda Restu', 'No RM': 'RM-100254', 'Dpjp': 'dr. Sp.B', 'Diisi': 'Ya', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Informed Consent Anestesi',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Oki Setiana', 'No RM': 'RM-100255', 'Dpjp': 'dr. Sp.An', 'Diisi': 'Ya', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Asesmen Pra Bedah',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Putri Titian', 'No RM': 'RM-100256', 'Dpjp': 'dr. Sp.B', 'Diisi': 'Ya', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Asesmen Pra Anestesi',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Qori Sandioriva', 'No RM': 'RM-100257', 'Dpjp': 'dr. Sp.An', 'Diisi': 'Ya', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Surgical Safety Checklist Op',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Raditya Dika', 'No RM': 'RM-100258', 'Dpjp': 'dr. Sp.B', 'Sign In': 'Ya', 'Time Out': 'Ya', 'Sign Out': 'Ya', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Penandaan Lokasi Operasi',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Syaiful Jamil', 'No RM': 'RM-100259', 'Diagnosis': 'Appendicitis', 'Dpjp': 'dr. Sp.B', 'Dilakukan': 'Ya', 'Not Applicable': 'Tidak', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Ketepatan Waktu Makanan',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Titi Kamal', 'No RM': 'RM-100260', 'Tepat Waktu': 'Ya', 'Keterangan': 'Sesuai jam makan' }]
+      },
+      {
+        name: 'Sisa Makanan Pasien',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Ussy Sulistiawaty', 'No RM': 'RM-100261', 'Sisa Makanan Pct': 10, 'Keterangan': '< 20%' }]
+      },
+      {
+        name: 'Akurasi Pemberian Diet',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Vino G Bastian', 'No RM': 'RM-100262', 'Sesuai Diet': 'Ya', 'Keterangan': 'Diet Rendah Garam' }]
+      },
+      {
+        name: 'Identifikasi Pasien SIMRS',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Wulan Guritno', 'No RM': 'RM-100263', 'Sesuai Identifikasi': 'Ya', 'Keterangan': 'Lengkap' }]
+      },
+      {
+        name: 'Response Time SIMRS IT',
+        sample: [{ 'Tanggal': '2026-08-01', 'Unit Pemohon': 'Rawat Inap Mawar', 'Kategori Komplain': 'Printer E-Resep Jammed', 'Response Time Menit': 12, 'Keterangan': 'Selesai cepat' }]
+      }
+    ];
+
+    for (const item of templateDefinitions) {
+      const sheetName = item.name.substring(0, 30);
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(item.sample), sheetName);
+    }
+
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    res.setHeader('Content-Disposition', 'attachment; filename=Template_Import_SIMURS.xlsx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buf);
+
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Safe value parser & cleaner for import engine
+function parseDateOrTimeValue(val, isTimeOnly = false) {
+  if (!val) return null;
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    return val;
+  }
+  const str = String(val).trim();
+  if (isTimeOnly) {
+    const match = str.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (match) {
+      return new Date(1970, 0, 1, parseInt(match[1]), parseInt(match[2]), parseInt(match[3] || '0'));
+    }
+  }
+  const parsed = new Date(str);
+  return !isNaN(parsed.getTime()) ? parsed : null;
+}
+
+function cleanValueForDb(key, val) {
+  if (val === undefined || val === null) return undefined;
+
+  const ignoredKeys = [
+    'no', 'hasil', 'total_data', 'target', 'pencapaian', 'status',
+    'numerator_(n)', 'denominator_(d)', 'total_lembar_resep', 'total_kesalahan_kejadian',
+    'total_obat_(d)', 'total_double_check_(n)', 'tidak_double_check',
+    'total_tidak_tersedia_(n)', 'total_obat_racikan', 'total_tunggu_racikan_<=_60_menit',
+    'total_obat_non_racikan', 'total_tunggu_non_racikan_<=_30_menit'
+  ];
+  if (ignoredKeys.includes(key.toLowerCase())) return undefined;
+
+  if (['usia', 'selisih_menit', 'waktu_tunggu_menit', 'respon_time_menit', 'response_time_menit', 'over_exposure', 'under_exposure', 'positioning', 'artefac', 'equitmen', 'jumlah_pasien', 'jumlah_pemeriksaan', 'jumlah_kepatuhan', 'jumlah_kesalahan', 'jumlah_kerusakan', 'ekspertisi_dokter', 'jumlah_permintaan_kolf', 'darah_masuk_kolf', 'sisa_makanan_pct'].includes(key)) {
+    const num = parseFloat(String(val).replace(/[^0-9.]/g, ''));
+    return isNaN(num) ? 0 : num;
+  }
+
+  if (['jam_kejadian', 'jam_masuk', 'jam_keluar', 'jam_datang', 'jam_dilayani_dokter', 'jam_ditentukan_operasi', 'jam_sayatan_pertama', 'jadwal_jam_operasi', 'jam_mulai_operasi', 'jam_pindah_ruangan', 'jam_visit'].includes(key)) {
+    return parseDateOrTimeValue(val, true);
+  }
+
+  if (['tanggal', 'tanggal_kejadian', 'tanggal_masuk', 'tanggal_keluar', 'tanggal_penjadwalan', 'tanggal_operasi'].includes(key)) {
+    return parseDateOrTimeValue(val, false) || new Date();
+  }
+
+  if (typeof val === 'string') {
+    const cleanStr = val.toLowerCase().trim();
+
+    if (['asesmen_awal', 'asesmen_ulang', 'intervensi', 'edukasi', 'gelang_identitas', 'alergi', 'fall_risk', 'dnr'].includes(key)) {
+      if (['dilakukan', 'ya', 'true', '1', 'sesuai'].includes(cleanStr)) return 'dilakukan';
+      return 'tidak dilakukan';
+    }
+
+    if (['pemberian_obat', 'nutrisi_ngt', 'pemberian_darah', 'tindakan_keperawatan', 'pengambilan_spesimen', 'melakukan_tindakan'].includes(key)) {
+      if (cleanStr.includes('peluang')) return 'tidak ada peluang';
+      if (['dilakukan', 'ya', 'true', '1', 'sesuai'].includes(cleanStr)) return 'dilakukan';
+      return 'tidak dilakukan';
+    }
+
+    if (['los', 'penunjang', 'obat', 'sesuai_diet', 'sesuai_identifikasi'].includes(key)) {
+      if (['sesuai', 'ya', 'true', '1', 'dilakukan'].includes(cleanStr)) return 'sesuai';
+      return 'tidak sesuai';
+    }
+
+    if (['akun', 'keluhan', 'ttv', 'konsul', 'tindakan'].includes(key)) {
+      if (['sesuai', 'ya', 'true', '1', 'dilakukan'].includes(cleanStr)) return 'Sesuai';
+      return 'Tidak Sesuai';
+    }
+
+    if (['anamnesis', 'tb', 'bb', 'diagnosis', 'terapi'].includes(key)) {
+      if (['ada', 'ya', 'true', '1'].includes(cleanStr)) return 'ada';
+      return 'tidak ada';
+    }
+
+    if (['ada_reaksi', 'diisi', 'sign_in', 'time_out', 'sign_out', 'dilakukan', 'batal', 'indikasi_medis', 'not_applicable', 'tepat_waktu', 'penggunaan_apd', 'moment_1', 'moment_2', 'moment_3', 'moment_4', 'moment_5'].includes(key)) {
+      if (['ya', 'true', '1', 'dilakukan', 'sesuai'].includes(cleanStr)) return true;
+      if (['tidak', 'false', '0', 'tidak dilakukan', 'tidak sesuai'].includes(cleanStr)) return false;
+    }
+  }
+
+  return val;
+}
+
+// Importer function with strict validation matching database structure
 async function importExcel(req, res, next) {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'File Excel tidak ditemukan' });
     }
 
-    // Parse uploaded excel file
     const wb = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true });
     
-    // Excel importer reads each sheet and migrates to DB.
-    // For demo/simplicity, we can parse 'Risiko Jatuh' and 'Identifikasi Pasien' sheets.
-    // In real use, we parse sheets matching table names.
     let importedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
 
-    // Get active period or default
+    // Get active period
     let activePeriode = await prisma.periode.findFirst({ where: { status: 'open' } });
     if (!activePeriode) {
       activePeriode = await prisma.periode.findFirst();
     }
 
-    for (const sheetName of wb.SheetNames) {
-      if (sheetName === 'Ringkasan Mutu') continue;
+    if (!activePeriode) {
+      return res.status(400).json({ success: false, message: 'Tidak ada periode aktif yang tersedia di sistem' });
+    }
 
-      // Find the service config matching sheet name exactly (up to 30 chars, matching Excel's export limit)
+    for (const sheetName of wb.SheetNames) {
+      if (['PETUNJUK_PENGISIAN', 'Ringkasan Mutu'].includes(sheetName)) continue;
+
+      // Match sheet name with services (up to 30 chars)
       const match = Object.entries(services).find(([name]) => {
         const exportedSheetName = name.substring(0, 30).toLowerCase();
         return sheetName.toLowerCase().trim() === exportedSheetName.trim();
       });
-      if (!match) continue;
+
+      if (!match) {
+        errors.push(`Sheet "${sheetName}" diabaikan (tidak cocok dengan nama indikator yang terdaftar).`);
+        continue;
+      }
 
       const [name, cfg] = match;
       const ws = wb.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json(ws);
 
+      let rowIdx = 1;
       for (const row of rows) {
-        // Build data payload
+        rowIdx++;
+
+        // Basic check: must have at least one identifier field
+        if (!row['Nama Pasien'] && !row['No RM'] && !row['Tanggal'] && !row['Tanggal Kejadian'] && !row['Nama Petugas'] && !row['Nama Perawat']) {
+          skippedCount++;
+          continue;
+        }
+
         const payload = {
-          periode_id: activePeriode ? activePeriode.id : 1,
+          periode_id: activePeriode.id,
           created_by: req.user.id,
         };
 
-        // Attempt to parse standard columns
-        if (row['Nama Pasien']) payload.nama_pasien = String(row['Nama Pasien']);
-        if (row['No RM']) payload.no_rm = String(row['No RM']);
-        if (row['Usia']) payload.usia = parseInt(row['Usia']) || 0;
-        if (row['DPJP']) payload.dpjp = String(row['DPJP']);
-        if (row['Tanggal']) payload.tanggal = new Date(row['Tanggal']);
-
-        // Check if there is unit_id, otherwise assign default unit
         if (!cfg.service.ignoreUnitId) {
-          payload.unit_id = req.user.unit_id || 1; // Default to user's unit or 1
+          payload.unit_id = req.user.unit_id || 1;
         }
 
-        // Try mapping other properties
         for (const [rowKey, rowVal] of Object.entries(row)) {
-          if (['No', 'Nama Pasien', 'No RM', 'Usia', 'DPJP', 'Tanggal'].includes(rowKey)) continue;
-
-          // Convert label back to database field key
           const dbKey = rowKey.toLowerCase().replace(/ /g, '_');
-          
-          // Map values
-          let val = rowVal;
-          if (String(rowVal).startsWith('Ya') || String(rowVal).startsWith('Sesuai')) val = true;
-          else if (String(rowVal).startsWith('Tidak')) val = false;
+          const cleanVal = cleanValueForDb(dbKey, rowVal);
 
-          // Check if this property exists in the model
-          payload[dbKey] = val;
+          if (cleanVal !== undefined) {
+            payload[dbKey] = cleanVal;
+          }
         }
 
-        // Add discriminator columns
         if (cfg.extraWhere) {
           Object.assign(payload, cfg.extraWhere);
         }
 
-        // Clean values before writing
         for (const key in payload) {
           if (payload[key] === undefined) delete payload[key];
         }
@@ -494,16 +728,28 @@ async function importExcel(req, res, next) {
           await prisma[cfg.table].create({ data: payload });
           importedCount++;
         } catch (err) {
-          console.error(`Import failed for row in sheet ${sheetName}:`, err.message);
+          skippedCount++;
+          errors.push(`Gagal mengimpor baris ${rowIdx} pada sheet "${sheetName}": ${err.message}`);
         }
       }
     }
 
-    res.json({ success: true, message: `Berhasil mengimpor ${importedCount} record data dari file Excel.` });
+    let msg = `Berhasil mengimpor ${importedCount} record data ke periode aktif.`;
+    if (skippedCount > 0) {
+      msg += ` (${skippedCount} baris dilewati/gagal diproses).`;
+    }
+
+    res.json({
+      success: true,
+      message: msg,
+      importedCount,
+      skippedCount,
+      errors: errors.slice(0, 10)
+    });
 
   } catch (err) {
     next(err);
   }
 }
 
-module.exports = { exportExcel, importExcel };
+module.exports = { exportExcel, importExcel, downloadTemplate };

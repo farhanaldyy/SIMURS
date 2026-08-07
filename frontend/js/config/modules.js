@@ -160,6 +160,7 @@ export const ADMIN_GROUP = {
     { label: 'Kelola Unit', hash: '#/admin/units' },
     { label: 'Kelola Indikator Unit', hash: '#/admin/unit-indicator-config' },
     { label: 'Kelola Periode', hash: '#/admin/periode' },
+    { label: 'Import Data Massal', hash: '#/admin/import-data' },
     { label: 'Audit Trail', hash: '#/admin/audit-log' },
   ],
 };
