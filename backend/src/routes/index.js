@@ -103,4 +103,7 @@ router.use('/kepatuhan-fornas', require('./modules/kepatuhan-fornas'));
 // SIMRS modules
 router.use('/simrs-response-time-it', require('./modules/simrs-response-time-it'));
 
+// Kepuasan Pelayanan
+router.use('/kepuasan-pasien-pelayanan', require('./modules/kepuasan-pasien-pelayanan'));
+
 module.exports = router;

@@ -5,7 +5,7 @@ const { AVAILABLE_INDICATORS } = require('../config/indicators.config');
 
 // Master List of Indicator Configurations for Rekap Mutu
 const ALL_INDICATOR_CONFIGS = [
-  {
+{
     no: 1,
     id: 'reaksi_transfusi',
     nama: 'Angka kejadian reaksi transfusi ( ≤ 0,01% ) - Nama Modul: Reaksi Transfusi',
@@ -21,7 +21,7 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
+{
     no: 2,
     id: 'identifikasi_pasien',
     nama: 'Kepatuhan identifikasi pasien ( 100% ) - Nama Modul: Identifikasi Pasien',
@@ -37,7 +37,7 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
+{
     no: 3,
     id: 'risiko_jatuh',
     nama: 'Kepatuhan upaya pencegahan risiko pasien jatuh ( 100% ) - Nama Modul: Risiko Jatuh',
@@ -53,7 +53,7 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
+{
     no: 4,
     id: 'visit_dokter',
     nama: 'Kepatuhan visite dokter ( ≥ 80% ) - Nama Modul: Visit Dokter Spesialis',
@@ -69,7 +69,7 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
+{
     no: 5,
     id: 'alur_klinis',
     nama: 'Kepatuhan terhadap alur klinis (Clinical Pathway) ( ≥ 80% ) - Nama Modul: Alur Klinis',
@@ -85,7 +85,7 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
+{
     no: 6,
     id: 'double_check_high_alert',
     nama: 'Kepatuhan pelaksanan doubel chek pada obat high alert ( ≥ 80% ) - Nama Modul: Double Check High Alert',
@@ -101,40 +101,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
+{
     no: 7,
-    id: 'kepatuhan_kebersihan_tangan',
-    nama: 'Kepatuhan kebersihan tangan ( ≥ 85% ) - Nama Modul: Kepatuhan Kebersihan Tangan',
-    nama_modul: 'Kepatuhan Kebersihan Tangan',
-    standar: '≥ 85%',
-    label_numerator: 'Total Data (Momen Sesuai “N”)',
-    label_denominator: 'Total Data (Momen Tidak Sesuai “D”)',
-    formula: 'Numerator / Denumerator * 100',
-    service: require('./modules/kepatuhan-kebersihan-tangan.service'),
-    extract: (summary) => {
-      const num = summary.numerator !== undefined ? summary.numerator : 0;
-      const den = summary.denominator !== undefined ? summary.denominator : 0;
-      return { num, den };
-    }
-  },
-  {
-    no: 8,
-    id: 'kepatuhan_apd',
-    nama: 'Kepatuhan penggunaan APD ( 100% ) - Nama Modul: Kepatuhan Penggunaan APD',
-    nama_modul: 'Kepatuhan Penggunaan APD',
-    standar: '100%',
-    label_numerator: 'Total Data (APD Dipakai “N”)',
-    label_denominator: 'Total Data (APD Wajib Indikasi “D”)',
-    formula: 'Numerator / Denumerator * 100',
-    service: require('./modules/kepatuhan-apd.service'),
-    extract: (summary) => {
-      const num = summary.numerator !== undefined ? summary.numerator : 0;
-      const den = summary.denominator !== undefined ? summary.denominator : 0;
-      return { num, den };
-    }
-  },
-  {
-    no: 9,
     id: 'insiden_keselamatan',
     nama: 'Insiden Keselamatan Pasien',
     nama_modul: 'Insiden Keselamatan Pasien',
@@ -149,8 +117,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 10,
+{
+    no: 8,
     id: 'angka_kematian_ranap',
     nama: 'Kejadian pasien meninggal di Rawat Inap ( - ) - Nama Modul: Angka Kematian Ranap',
     nama_modul: 'Kejadian Pasien Meninggal di Rawat Inap',
@@ -166,8 +134,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 11,
+{
+    no: 9,
     id: 'kembali-icu',
     nama: 'Rata-rata Kembali Rawat Intensif < 72 jam ( - ) - Nama Modul: Kembali ICU',
     nama_modul: 'Rata-rata Kembali Rawat Intensif < 72 jam',
@@ -182,8 +150,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 11,
+{
+    no: 10,
     id: 'emergency_response_time',
     nama: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat ( ≤ 5 menit ) - Nama Modul: Emergency Response Time',
     nama_modul: 'Waktu Tanggap Pelayanan Dokter di Gawat Darurat',
@@ -198,8 +166,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 12,
+{
+    no: 11,
     id: 'asesmen_awal_igd',
     nama: 'Kelengkapan Asesmen Awal IGD ( 100% ) - Nama Modul: Asesmen Awal IGD',
     nama_modul: 'Kelengkapan Asesmen Awal IGD',
@@ -214,8 +182,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 13,
+{
+    no: 12,
     id: 'gelang_identitas',
     nama: 'Pemasangan Gelang Identitas ( 100% ) - Nama Modul: Gelang Identitas',
     nama_modul: 'Pemasangan Gelang Identitas',
@@ -230,8 +198,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 14,
+{
+    no: 13,
     id: 'serah_terima_pasien',
     nama: 'Kesesuaian Pelaksanaan Serah Terima Pasien ( 100% ) - Nama Modul: Serah Terima Pasien',
     nama_modul: 'Kesesuaian Pelaksanaan Serah Terima Pasien',
@@ -246,8 +214,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 15,
+{
+    no: 14,
     id: 'pasien_tertahan_igd',
     nama: 'Pasien Tertahan di IGD ( - ) - Nama Modul: Pasien Tertahan IGD',
     nama_modul: 'Pasien Tertahan di IGD',
@@ -262,8 +230,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 16,
+{
+    no: 15,
     id: 'angka_kematian_igd',
     nama: 'Angka Kematian Pasien di IGD ( - ) - Nama Modul: Angka Kematian IGD',
     nama_modul: 'Angka Kematian Pasien di IGD',
@@ -278,8 +246,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 17,
+{
+    no: 16,
     id: 'waktu_tunggu_poliklinik',
     nama: 'Waktu Tunggu Rawat Jalan (Menit) - Nama Modul: Waktu Tunggu Rawat Jalan',
     nama_modul: 'Waktu Tunggu Rawat Jalan (Menit)',
@@ -295,8 +263,8 @@ const ALL_INDICATOR_CONFIGS = [
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
   },
-  {
-    no: 18,
+{
+    no: 17,
     id: 'waktu_tunggu_poliklinik_jam',
     nama: 'Waktu Tunggu Rawat Jalan (WT in Jam) - Nama Modul: Waktu Tunggu Rawat Jalan',
     nama_modul: 'Waktu Tunggu Rawat Jalan (WT in Jam)',
@@ -312,8 +280,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 19,
+{
+    no: 18,
     id: 'waktu_tunggu_poliklinik_kepatuhan',
     nama: 'Waktu Tunggu Rawat Jalan (≥ 80%) - Nama Modul: Waktu Tunggu Rawat Jalan',
     nama_modul: 'Waktu Tunggu Rawat Jalan (≥ 80%)',
@@ -328,8 +296,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 20,
+{
+    no: 19,
     id: 'waktu_tunggu_poliklinik_rata_rata',
     nama: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli) - Nama Modul: Waktu Tunggu Rawat Jalan',
     nama_modul: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli)',
@@ -345,8 +313,8 @@ const ALL_INDICATOR_CONFIGS = [
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
   },
-  {
-    no: 21,
+{
+    no: 20,
     id: 'penundaan_operasi_elektif',
     nama: 'Penundaan Operasi Elektif ( ≤ 5% ) - Nama Modul: Penundaan Operasi Elektif',
     nama_modul: 'Penundaan Operasi Elektif',
@@ -361,8 +329,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 22,
+{
+    no: 21,
     id: 'informed_consent_pembedahaan',
     nama: 'Kelengkapan Pengisian Inform Concent Pembedahan ( 100% ) - Nama Modul: Informed Consent Pembedahan',
     nama_modul: 'Kelengkapan Pengisian Inform Concent Pembedahan',
@@ -377,8 +345,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 23,
+{
+    no: 22,
     id: 'asesmen_pra_bedah',
     nama: 'Angka Kelengkapan Asesemen Pra Bedah ( 100% ) - Nama Modul: Asesmen Pra Bedah',
     nama_modul: 'Angka Kelengkapan Asesemen Pra Bedah',
@@ -393,8 +361,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 24,
+{
+    no: 23,
     id: 'surgical_checklist_operasi',
     nama: 'Kepatuhan Melakukan Proses TimeOut Pasien Pre Operasi ( 100% ) - Nama Modul: Surgical Safety Checklist Op',
     nama_modul: 'Kepatuhan Melakukan Proses TimeOut Pasien Pre Operasi',
@@ -409,8 +377,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 25,
+{
+    no: 24,
     id: 'surgical_checklist_sc',
     nama: 'Kepatuhan Melakukan Proses TimeOut Pasien Operasi SC ( 100% ) - Nama Modul: Surgical Safety Checklist SC',
     nama_modul: 'Kepatuhan Melakukan Proses TimeOut Pasien Operasi SC',
@@ -425,8 +393,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 26,
+{
+    no: 25,
     id: 'penandaan_lokasi_operasi',
     nama: '100% Pasien Yang dioperasi Ada Marker (Sesuai Ketentuan) ( 100% ) - Nama Modul: Penandaan Lokasi Operasi',
     nama_modul: '100% Pasien Yang dioperasi Ada Marker (Sesuai Ketentuan)',
@@ -441,8 +409,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 27,
+{
+    no: 26,
     id: 'kematian_meja_operasi',
     nama: 'Kejadian Kematian di Meja Operasi ( 0% ) - Nama Modul: Mutu Kamar Operasi',
     nama_modul: 'Kejadian Kematian di Meja Operasi',
@@ -458,8 +426,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 28,
+{
+    no: 27,
     id: 'salah_sisi_operasi',
     nama: 'Kejadian Operasi Salah Sisi ( 0% ) - Nama Modul: Mutu Kamar Operasi',
     nama_modul: 'Kejadian Operasi Salah Sisi',
@@ -475,8 +443,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 29,
+{
+    no: 28,
     id: 'operasi_salah_pasien',
     nama: 'Kejadian Operasi Salah Pasien ( 0% ) - Nama Modul: Mutu Kamar Operasi',
     nama_modul: 'Kejadian Operasi Salah Pasien',
@@ -492,8 +460,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 30,
+{
+    no: 29,
     id: 'operasi_salah_prosedur',
     nama: 'Kejadian Operasi Salah Prosedur Tindakan ( 0% ) - Nama Modul: Mutu Kamar Operasi',
     nama_modul: 'Kejadian Operasi Salah Prosedur Tindakan',
@@ -509,8 +477,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 31,
+{
+    no: 30,
     id: 'kelengkapan_ic_anestesi',
     nama: 'Kelengkapan IC Tindakan Anestesi Sedasi ( 100% ) - Nama Modul: Informed Consent Anestesi',
     nama_modul: 'Kelengkapan IC Tindakan Anestesi Sedasi',
@@ -525,8 +493,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 32,
+{
+    no: 31,
     id: 'asesmen_pra_anestesi',
     nama: 'Kelengkapan Asesmen Pre Anestesi Sedasi ( 100% ) - Nama Modul: Asesmen Pra Anestesi',
     nama_modul: 'Kelengkapan Asesmen Pre Anestesi Sedasi',
@@ -541,8 +509,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 33,
+{
+    no: 32,
     id: 'kelengkapan_laporan_anestesi',
     nama: 'Kelengkapan Laporan Anestesi Sedasi ( 100% ) - Nama Modul: Mutu Kamar Operasi',
     nama_modul: 'Kelengkapan Laporan Anestesi Sedasi',
@@ -558,8 +526,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 34,
+{
+    no: 33,
     id: 'insiden-clotting-durante',
     nama: 'Insiden Clotting Durante HD ( - ) - Nama Modul: Insiden Clotting Durante HD',
     nama_modul: 'Insiden Clotting Durante HD',
@@ -574,8 +542,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 35,
+{
+    no: 34,
     id: 'insiden-jarum-vena',
     nama: 'Insiden Terlepaskan Jarum Vena Fistula Intra Dialysis ( 0% ) - Nama Modul: Insiden Jarum Vena',
     nama_modul: 'Insiden Terlepaskan Jarum Vena Fistula Intra Dialysis',
@@ -590,8 +558,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 36,
+{
+    no: 35,
     id: 'jadwal-hemodialisa',
     nama: 'Ketidakpatuhan Pasien Tentang Jadwal Hemodialisa ( - ) - Nama Modul: Ketidakpatuhan HD',
     nama_modul: 'Ketidakpatuhan Pasien Tentang Jadwal Hemodialisa',
@@ -606,8 +574,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 37,
+{
+    no: 36,
     id: 'waktu-tanggap-sc',
     nama: 'Waktu Tanggap Operasi Seksio Sesarea Emergency ( ≥ 80% ) - Nama Modul: Waktu Tanggap SC Emergency',
     nama_modul: 'Waktu Tanggap Operasi Seksio Sesarea Emergency',
@@ -622,8 +590,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 38,
+{
+    no: 37,
     id: 'insiden-pasien-jatuh-hd',
     nama: 'Insiden Pasien Jatuh Hemodialisis ( 0% ) - Nama Modul: Insiden Pasien Jatuh HD',
     nama_modul: 'Insiden Pasien Jatuh Hemodialisis',
@@ -638,8 +606,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 39,
+{
+    no: 38,
     id: 'tidaktersedia-obat-rawat-jalan',
     nama: 'Angka Kejadian Ketidaktersediaan Obat di Farmasi Rawat Jalan ( ≤ 5% ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Angka Kejadian Ketidaktersediaan Obat di Farmasi Rawat Jalan',
@@ -655,8 +623,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 40,
+{
+    no: 39,
     id: 'tidaktersedia-obat-rawat-inap',
     nama: 'Angka Kejadian Ketidaktersediaan Obat di Farmasi Rawat Inap ( ≤ 5% ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Angka Kejadian Ketidaktersediaan Obat di Farmasi Rawat Inap',
@@ -672,8 +640,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 41,
+{
+    no: 40,
     id: 'salah-obat-rajal',
     nama: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien Rawat Jalan ( 0% ) - Nama Modul: Kesalahan Penyerahan Obat',
     nama_modul: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien Rawat Jalan',
@@ -688,8 +656,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 42,
+{
+    no: 41,
     id: 'salah-obat-ranap',
     nama: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien Rawat Inap ( 0% ) - Nama Modul: Kesalahan Penyerahan Obat',
     nama_modul: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien Rawat Inap',
@@ -704,8 +672,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 43,
+{
+    no: 42,
     id: 'salah-obat-igd',
     nama: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien IGD ( 0% ) - Nama Modul: Kesalahan Penyerahan Obat',
     nama_modul: 'Tidak Adanya Kejadian Kesalahan Pemberian Obat Pasien IGD',
@@ -720,8 +688,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 44,
+{
+    no: 43,
     id: 'total-salah-obat',
     nama: 'Total Kesalahan Pemberian Obat Pasien Rawat Jalan, Inap dan IGD ( 0% ) - Nama Modul: Kesalahan Penyerahan Obat',
     nama_modul: 'Total Kesalahan Pemberian Obat Pasien Rawat Jalan, Inap dan IGD',
@@ -736,8 +704,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 45,
+{
+    no: 44,
     id: 'tunggu-obat-racik',
     nama: 'Waktu Tunggu Obat Racikan ( ≤ 60 Menit ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Waktu Tunggu Obat Racikan',
@@ -753,8 +721,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 46,
+{
+    no: 45,
     id: 'rata-tunggu-racikan',
     nama: 'Rata-rata Waktu Tunggu Obat Racikan Dalam Menit ( - ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Rata-rata Waktu Tunggu Obat Racikan Dalam Menit',
@@ -769,8 +737,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num: '-', den: '-', capaian: val };
     }
   },
-  {
-    no: 47,
+{
+    no: 46,
     id: 'tunggu-obat-nonracik',
     nama: 'Waktu Tunggu Obat Non Racikan ( ≤ 30 Menit ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Waktu Tunggu Obat Non Racikan',
@@ -786,8 +754,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 48,
+{
+    no: 47,
     id: 'rata-tunggu-nonracikan',
     nama: 'Rata-rata Waktu Tunggu Obat Non Racikan Dalam Menit ( - ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Rata-rata Waktu Tunggu Obat Non Racikan Dalam Menit',
@@ -802,8 +770,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num: '-', den: '-', capaian: val };
     }
   },
-  {
-    no: 49,
+{
+    no: 48,
     id: 'kepatuhan-formula-nasional',
     nama: 'Kepatuhan Penggunaan Formularium Nasional ( ≥ 80% ) - Nama Modul: Kepatuhan Fornas',
     nama_modul: 'Kepatuhan Penggunaan Formularium Nasional',
@@ -818,8 +786,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 50,
+{
+    no: 49,
     id: 'double-check-obat-farmasi',
     nama: 'Kepatuhan Pelaksanaan Double Check Obat High Alert ( ≥ 80% ) - Nama Modul: Mutu Farmasi',
     nama_modul: 'Kepatuhan Pelaksanaan Double Check Obat High Alert',
@@ -835,8 +803,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 51,
+{
+    no: 50,
     id: 'hasil-kritis-lab',
     nama: 'Pelaporan Hasil Kritis Laboratorium  ≤ 30 menit ( 100% ) - Nama Modul: Pelaporan Hasil Kritis Lab',
     nama_modul: 'Pelaporan Hasil Kritis Laboratorium  ≤ 30 menit',
@@ -851,8 +819,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 52,
+{
+    no: 51,
     id: 'waktu-tunggu-lab-kurangdari',
     nama: 'Waktu Tunggu Hasil Pemeriksaan Laboratorium Klinik ( <= 140 Menit ) - Nama Modul: Waktu Tunggu Hasil Lab <= 140 Menit',
     nama_modul: 'Waktu Tunggu Hasil Pemeriksaan Laboratorium Klinik ( <= 140 Menit )',
@@ -881,8 +849,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 53,
+{
+    no: 52,
     id: 'waktu-tunggu-lab-lebihdari',
     nama: 'Waktu Tunggu Hasil Pemeriksaan Laboratorium Klinik ( >= 140 Menit ) - Nama Modul: Waktu Tunggu Hasil Lab > 140 Menit',
     nama_modul: 'Waktu Tunggu Hasil Pemeriksaan Laboratorium Klinik ( >= 140 Menit )',
@@ -897,8 +865,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 54,
+{
+    no: 53,
     id: 'dalam-menit-perpasien',
     nama: 'Jumlah Dalam Menit Perpasien ( - ) - Nama Modul: Waktu Tunggu Hasil Lab < 140 Menit',
     nama_modul: 'Jumlah Dalam Menit Perpasien',
@@ -914,8 +882,8 @@ const ALL_INDICATOR_CONFIGS = [
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
   },
-  {
-    no: 55,
+{
+    no: 54,
     id: 'kerusakan-sample-lab',
     nama: 'Tidak Adanya Kerusakan Sampel di Laboratorium ( 100% ) - Nama Modul: Tidak Adanya Kerusakan Sampel',
     nama_modul: 'Tidak Adanya Kerusakan Sampel di Laboratorium',
@@ -932,8 +900,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 56,
+{
+    no: 55,
     id: 'kesalahan-input-lab',
     nama: 'Tidak Adanya Kesalahan Input Data Hasil Pemeriksaan Lab ( 100% ) - Nama Modul: Tidak Adanya Kesalahan Input Lab',
     nama_modul: 'Tidak Adanya Kesalahan Input Data Hasil Pemeriksaan Lab',
@@ -950,8 +918,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 57,
+{
+    no: 56,
     id: 'kepatuhan-identifikasi-lab',
     nama: 'Kepatuhan Identifikasi Pasien ( 100% ) - Nama Modul: Kepatuhan Identifikasi Pasien',
     nama_modul: 'Kepatuhan Identifikasi Pasien',
@@ -966,8 +934,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 58,
+{
+    no: 57,
     id: 'ekpertisi-dokter-lab',
     nama: 'Ekspertisi Oleh Dokter Spesialis Patologi Klinik ( 100% ) - Nama Modul: Data Ekspertisi Oleh Dokter',
     nama_modul: 'Ekspertisi Oleh Dokter Spesialis Patologi Klinik',
@@ -982,8 +950,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 59,
+{
+    no: 58,
     id: 'kesalahan-penyerahan-hasil-lab',
     nama: 'Tidak Adanya Kesalahan Penyerahan Hasil Laboratorium ( 100% ) - Nama Modul: Kesalahan Penyerahan Hasil Lab',
     nama_modul: 'Tidak Adanya Kesalahan Penyerahan Hasil Laboratorium',
@@ -1000,8 +968,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 60,
+{
+    no: 59,
     id: 'waktu-tunggu-sesuai-foto-thorax',
     nama: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Sesuai Jadwal) ( ≤ 3 Jam ) - Nama Modul: Waktu Tunggu Foto Thorax Sesuai Jadwal',
     nama_modul: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Sesuai Jadwal)',
@@ -1017,8 +985,8 @@ const ALL_INDICATOR_CONFIGS = [
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
   },
-  {
-    no: 61,
+{
+    no: 60,
     id: 'waktu-tunggu-diluar-foto-thorax',
     nama: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Diluar Jadwal) ( - ) - Nama Modul: Waktu Tunggu Foto Thorax Diluar Jadwal',
     nama_modul: 'Waktu Tunggu Hasil Pelayanan Foto Thorax (Diluar Jadwal)',
@@ -1034,8 +1002,8 @@ const ALL_INDICATOR_CONFIGS = [
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((num / den).toFixed(2)) : 0
   },
-  {
-    no: 62,
+{
+    no: 61,
     id: 'kepatuhan-identifikasi-pasien-radiologi',
     nama: 'Kepatuhan Identifikasi Pasien Radiologi ( 100% ) - Nama Modul: Kepatuhan Identifikasi Pasien Radiologi',
     nama_modul: 'Kepatuhan Identifikasi Pasien Radiologi',
@@ -1050,8 +1018,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 63,
+{
+    no: 62,
     id: 'kelengkapan-form-radiologi',
     nama: 'Kelengkapan Pengisian Form Info Tindakan Radiologi ( ≥ 85% ) - Nama Modul: Kelengkapan Form Info Tindakan Radiologi',
     nama_modul: 'Kelengkapan Pengisian Form Info Tindakan Radiologi',
@@ -1066,8 +1034,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 64,
+{
+    no: 63,
     id: 'foto-ulang-pasien-radiologi',
     nama: 'Kejadian Foto Ulang Pasien ( - ) - Nama Modul: Kejadian Foto Ulang Pasien',
     nama_modul: 'Kejadian Foto Ulang Pasien',
@@ -1082,8 +1050,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 65,
+{
+    no: 64,
     id: 'waktu-gizi-pasien',
     nama: 'Ketepatan Waktu Pemberian Makan Pada Pasien ( ≥ 90% ) - Nama Modul: Ketepatan Waktu Pemberian Makan Pada Pasien',
     nama_modul: 'Ketepatan Waktu Pemberian Makan Pada Pasien',
@@ -1098,8 +1066,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 66,
+{
+    no: 65,
     id: 'salah-gizi-diet',
     nama: 'Tidak Adanya Kejadian Salah Pemberian Diet Pasien ( 100% ) - Nama Modul: Tidak Adanya Kejadian Salah Pemberian Diet Pasien',
     nama_modul: 'Tidak Adanya Kejadian Salah Pemberian Diet Pasien',
@@ -1114,8 +1082,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 67,
+{
+    no: 66,
     id: 'sisa-gizi-pasien',
     nama: 'Sisa Makanan Yang Tidak Termakan Oleh Pasien ( ≤ 20% ) - Nama Modul: Sisa Makanan Yang Tidak Termakan Oleh Pasien',
     nama_modul: 'Sisa Makanan Yang Tidak Termakan Oleh Pasien',
@@ -1130,8 +1098,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 68,
+{
+    no: 67,
     id: 'simrs-gizi-identifikasi',
     nama: 'Penulisan Pasien Di SIMRS Sesuai Ruangan, Bed, RM, Diet Pasien ( ≥ 85% ) - Nama Modul: Penulisan Pasien Di SIMRS Sesuai Ruangan, Bed, RM, Diet Pasien',
     nama_modul: 'Penulisan Pasien Di SIMRS Sesuai Ruangan, Bed, RM, Diet Pasien',
@@ -1146,8 +1114,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 69,
+{
+    no: 68,
     id: 'rm-dokumen',
     nama: 'Kelengkapan Dokumen Rekam Medis Pasien Ranap ( 100% ) - Nama Modul: Kelengkapan Dokumen Rekam Medis Pasien Ranap',
     nama_modul: 'Kelengkapan Dokumen Rekam Medis Pasien Ranap',
@@ -1163,8 +1131,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 70,
+{
+    no: 69,
     id: 'rm-pengisian-dok',
     nama: 'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam ( 1x24 Jam ) - Nama Modul: Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam',
     nama_modul: 'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam',
@@ -1180,8 +1148,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 71,
+{
+    no: 70,
     id: 'rm-antrian-online',
     nama: 'Pemberian Informasi Antrian Online ( 85% ) - Nama Modul: Pemberian Informasi Antrian Online',
     nama_modul: 'Pemberian Informasi Antrian Online',
@@ -1197,8 +1165,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 72,
+{
+    no: 71,
     id: 'rm-coding-rwi-rwj',
     nama: 'Ketepatan Coding Rawat Inap & Rawat Jalan ( 100% ) - Nama Modul: Ketepatan Coding Rawat Inap & Rawat Jalan',
     nama_modul: 'Ketepatan Coding Rawat Inap & Rawat Jalan',
@@ -1214,8 +1182,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 73,
+{
+    no: 72,
     id: 'rm-jkn',
     nama: 'Antrian Mobile JKN ( 30% ) - Nama Modul: Antrian Mobile JKN',
     nama_modul: 'Antrian Mobile JKN',
@@ -1231,8 +1199,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 74,
+{
+    no: 73,
     id: 'rehab-drop-pasien',
     nama: 'Kejadian Drop Out Pasien Terhadap Pelayanan Rehabilitasi Medis ( ≤ 50% ) - Nama Modul: Kejadian Drop Out Pasien Terhadap Pelayanan Rehabilitasi Medis',
     nama_modul: 'Kejadian Drop Out Pasien Terhadap Pelayanan Rehabilitasi Medis',
@@ -1247,8 +1215,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 75,
+{
+    no: 74,
     id: 'rehab-kesalahan-tindakan',
     nama: 'Tidak Adanya Kejadian Kesalahan Tindakan Rehabilitasi Medis ( 100% ) - Nama Modul: Tidak Adanya Kejadian Kesalahan Tindakan Rehabilitasi Medis',
     nama_modul: 'Tidak Adanya Kejadian Kesalahan Tindakan Rehabilitasi Medis',
@@ -1264,8 +1232,8 @@ const ALL_INDICATOR_CONFIGS = [
     },
     calculateCapaian: (num, den) => den > 0 ? parseFloat((((den - num) / den) * 100).toFixed(2)) : 100
   },
-  {
-    no: 76,
+{
+    no: 75,
     id: 'rehab-waktu-tunggu',
     nama: 'Waktu Tunggu Pelayanan Rawat Jalan Rehabilitasi Medis ( ≤ 60 menit ) - Nama Modul: Waktu Tunggu Pelayanan Rawat Jalan Rehabilitasi Medis',
     nama_modul: 'Waktu Tunggu Pelayanan Rawat Jalan Rehabilitasi Medis',
@@ -1280,8 +1248,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 77,
+{
+    no: 76,
     id: 'rehab-identifikasi',
     nama: 'Kepatuhan Identifikasi Pasien ( 100% ) - Nama Modul: Kepatuhan Identifikasi Pasien',
     nama_modul: 'Kepatuhan Identifikasi Pasien',
@@ -1296,8 +1264,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 78,
+{
+    no: 77,
     id: 'laundry-linen-hilang',
     nama: 'Tidak Adanya Kejadian Linen Yang Hilang ( 100% ) - Nama Modul: Tidak Adanya Kejadian Linen Yang Hilang',
     nama_modul: 'Tidak Adanya Kejadian Linen Yang Hilang',
@@ -1312,8 +1280,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 79,
+{
+    no: 78,
     id: 'laundry-waktu-linen',
     nama: 'Ketepatan Waktu Penyediaan Linen Untuk Ruang Rawat Inap ( 100% ) - Nama Modul: Ketepatan Waktu Penyediaan Linen',
     nama_modul: 'Ketepatan Waktu Penyediaan Linen Untuk Ruang Rawat Inap',
@@ -1328,8 +1296,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 80,
+{
+    no: 79,
     id: 'laundry-waktu-instrumen-op',
     nama: 'Ketepatan Waktu Penyediaan Instrumen Operasi Siap Pakai Ke Kamar Bedah ( 100% ) - Nama Modul: Ketepatan Waktu Penyediaan Instrumen Operasi',
     nama_modul: 'Ketepatan Waktu Penyediaan Instrumen Operasi Siap Pakai Ke Kamar Bedah',
@@ -1344,8 +1312,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 81,
+{
+    no: 80,
     id: 'laundry-sterilisasi',
     nama: 'Kesesuain Prosedur Sterilisasi Alat-Alat Medis ( 100% ) - Nama Modul: Kesesuain Prosedur Sterilisasi Alat-Alat Medis',
     nama_modul: 'Kesesuain Prosedur Sterilisasi Alat-Alat Medis',
@@ -1360,8 +1328,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 82,
+{
+    no: 81,
     id: 'simrs-waktu-menanggapi',
     nama: 'Kecepatan Waktu Menanggapi Kerusakan SIMRS ( ≤ 15 Menit ) - Nama Modul: SIMRS Response Time IT',
     nama_modul: 'Kecepatan Waktu Menanggapi Kerusakan SIMRS',
@@ -1378,8 +1346,8 @@ const ALL_INDICATOR_CONFIGS = [
       return { num, den };
     }
   },
-  {
-    no: 83,
+{
+    no: 82,
     id: 'simrs-persentase-pelaksanaan',
     nama: 'Persentase Pelaksanaan Maintenance Perangkat Keras ( - ) - Nama Modul: SIMRS Response Time IT',
     nama_modul: 'Persentase Pelaksanaan Maintenance Perangkat Keras',
@@ -1392,6 +1360,56 @@ const ALL_INDICATOR_CONFIGS = [
     extract: (summary) => {
       const num = summary.totalResponseTimeMenit !== undefined ? summary.totalResponseTimeMenit : 0;
       const den = summary.total !== undefined ? summary.total : 0;
+      return { num, den };
+    }
+  },
+  {
+    no: 83,
+    id: 'kepuasan_pasien_pelayanan',
+    nama: 'Kepuasan Pasien Pada Pelayanan ( ≥ 76,61% ) - Nama Modul: Kepuasan Pasien Pada Pelayanan',
+    nama_modul: 'Kepuasan Pasien Pada Pelayanan',
+    standar: '≥ 76,61%',
+    label_numerator: 'Rata Rata Penilaian Pasien',
+    label_denominator: 'Total Pasien',
+    formula: 'Rata-Rata Penilaian Pasien (%)',
+    service: require('./modules/kepuasan-pasien-pelayanan.service'),
+    calculateCapaian: (num, den) => den > 0 ? parseFloat(num.toFixed(2)) : 0,
+    extract: (summary) => {
+      const num = summary.avgPenilaian !== undefined ? summary.avgPenilaian : (summary.numerator !== undefined ? summary.numerator : 0);
+      const den = summary.totalPasien !== undefined ? summary.totalPasien : (summary.denominator !== undefined ? summary.denominator : 0);
+      const capaian = summary.persen !== undefined ? summary.persen : (summary.avgPenilaian !== undefined ? summary.avgPenilaian : 0);
+      return { num, den, capaian };
+    }
+  },
+{
+    no: 84,
+    id: 'kepatuhan_kebersihan_tangan',
+    nama: 'Kepatuhan kebersihan tangan ( ≥ 85% ) - Nama Modul: Kepatuhan Kebersihan Tangan',
+    nama_modul: 'Kepatuhan Kebersihan Tangan',
+    standar: '≥ 85%',
+    label_numerator: 'Total Data (Momen Sesuai “N”)',
+    label_denominator: 'Total Data (Momen Tidak Sesuai “D”)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/kepatuhan-kebersihan-tangan.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den };
+    }
+  },
+{
+    no: 85,
+    id: 'kepatuhan_apd',
+    nama: 'Kepatuhan penggunaan APD ( 100% ) - Nama Modul: Kepatuhan Penggunaan APD',
+    nama_modul: 'Kepatuhan Penggunaan APD',
+    standar: '100%',
+    label_numerator: 'Total Data (APD Dipakai “N”)',
+    label_denominator: 'Total Data (APD Wajib Indikasi “D”)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/kepatuhan-apd.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
       return { num, den };
     }
   }

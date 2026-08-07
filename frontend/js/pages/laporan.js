@@ -144,7 +144,10 @@ const serviceToHash = {
   'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam': '#/mutu-rekam-medis',
   'Pemberian Informasi Antrian Online': '#/mutu-rekam-medis',
   'Ketepatan Coding Rawat Inap & Rawat Jalan': '#/mutu-rekam-medis',
-  'Antrian Mobile JKN': '#/mutu-rekam-medis'
+  'Antrian Mobile JKN': '#/mutu-rekam-medis',
+
+  // Pelayanan
+  'Kepuasan Pasien Pada Pelayanan': '#/kepuasan-pasien-pelayanan'
 };
 
 function renderReportTable() {

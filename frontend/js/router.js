@@ -107,6 +107,9 @@ const routes = {
 
   // SIMRS
   '#/simrs-response-time-it':                 { module: () => import('./pages/modules/simrs-response-time-it.js'), title: 'Response Time SIMRS IT' },
+
+  // Kepuasan Pelayanan
+  '#/kepuasan-pasien-pelayanan':              { module: () => import('./pages/modules/kepuasan-pasien-pelayanan.js'), title: 'Kepuasan Pasien Pada Pelayanan' },
 };
 
 let currentPage = null;

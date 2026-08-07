@@ -40,18 +40,6 @@ const AVAILABLE_INDICATORS = [
     kategori_default: ['rawat_inap', 'unit_khusus', 'farmasi']
   },
   {
-    id: 'kepatuhan_kebersihan_tangan',
-    nama: 'Kepatuhan Kebersihan Tangan',
-    standar: '≥ 85%',
-    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang']
-  },
-  {
-    id: 'kepatuhan_apd',
-    nama: 'Kepatuhan Penggunaan APD',
-    standar: '100%',
-    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang']
-  },
-  {
     id: 'insiden_keselamatan',
     nama: 'Insiden Keselamatan Pasien',
     standar: '0%',
@@ -506,6 +494,24 @@ const AVAILABLE_INDICATORS = [
     nama: 'Persentase Pelaksanaan Maintenance Perangkat Keras',
     standar: '-',
     kategori_default: ['penunjang', 'simrs']
+  },
+  {
+    id: 'kepuasan_pasien_pelayanan',
+    nama: 'Kepuasan Pasien Pada Pelayanan',
+    standar: '≥ 76,61%',
+    kategori_default: ['rawat_inap', 'rawat_jalan', 'unit_khusus', 'igd', 'penunjang']
+  },
+  {
+    id: 'kepatuhan_kebersihan_tangan',
+    nama: 'Kepatuhan Kebersihan Tangan',
+    standar: '≥ 85%',
+    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang']
+  },
+  {
+    id: 'kepatuhan_apd',
+    nama: 'Kepatuhan Penggunaan APD',
+    standar: '100%',
+    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang']
   }
 ];
 

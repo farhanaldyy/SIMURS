@@ -211,6 +211,9 @@ const services = {
   
   // SIMRS
   'Response Time SIMRS IT': { service: require('../services/modules/simrs-response-time-it.service'), category: 'SIMRS' },
+
+  // Pelayanan
+  'Kepuasan Pasien Pada Pelayanan': { service: require('../services/modules/kepuasan-pasien-pelayanan.service'), category: 'Pelayanan' },
 };
 
 async function getIndicatorSummaries(req, res, next) {

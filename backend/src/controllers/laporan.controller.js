@@ -99,6 +99,9 @@ const services = {
   'Pemberian Informasi Antrian Online': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'antrian_online' } },
   'Ketepatan Coding Rawat Inap & Rawat Jalan': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'ketepatan_coding' } },
   'Antrian Mobile JKN': { service: require('../services/modules/mutu-rekam-medis.service'), table: 'mutuRekamMedis', category: 'Rekam Medis', extraWhere: { tipe: 'mobile_jkn' } },
+  
+  // Pelayanan
+  'Kepuasan Pasien Pada Pelayanan': { service: require('../services/modules/kepuasan-pasien-pelayanan.service'), table: 'kepuasanPasienPelayanan', category: 'Pelayanan' },
 };
 
 async function exportExcel(req, res, next) {
@@ -549,6 +552,10 @@ async function downloadTemplate(req, res, next) {
       {
         name: 'Response Time SIMRS IT',
         sample: [{ 'Tanggal': '2026-08-01', 'Unit Pemohon': 'Rawat Inap Mawar', 'Kategori Komplain': 'Printer E-Resep Jammed', 'Response Time Menit': 12, 'Keterangan': 'Selesai cepat' }]
+      },
+      {
+        name: 'Kepuasan Pasien Pada Pelayanan',
+        sample: [{ 'Tanggal': '2026-08-01', 'Total Pasien': 100, 'Rata Rata Penilaian': 85.5, 'Keterangan': 'Survei Bulanan' }]
       }
     ];
 

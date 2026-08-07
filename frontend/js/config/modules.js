@@ -144,6 +144,12 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    title: '😊 Kepuasan Pelayanan',
+    items: [
+      { label: 'Kepuasan Pasien Pelayanan', hash: '#/kepuasan-pasien-pelayanan' }
+    ],
+  },
+  {
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },
