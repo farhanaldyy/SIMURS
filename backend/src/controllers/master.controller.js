@@ -98,6 +98,16 @@ async function closePeriode(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function openPeriode(req, res, next) {
+  try {
+    const periode = await prisma.periode.update({
+      where: { id: parseInt(req.params.id) },
+      data: { status: 'open' },
+    });
+    res.json({ success: true, data: periode });
+  } catch (err) { next(err); }
+}
+
 // === USERS ===
 async function getUsers(req, res, next) {
   try {
@@ -206,4 +216,4 @@ async function deleteUser(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getUnits, createUnit, updateUnit, deleteUnit, getPeriode, createPeriode, closePeriode, getUsers, createUser, updateUser, getAuditLogs, deleteUser };
+module.exports = { getUnits, createUnit, updateUnit, deleteUnit, getPeriode, createPeriode, closePeriode, openPeriode, getUsers, createUser, updateUser, getAuditLogs, deleteUser };

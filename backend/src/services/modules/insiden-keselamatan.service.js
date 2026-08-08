@@ -1,4 +1,5 @@
 const prisma = require('../../config/database');
+const { isPeriodClosed } = require('../../middleware/periodLock');
 
 async function logAudit(userId, tabel, recordId, aksi, dataLama = null, dataBaru = null) {
   if (!userId) return;
@@ -38,6 +39,13 @@ async function create(body, userId) {
   }
   if (data.periode_id) data.periode_id = parseInt(data.periode_id);
   if (data.unit_id) data.unit_id = parseInt(data.unit_id);
+
+  if (data.periode_id && await isPeriodClosed(data.periode_id)) {
+    const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+    err.statusCode = 403;
+    throw err;
+  }
+
   const record = await prisma.insidenKeselamatan.create({ data });
   await logAudit(userId, 'insidenKeselamatan', record.id, 'create', null, record);
   return record;
@@ -54,9 +62,12 @@ async function update(id, body, userId) {
   if (data.periode_id) data.periode_id = parseInt(data.periode_id);
   if (data.unit_id) data.unit_id = parseInt(data.unit_id);
 
-  let oldRecord = null;
-  if (userId) {
-    oldRecord = await prisma.insidenKeselamatan.findUnique({ where: { id } });
+  const oldRecord = await prisma.insidenKeselamatan.findUnique({ where: { id } });
+  const targetPeriodeId = data.periode_id || oldRecord?.periode_id;
+  if (targetPeriodeId && await isPeriodClosed(targetPeriodeId)) {
+    const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+    err.statusCode = 403;
+    throw err;
   }
 
   const record = await prisma.insidenKeselamatan.update({ where: { id }, data });
@@ -65,9 +76,11 @@ async function update(id, body, userId) {
 }
 
 async function remove(id, userId) {
-  let oldRecord = null;
-  if (userId) {
-    oldRecord = await prisma.insidenKeselamatan.findUnique({ where: { id } });
+  const oldRecord = await prisma.insidenKeselamatan.findUnique({ where: { id } });
+  if (oldRecord?.periode_id && await isPeriodClosed(oldRecord.periode_id)) {
+    const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+    err.statusCode = 403;
+    throw err;
   }
   const record = await prisma.insidenKeselamatan.delete({ where: { id } });
   await logAudit(userId, 'insidenKeselamatan', id, 'delete', oldRecord, null);
@@ -107,6 +120,12 @@ async function upsertSummaryData(periodeId, unitId, body) {
   const pId = parseInt(periodeId || 0);
   const uId = parseInt(unitId || 0);
   const totalPasien = parseInt(body.total_pasien || 0);
+
+  if (await isPeriodClosed(pId)) {
+    const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+    err.statusCode = 403;
+    throw err;
+  }
 
   return prisma.periodeInsidenSummary.upsert({
     where: {

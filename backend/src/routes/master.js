@@ -20,6 +20,9 @@ router.post('/periode', checkRole('admin'), [
   body('tahun').isInt({ min: 2020, max: 2100 }).withMessage('Tahun tidak valid'),
 ], validate, mc.createPeriode);
 router.patch('/periode/:id/close', checkRole('admin'), mc.closePeriode);
+router.put('/periode/:id/close', checkRole('admin'), mc.closePeriode);
+router.patch('/periode/:id/open', checkRole('admin'), mc.openPeriode);
+router.put('/periode/:id/open', checkRole('admin'), mc.openPeriode);
 
 // Users
 router.get('/users', checkRole('admin'), mc.getUsers);

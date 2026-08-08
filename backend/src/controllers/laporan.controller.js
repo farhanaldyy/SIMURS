@@ -668,13 +668,13 @@ async function importExcel(req, res, next) {
     const errors = [];
 
     // Get active period
-    let activePeriode = await prisma.periode.findFirst({ where: { status: 'open' } });
+    let activePeriode = await prisma.periode.findFirst({ where: { status: 'open' }, orderBy: [{ tahun: 'desc' }, { bulan: 'desc' }] });
     if (!activePeriode) {
-      activePeriode = await prisma.periode.findFirst();
+      return res.status(403).json({ success: false, message: 'Tidak ada periode terbuka (open) yang tersedia. Periode telah dikunci.' });
     }
 
-    if (!activePeriode) {
-      return res.status(400).json({ success: false, message: 'Tidak ada periode aktif yang tersedia di sistem' });
+    if (activePeriode.status === 'closed') {
+      return res.status(403).json({ success: false, message: 'Periode aktif ini telah dikunci (closed). Data tidak dapat diimpor.' });
     }
 
     for (const sheetName of wb.SheetNames) {

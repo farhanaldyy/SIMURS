@@ -6,6 +6,7 @@ import { showModal, closeModal } from '../../components/modal.js';
 import { showToast } from '../../components/toast.js';
 import { renderBadge } from '../../components/indicator-badge.js';
 import { validateRequired, validateNoRM, showFormErrors, validateForm } from '../../utils/validator.js';
+import { applyPeriodLockUI, checkAndNotifyLock } from '../../utils/lock-helper.js';
 
 export function createGenericIndicatorPage(config) {
   let state = { data: [], page: 1, limit: 10, total: 0, summary: {}, summaryData: null };
@@ -55,6 +56,10 @@ export function createGenericIndicatorPage(config) {
         state.summaryData = summaryDataRes.data;
         renderSummaryDataCard();
       }
+
+      setTimeout(() => {
+        applyPeriodLockUI(document.querySelector('.module-page'));
+      }, 50);
     } catch (err) {
       console.error('Error loading indicator data:', err);
       showToast('Gagal memuat data', 'error');
@@ -236,6 +241,7 @@ export function createGenericIndicatorPage(config) {
   }
 
   function openFormModal(data = null) {
+    if (checkAndNotifyLock()) return;
     const isEdit = !!data;
     if (!isEdit) {
       if (!Store.periodeAktif) {
@@ -406,6 +412,7 @@ export function createGenericIndicatorPage(config) {
   }
 
   async function handleDelete(id) {
+    if (checkAndNotifyLock()) return;
     if (!confirm('Yakin ingin menghapus data ini?')) return;
     const res = await api.delete(`${endpoint}/${id}`);
     if (res.success) {

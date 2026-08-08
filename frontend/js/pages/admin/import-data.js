@@ -1,5 +1,6 @@
 import Store from '../../store.js';
 import { showToast } from '../../components/toast.js';
+import { applyPeriodLockUI, checkAndNotifyLock } from '../../utils/lock-helper.js';
 
 async function downloadTemplateFile() {
   showToast('Menyiapkan template Excel...', 'info');
@@ -28,6 +29,8 @@ async function downloadTemplateFile() {
 
 async function handleImport(e) {
   e.preventDefault();
+  if (checkAndNotifyLock()) return;
+
   const fileInput = document.getElementById('input-import-file');
   const file = fileInput ? fileInput.files[0] : null;
 
@@ -197,6 +200,7 @@ export const render = async (container) => {
   // Attach event listeners
   document.getElementById('btn-download-template-page').addEventListener('click', downloadTemplateFile);
   document.getElementById('form-import-excel').addEventListener('submit', handleImport);
+  applyPeriodLockUI(container);
 };
 
 export const destroy = () => {};

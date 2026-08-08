@@ -1,4 +1,5 @@
 const prisma = require('../../config/database');
+const { isPeriodClosed } = require('../../middleware/periodLock');
 
 function coerceTypes(data) {
   for (const key in data) {
@@ -98,6 +99,12 @@ function createGenericService(modelName, options = {}) {
       
       coerceTypes(data);
 
+      if (data.periode_id && await isPeriodClosed(data.periode_id)) {
+        const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+        err.statusCode = 403;
+        throw err;
+      }
+
       const record = await model.create({ data });
       if (userId) {
         await prisma.auditLog.create({
@@ -127,10 +134,15 @@ function createGenericService(modelName, options = {}) {
 
       coerceTypes(data);
 
-      let oldRecord = null;
-      if (userId) {
-        oldRecord = await model.findUnique({ where: { id } });
+      const targetRecord = await model.findUnique({ where: { id } });
+      const targetPeriodeId = data.periode_id || targetRecord?.periode_id;
+      if (targetPeriodeId && await isPeriodClosed(targetPeriodeId)) {
+        const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+        err.statusCode = 403;
+        throw err;
       }
+
+      let oldRecord = userId ? targetRecord : null;
 
       const record = await model.update({ where: { id }, data });
 
@@ -150,10 +162,14 @@ function createGenericService(modelName, options = {}) {
     },
 
     async remove(id, userId) {
-      let oldRecord = null;
-      if (userId) {
-        oldRecord = await model.findUnique({ where: { id } });
+      const targetRecord = await model.findUnique({ where: { id } });
+      if (targetRecord?.periode_id && await isPeriodClosed(targetRecord.periode_id)) {
+        const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+        err.statusCode = 403;
+        throw err;
       }
+
+      let oldRecord = userId ? targetRecord : null;
 
       const record = await model.delete({ where: { id } });
 

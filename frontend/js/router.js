@@ -1,6 +1,7 @@
 import { updateActiveLink } from './components/sidebar.js';
 import { setPageTitle } from './components/header.js';
 import Store from './store.js';
+import { applyPeriodLockUI } from './utils/lock-helper.js';
 
 const routes = {
   '#/login':                      { module: () => import('./pages/login.js'), title: 'Login' },
@@ -204,6 +205,7 @@ async function handleRoute(contentContainer) {
     }
     currentPage = pageModule;
     await pageModule.render(contentContainer);
+    applyPeriodLockUI(contentContainer);
   } catch (err) {
     console.error('Route error:', err);
     contentContainer.innerHTML = `

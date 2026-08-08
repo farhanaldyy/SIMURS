@@ -37,8 +37,8 @@ function renderPeriodeTable() {
     {
       label: 'Aksi',
       render: (r) => r.status === 'open'
-        ? `<button class="btn btn-danger btn-sm btn-close-periode" data-id="${r.id}">Kunci Periode</button>`
-        : '<span style="color:var(--text-light); font-size:0.9rem">Terkunci</span>'
+        ? `<button class="btn btn-danger btn-sm btn-close-periode" data-id="${r.id}">🔒 Kunci Periode</button>`
+        : `<button class="btn btn-outline btn-sm btn-open-periode" data-id="${r.id}" style="color: var(--color-warning, #d97706); border-color: var(--color-warning, #d97706);">🔓 Buka Periode</button>`
     }
   ];
 
@@ -47,18 +47,53 @@ function renderPeriodeTable() {
   document.querySelectorAll('.btn-close-periode').forEach(btn => {
     btn.addEventListener('click', () => handleClose(parseInt(btn.dataset.id)));
   });
+
+  document.querySelectorAll('.btn-open-periode').forEach(btn => {
+    btn.addEventListener('click', () => handleOpen(parseInt(btn.dataset.id)));
+  });
 }
 
 async function handleClose(id) {
   if (!confirm('PENTING: Menutup periode akan mengunci seluruh data pada bulan tersebut. Yakin ingin menutup periode ini?')) return;
-  const res = await api.patch(`/periode/${id}/close`);
-  if (res.success) {
-    showToast('Periode berhasil ditutup', 'success');
-    loadData();
-    // Dispatch event to refresh topbar selectors
-    window.dispatchEvent(new CustomEvent('updatePeriodesList'));
-  } else {
-    showToast(res.message || 'Gagal menutup periode', 'error');
+  try {
+    const res = await api.patch(`/periode/${id}/close`);
+    if (res.success) {
+      showToast('Periode berhasil ditutup (dikunci)', 'success');
+      if (Store.periodeAktif && Store.periodeAktif.id === id) {
+        Store.set('periodeAktif', { ...Store.periodeAktif, status: 'closed' });
+        window.dispatchEvent(new CustomEvent('periodeChanged'));
+      }
+      await loadData();
+      // Dispatch event to refresh topbar selectors
+      window.dispatchEvent(new CustomEvent('updatePeriodesList'));
+    } else {
+      showToast(res.message || 'Gagal menutup periode', 'error');
+    }
+  } catch (err) {
+    console.error('Error closing periode:', err);
+    showToast('Terjadi kesalahan saat menutup periode', 'error');
+  }
+}
+
+async function handleOpen(id) {
+  if (!confirm('Apakah Anda yakin ingin membuka kembali penguncian periode ini? Users akan dapat mengubah data kembali.')) return;
+  try {
+    const res = await api.patch(`/periode/${id}/open`);
+    if (res.success) {
+      showToast('Periode berhasil dibuka kembali', 'success');
+      if (Store.periodeAktif && Store.periodeAktif.id === id) {
+        Store.set('periodeAktif', { ...Store.periodeAktif, status: 'open' });
+        window.dispatchEvent(new CustomEvent('periodeChanged'));
+      }
+      await loadData();
+      // Dispatch event to refresh topbar selectors
+      window.dispatchEvent(new CustomEvent('updatePeriodesList'));
+    } else {
+      showToast(res.message || 'Gagal membuka periode', 'error');
+    }
+  } catch (err) {
+    console.error('Error opening periode:', err);
+    showToast('Terjadi kesalahan saat membuka periode', 'error');
   }
 }
 

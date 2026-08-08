@@ -254,12 +254,17 @@ module.exports = {
 
       let periode_id = req.body.periode_id || req.query.periode_id;
       if (!periode_id) {
-        const activePeriode = await prisma.periode.findFirst({ where: { status: 'open' } }) || await prisma.periode.findFirst();
+        const activePeriode = await prisma.periode.findFirst({ where: { status: 'open' }, orderBy: [{ tahun: 'desc' }, { bulan: 'desc' }] });
         if (activePeriode) periode_id = activePeriode.id;
       }
 
       if (!periode_id) {
         return res.status(400).json({ success: false, message: 'Periode aktif tidak ditemukan. Silakan pilih periode pada header.' });
+      }
+
+      const { isPeriodClosed } = require('../../middleware/periodLock');
+      if (await isPeriodClosed(periode_id)) {
+        return res.status(403).json({ success: false, message: 'Periode ini telah dikunci (closed). Data tidak dapat diimpor.' });
       }
 
       let unit_id = (req.body && req.body.unit_id) || (req.query && req.query.unit_id) || (req.user ? req.user.unit_id : 1);

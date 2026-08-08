@@ -69,6 +69,7 @@ export const api = {
   get: (endpoint) => apiCall('GET', endpoint),
   post: (endpoint, body) => apiCall('POST', endpoint, body),
   put: (endpoint, body) => apiCall('PUT', endpoint, body),
+  patch: (endpoint, body) => apiCall('PATCH', endpoint, body),
   delete: (endpoint) => apiCall('DELETE', endpoint),
   upload: async (endpoint, formData) => {
     const headers = {};

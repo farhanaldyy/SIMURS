@@ -109,6 +109,13 @@ async function loadPeriodeOptions() {
         Store.set('periodeAktif', period);
         window.dispatchEvent(new CustomEvent('periodeChanged'));
       }
+    } else {
+      // Sync active period object with latest status
+      const updated = res.data.find(p => p.id === Store.periodeAktif.id);
+      if (updated && updated.status !== Store.periodeAktif.status) {
+        Store.set('periodeAktif', updated);
+        window.dispatchEvent(new CustomEvent('periodeChanged'));
+      }
     }
 
     const select = document.getElementById('header-periode-select');

@@ -1,5 +1,6 @@
 const { createGenericService } = require('./generic.service');
 const prisma = require('../../config/database');
+const { isPeriodClosed } = require('../../middleware/periodLock');
 
 const service = createGenericService('insidenClotting', {
   ignoreUnitId: true,
@@ -39,6 +40,12 @@ service.getSummaryData = async function(periodeId) {
 service.upsertSummaryData = async function(periodeId, data) {
   const pid = parseInt(periodeId, 10);
   const totalPasien = parseInt(data.total_pasien, 10) || 0;
+
+  if (await isPeriodClosed(pid)) {
+    const err = new Error('Periode ini telah dikunci (closed). Data tidak dapat ditambah, diubah, atau dihapus.');
+    err.statusCode = 403;
+    throw err;
+  }
 
   return prisma.periodeInsidenClottingSummary.upsert({
     where: { periode_id: pid },
