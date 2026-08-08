@@ -1803,7 +1803,15 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
   // Calculate Total MUTU RS (Aggregated across all rooms) ONLY for rawat_inap category
   let totalRs = [];
   if (kategori === 'rawat_inap') {
-    const rawatInapInds = getActiveIndicatorsForRoom({ kategori_unit: 'rawat_inap' }, null, 'rawat_inap')
+    // Dynamically collect unique active indicator IDs across all Rawat Inap rooms
+    const activeIndIdSet = new Set();
+    roomResults.forEach(r => {
+      if (r.indicators) {
+        r.indicators.forEach(i => activeIndIdSet.add(i.id));
+      }
+    });
+
+    const rawatInapInds = ALL_INDICATOR_CONFIGS.filter(ind => activeIndIdSet.has(ind.id))
       .map((ind, idx) => ({ ...ind, no: idx + 1 }));
     totalRs = rawatInapInds.map(ind => {
       const monthlyData = {};
