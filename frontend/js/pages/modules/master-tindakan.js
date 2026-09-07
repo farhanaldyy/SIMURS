@@ -178,7 +178,7 @@ function openTindakanModal(tindakan = null) {
       </div>
       <div class="form-group">
         <label class="form-label">Nilai Tindakan <span class="required">*</span></label>
-        <input type="number" name="nilai" step="any" class="form-control" value="${tindakan?.nilai !== undefined ? tindakan.nilai : ''}" required placeholder="Contoh: 100 atau 85.5">
+        <input type="number" name="nilai" step="any" class="form-control" value="${tindakan?.nilai !== undefined ? tindakan.nilai : ''}" required placeholder="Contoh: 1 atau 5">
       </div>
       <div class="form-group" style="margin-top: 16px;">
         <label class="form-label" style="font-weight: 600;">Standar Item APD Wajib Dipakai</label>
