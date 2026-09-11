@@ -72,6 +72,7 @@ const routes = {
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
   '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },
   '#/master-poliklinik':          { module: () => import('./pages/modules/master-poliklinik.js'), title: 'Master Poliklinik' },
+  '#/master-dokter':              { module: () => import('./pages/modules/master-dokter.js'), title: 'Master Dokter' },
   '#/waktu-tunggu-poliklinik':    { module: () => import('./pages/modules/waktu-tunggu-poliklinik.js'), title: 'Waktu Tunggu Poliklinik' },
   '#/waktu-tunggu-operasi-elektif': { module: () => import('./pages/modules/waktu-tunggu-operasi.js'), title: 'Waktu Tunggu Operasi Elektif' },
   '#/mutu-rekam-medis':           { module: () => import('./pages/modules/mutu-rekam-medis.js'), title: 'Standar Minimal Mutu Rekam Medis' },

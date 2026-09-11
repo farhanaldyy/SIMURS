@@ -153,7 +153,8 @@ export const NAV_GROUPS = [
     title: '⚙️ Master Data',
     items: [
       { label: 'Master Tindakan', hash: '#/master-tindakan' },
-      { label: 'Master Poliklinik', hash: '#/master-poliklinik' }
+      { label: 'Master Poliklinik', hash: '#/master-poliklinik' },
+      { label: 'Master Dokter', hash: '#/master-dokter' }
     ],
   },
 ];

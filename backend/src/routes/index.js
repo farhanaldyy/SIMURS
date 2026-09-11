@@ -7,6 +7,7 @@ router.use('/auth', require('./auth'));
 router.use('/informasi-rs', require('./informasi-rs'));
 router.use('/master-tindakan', require('./modules/master-tindakan'));
 router.use('/master-poliklinik', require('./modules/master-poliklinik'));
+router.use('/master-dokter', require('./modules/master-dokter'));
 router.use('/', require('./master'));
 
 // Rawat Jalan / Outpatient modules

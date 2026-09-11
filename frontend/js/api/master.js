@@ -14,3 +14,11 @@ export const openPeriode = (id) => api.patch(`/periode/${id}/open`);
 export const getUsers = () => api.get('/users');
 export const createUser = (data) => api.post('/users', data);
 export const updateUser = (id, data) => api.put(`/users/${id}`, data);
+export const getMasterDokter = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return api.get(`/master-dokter${query ? '?' + query : ''}`);
+};
+export const createMasterDokter = (data) => api.post('/master-dokter', data);
+export const updateMasterDokter = (id, data) => api.put(`/master-dokter/${id}`, data);
+export const deleteMasterDokter = (id) => api.delete(`/master-dokter/${id}`);
+

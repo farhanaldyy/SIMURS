@@ -37,8 +37,8 @@ export function renderSidebar(container, forceRebuild = false) {
     }
     if (item.hash === '#/laporan') return true;
     if (item.hash === '#/modul') return true;
-    if (item.hash === '#/master-tindakan') {
-      return role === 'admin' || role === 'komite' || role === 'pic_mutu';
+    if (item.hash === '#/master-tindakan' || item.hash === '#/master-dokter') {
+      return role === 'admin' || role === 'komite' || role === 'pic_mutu' || allowed.includes(item.hash);
     }
     if (item.hash === '#/master-poliklinik') {
       if (role === 'admin' || role === 'komite' || role === 'pic_mutu') return true;

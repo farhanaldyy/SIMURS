@@ -632,6 +632,37 @@ async function runSeed() {
     });
   }
 
+  // Clean & Seed MasterDokter with real doctor data
+  console.log('Seeding MasterDokter real data...');
+  await prisma.masterDokter.deleteMany();
+  const realDoctors = [
+    { nama: 'dr. Ismail Yusuf, Sp.PD', spesialisasi: 'Spesialis Penyakit Dalam' },
+    { nama: 'dr. Aries Kuswanda, Sp.PD', spesialisasi: 'Spesialis Penyakit Dalam' },
+    { nama: 'dr. Ditto Ruldifar Pribadi, Sp.B', spesialisasi: 'Spesialis Bedah' },
+    { nama: 'dr. Yudi Rinaldi, M.Biomed, MARS., Sp.B', spesialisasi: 'Spesialis Bedah' },
+    { nama: 'dr. Imas Masitoh, Sp.OG', spesialisasi: 'Spesialis Obstetri dan Ginekologi' },
+    { nama: 'dr. David Mallisa Allorante, Sp.OG', spesialisasi: 'Spesialis Obstetri dan Ginekologi' },
+    { nama: 'dr. H. Didi Sukandi, Sp.A', spesialisasi: 'Spesialis Anak' },
+    { nama: 'dr. Ani Yuniar, Sp.A', spesialisasi: 'Spesialis Anak' },
+    { nama: 'dr. Muhammad Baihaqy Ibnu Hakim, Sp.U', spesialisasi: 'Spesialis Urologi' },
+    { nama: 'dr. Henny Herawati, Sp.N', spesialisasi: 'Spesialis Neurologi' },
+    { nama: 'dr. Diding Sawaludin, Sp.KJ., M.Kes', spesialisasi: 'Spesialis Kedokteran Jiwa' },
+    { nama: 'dr. Fatimah Alzahra, Sp.JP', spesialisasi: 'Spesialis Jantung dan Pembuluh Darah' },
+    { nama: 'dr. Dora Apriani, Sp.M', spesialisasi: 'Spesialis Mata' },
+    { nama: 'dr. Dira Megiani Rosti, Sp.M', spesialisasi: 'Spesialis Mata' },
+    { nama: 'dr. Evata Putri Ikromi, Sp.P', spesialisasi: 'Spesialis Paru' },
+    { nama: 'dr. Nurhayati, Sp.P (K) Onk. FISR', spesialisasi: 'Spesialis Paru' },
+    { nama: 'dr. Adi Januar Akbar, Sp.THT-KL', spesialisasi: 'Spesialis THT-KL' },
+    { nama: 'dr. David Simorangkir, Sp.OT', spesialisasi: 'Spesialis Orthopaedi dan Traumatologi' },
+    { nama: 'dr. Euis Kartika, Sp.Rad', spesialisasi: 'Spesialis Radiologi' },
+    { nama: 'drg. Anggun Retnoningtyas', spesialisasi: 'Dokter Gigi' },
+    { nama: 'drg. Hamidah Az Zahra', spesialisasi: 'Dokter Gigi' },
+    { nama: 'dr. Nita Theresia Reyne S, Sp.KFR., M.Kes', spesialisasi: 'Spesialis Kedokteran Fisik dan Rehabilitasi' }
+  ];
+  for (const d of realDoctors) {
+    await prisma.masterDokter.create({ data: d });
+  }
+
   console.log('=== SUCCESS! 20 RECORDS PER MODULE HAVE BEEN INSERTED INTO DATABASE ===');
 }
 
