@@ -22,14 +22,6 @@ export function renderSidebar(container, forceRebuild = false) {
 
   const user = Store.get('user');
   const role = user ? user.role : '';
-  let allowed = [];
-  if (user && user.allowed_modules) {
-    try {
-      allowed = JSON.parse(user.allowed_modules);
-    } catch (e) {
-      allowed = [];
-    }
-  }
 
   const hasAccess = (item) => {
     if (item.hash === '#/dashboard') {
@@ -38,22 +30,23 @@ export function renderSidebar(container, forceRebuild = false) {
     if (item.hash === '#/laporan') return true;
     if (item.hash === '#/modul') return true;
     if (item.hash === '#/master-tindakan' || item.hash === '#/master-dokter') {
-      return role === 'admin' || role === 'komite' || role === 'pic_mutu' || allowed.includes(item.hash);
+      return role === 'admin' || role === 'komite' || role === 'pic_mutu' || Store.hasAllowedModule(item.hash, user);
     }
     if (item.hash === '#/master-poliklinik') {
       if (role === 'admin' || role === 'komite' || role === 'pic_mutu') return true;
+      if (Store.hasAllowedModule(item.hash, user)) return true;
       if (role === 'petugas') {
         const unitObj = (user && user.unit) || Store.get('unitAktif');
         if (unitObj) {
           const unitNama = (unitObj.nama_unit || '').toUpperCase();
           const unitKode = (unitObj.kode_unit || '').toUpperCase();
-          return unitKode === 'RJ_POLIKLINIK' || unitNama.includes('POLI');
+          if (unitKode === 'RJ_POLIKLINIK' || unitNama.includes('POLI')) return true;
         }
       }
-      return allowed.includes(item.hash);
+      return false;
     }
     if (role === 'admin' || role === 'komite') return true;
-    return allowed.includes(item.hash);
+    return Store.hasAllowedModule(item.hash, user);
   };
 
   const groups = NAV_GROUPS.map(g => ({

@@ -127,14 +127,7 @@ async function handleRoute(contentContainer) {
   // Get user details
   const user = Store.get('user');
   const role = user ? user.role : '';
-  let allowed = [];
-  if (user && user.allowed_modules) {
-    try {
-      allowed = JSON.parse(user.allowed_modules);
-    } catch (e) {
-      allowed = [];
-    }
-  }
+  const allowed = Store.getAllowedModules(user);
 
   // Redirect petugas from dashboard to their first allowed module
   if (hash === '#/dashboard' && role === 'petugas') {
@@ -168,15 +161,21 @@ async function handleRoute(contentContainer) {
   if (hash === '#/login') {
     // login is always accessible
   } else if (role === 'petugas') {
-    // petugas can only access login, laporan, rekap-mutu, modul, and their allowed modules (specifically block dashboard and admin)
-    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && hash !== '#/rekap-mutu' && hash !== '#/modul' && !allowed.includes(hash))) {
+    const unitObj = (user && user.unit) || Store.get('unitAktif');
+    const unitNama = (unitObj?.nama_unit || '').toUpperCase();
+    const unitKode = (unitObj?.kode_unit || '').toUpperCase();
+    const isPoliUser = unitKode === 'RJ_POLIKLINIK' || unitNama.includes('POLI');
+    const isPoliAccess = hash === '#/master-poliklinik' && isPoliUser;
+
+    // petugas can access login, laporan, rekap-mutu, modul, their allowed modules, or master-poliklinik if in poli unit
+    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && hash !== '#/rekap-mutu' && hash !== '#/modul' && !isPoliAccess && !Store.hasAllowedModule(hash, user))) {
       renderAccessDenied(contentContainer);
       return;
     }
   } else if (role === 'pic_mutu') {
-    // pic_mutu can access dashboard, laporan, rekap-mutu, master-tindakan, modul, and their allowed modules
-    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/rekap-mutu' || hash === '#/master-tindakan' || hash === '#/modul';
-    if (!isGeneralRoute && !allowed.includes(hash)) {
+    // pic_mutu can access dashboard, laporan, rekap-mutu, master data, modul, and their allowed modules
+    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/rekap-mutu' || hash === '#/master-tindakan' || hash === '#/master-poliklinik' || hash === '#/master-dokter' || hash === '#/modul';
+    if (!isGeneralRoute && !Store.hasAllowedModule(hash, user)) {
       renderAccessDenied(contentContainer);
       return;
     }
@@ -225,14 +224,7 @@ async function handleRoute(contentContainer) {
 function renderAccessDenied(container) {
   const user = Store.get('user');
   const role = user ? user.role : '';
-  let allowed = [];
-  if (user && user.allowed_modules) {
-    try {
-      allowed = JSON.parse(user.allowed_modules);
-    } catch (e) {
-      allowed = [];
-    }
-  }
+  const allowed = Store.getAllowedModules(user);
 
   const homeLink = role === 'petugas' && allowed.length > 0 ? allowed[0] : '#/dashboard';
   const homeText = role === 'petugas' ? 'Kembali ke Halaman Modul' : 'Kembali ke Dashboard';

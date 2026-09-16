@@ -78,15 +78,7 @@ function renderUserTable() {
 
 function openUserModal(user = null) {
   const isEdit = !!user;
-  
-  let allowed = [];
-  if (user && user.allowed_modules) {
-    try {
-      allowed = JSON.parse(user.allowed_modules);
-    } catch (e) {
-      allowed = [];
-    }
-  }
+  const allowed = Store.getAllowedModules(user);
 
   const unitOptions = [
     '<option value="">Pilih Unit...</option>',

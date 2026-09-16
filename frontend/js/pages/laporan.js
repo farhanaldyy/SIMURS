@@ -156,20 +156,12 @@ function renderReportTable() {
 
   const user = Store.get('user');
   const role = user ? user.role : '';
-  let allowed = [];
-  if (user && user.allowed_modules) {
-    try {
-      allowed = JSON.parse(user.allowed_modules);
-    } catch (e) {
-      allowed = [];
-    }
-  }
 
   let entries = Object.entries(state.summaries);
   if (role === 'petugas') {
     entries = entries.filter(([name]) => {
       const hash = serviceToHash[name];
-      return hash && allowed.includes(hash);
+      return hash && Store.hasAllowedModule(hash, user);
     });
   }
 

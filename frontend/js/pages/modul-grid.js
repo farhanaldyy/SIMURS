@@ -7,14 +7,6 @@ export async function render(container) {
   // Determine all groups for this user
   const user = Store.get('user');
   const role = user ? user.role : '';
-  let allowed = [];
-  if (user && user.allowed_modules) {
-    try {
-      allowed = JSON.parse(user.allowed_modules);
-    } catch (e) {
-      allowed = [];
-    }
-  }
 
   const hasAccess = (item) => {
     if (item.hash === '#/dashboard') {
@@ -22,11 +14,24 @@ export async function render(container) {
     }
     if (item.hash === '#/laporan') return true;
     if (item.hash === '#/modul') return true;
-    if (item.hash === '#/master-tindakan') {
-      return role === 'admin' || role === 'komite' || role === 'pic_mutu';
+    if (item.hash === '#/master-tindakan' || item.hash === '#/master-dokter') {
+      return role === 'admin' || role === 'komite' || role === 'pic_mutu' || Store.hasAllowedModule(item.hash, user);
+    }
+    if (item.hash === '#/master-poliklinik') {
+      if (role === 'admin' || role === 'komite' || role === 'pic_mutu') return true;
+      if (Store.hasAllowedModule(item.hash, user)) return true;
+      if (role === 'petugas') {
+        const unitObj = (user && user.unit) || Store.get('unitAktif');
+        if (unitObj) {
+          const unitNama = (unitObj.nama_unit || '').toUpperCase();
+          const unitKode = (unitObj.kode_unit || '').toUpperCase();
+          if (unitKode === 'RJ_POLIKLINIK' || unitNama.includes('POLI')) return true;
+        }
+      }
+      return false;
     }
     if (role === 'admin' || role === 'komite') return true;
-    return allowed.includes(item.hash);
+    return Store.hasAllowedModule(item.hash, user);
   };
 
   // Compile all groups. We skip "Dashboard & Laporan" (NAV_GROUPS[0]) because those are general dashboard menus,

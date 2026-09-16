@@ -127,6 +127,28 @@ const Store = {
 
   canExport() {
     return this.user && ['admin', 'pic_mutu', 'komite'].includes(this.user.role);
+  },
+
+  getAllowedModules(targetUser = this.user) {
+    if (!targetUser || !targetUser.allowed_modules) return [];
+    if (Array.isArray(targetUser.allowed_modules)) return targetUser.allowed_modules;
+    if (typeof targetUser.allowed_modules === 'string') {
+      try {
+        const parsed = JSON.parse(targetUser.allowed_modules);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  },
+
+  hasAllowedModule(itemHash, targetUser = this.user) {
+    if (!itemHash) return false;
+    const allowed = this.getAllowedModules(targetUser);
+    const hashClean = itemHash.startsWith('#') ? itemHash : `#${itemHash}`;
+    const pathClean = itemHash.startsWith('#') ? itemHash.replace('#', '') : itemHash;
+    return allowed.includes(hashClean) || allowed.includes(pathClean);
   }
 };
 
