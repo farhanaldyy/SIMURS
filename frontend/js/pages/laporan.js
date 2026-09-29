@@ -284,6 +284,22 @@ async function downloadExcelFile() {
   }
 }
 
+async function downloadSimarExcelFile() {
+  const periode = Store.periodeAktif;
+  const bulan = periode ? periode.bulan : new Date().getMonth() + 1;
+  const tahun = periode ? periode.tahun : new Date().getFullYear();
+
+  showToast('Menyiapkan file Laporan SIMAR INM Kemenkes (.xlsx)...', 'info');
+  try {
+    const { exportSimarExcel } = await import('../api/settings.js');
+    await exportSimarExcel(bulan, tahun);
+    showToast('File SIMAR INM Kemenkes berhasil diunduh!', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal mengekspor laporan SIMAR', 'error');
+  }
+}
+
 async function downloadTemplateFile() {
   showToast('Menyiapkan template Excel...', 'info');
   try {
@@ -418,8 +434,9 @@ export const render = async (container) => {
 
       <div class="card" style="margin-bottom: 24px; padding: 24px;">
         <h3 style="margin-top: 0; margin-bottom: 16px;">Opsi Ekspor Laporan</h3>
-        <div style="display: flex; gap: 16px;">
-          <button class="btn btn-primary" id="btn-export-excel">📁 Unduh Excel (.xlsx)</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btn-export-excel">📁 Unduh Excel Internal (.xlsx)</button>
+          <button class="btn btn-success" id="btn-export-simar" style="background: #166534; border-color: #166534; color: #ffffff;">📥 Unduh SIMAR INM Kemenkes (.xlsx)</button>
           <button class="btn btn-outline" id="btn-print-pdf">🖨️ Cetak PDF / Print</button>
         </div>
       </div>
@@ -492,6 +509,10 @@ export const render = async (container) => {
 
   // Bind export/import events
   document.getElementById('btn-export-excel').addEventListener('click', downloadExcelFile);
+  const btnSimar = document.getElementById('btn-export-simar');
+  if (btnSimar) {
+    btnSimar.addEventListener('click', downloadSimarExcelFile);
+  }
   document.getElementById('btn-print-pdf').addEventListener('click', () => {
     const previewBody = document.getElementById('report-summary-table-body');
     const printBody = document.getElementById('print-table-body');

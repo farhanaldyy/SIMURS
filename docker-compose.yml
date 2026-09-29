@@ -6,11 +6,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=mysql://simurs:simurs_pass@db:3306/simurs
-      - JWT_SECRET=simurs-jwt-secret-key-change-in-production
-      - JWT_REFRESH_SECRET=simurs-refresh-secret-key-change-in-production
-      - PORT=3000
-      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL:-mysql://simurs:simurs_pass@db:3306/simurs}
+      - JWT_SECRET=${JWT_SECRET:-simurs-jwt-secret-key-change-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-simurs-refresh-secret-key-change-in-production}
+      - PORT=${PORT:-3000}
+      - NODE_ENV=${NODE_ENV:-development}
     depends_on:
       - db
     volumes:
@@ -20,13 +20,11 @@ services:
 
   db:
     image: mariadb:10.11
-    ports:
-      - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=root_password
-      - MYSQL_DATABASE=simurs
-      - MYSQL_USER=simurs
-      - MYSQL_PASSWORD=simurs_pass
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-simurs}
+      - MYSQL_USER=${MYSQL_USER:-simurs}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-simurs_pass}
     volumes:
       - mariadb_data:/var/lib/mysql
 

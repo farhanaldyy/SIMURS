@@ -101,6 +101,13 @@ export const api = {
         headers,
         credentials: 'include'
       });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        showToast(errorData.message || 'Gagal mengunduh file', 'error');
+        return;
+      }
+
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

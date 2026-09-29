@@ -62,8 +62,9 @@ const routes = {
   '#/kesalahan-penyerahan-obat':  { module: () => import('./pages/modules/kesalahan-penyerahan-obat.js'), title: 'Kesalahan Penyerahan Obat' },
   '#/kepatuhan-formularium-nasional': { module: () => import('./pages/modules/kepatuhan-formularium-nasional.js'), title: 'Kepatuhan Formularium Nasional' },
 
-  // Admin Panel
-  '#/admin/informasi-rs':         { module: () => import('./pages/modules/informasi-rs.js'), title: 'Kelola Informasi Rumah Sakit' },
+  // Admin Panel & Settings
+  '#/settings':                   { module: () => import('./pages/admin/settings.js'), title: 'Settings & Integrasi' },
+  '#/admin/informasi-rs':         { module: () => import('./pages/admin/settings.js'), title: 'Settings & Integrasi' },
   '#/admin/users':                { module: () => import('./pages/admin/users.js'), title: 'Kelola Pengguna' },
   '#/admin/units':                { module: () => import('./pages/admin/units.js'), title: 'Kelola Unit' },
   '#/admin/unit-indicator-config':{ module: () => import('./pages/admin/unit-indicator-config.js'), title: 'Kelola Indikator Unit' },

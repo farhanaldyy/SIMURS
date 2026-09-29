@@ -1715,22 +1715,62 @@ model UnitIndicatorConfig {
 }
 
 model InformasiRumahSakit {
-  id            Int      @id @default(autoincrement())
-  nama_rs       String   @default("RS Islam Kalimantan Muhammad Arsyad Al Banjari") @db.VarChar(150)
-  kode_rs       String?  @db.VarChar(50)
-  alamat        String?  @db.Text
-  telepon       String?  @db.VarChar(50)
-  email         String?  @db.VarChar(100)
-  website       String?  @db.VarChar(100)
-  logo_url      String?  @db.Text
-  nama_direktur String?  @db.VarChar(100)
-  nip_direktur  String?  @db.VarChar(50)
-  kota          String?  @db.VarChar(100)
-  deskripsi     String?  @db.Text
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  id                    Int      @id @default(autoincrement())
+  nama_rs               String   @default("RS Islam Kalimantan Muhammad Arsyad Al Banjari") @db.VarChar(150)
+  kode_rs               String?  @db.VarChar(50)
+  alamat                String?  @db.Text
+  telepon               String?  @db.VarChar(50)
+  email                 String?  @db.VarChar(100)
+  website               String?  @db.VarChar(100)
+  logo_url              String?  @db.Text
+  nama_direktur         String?  @db.VarChar(100)
+  nip_direktur          String?  @db.VarChar(50)
+  kota                  String?  @db.VarChar(100)
+  deskripsi             String?  @db.Text
+  integration_mode      String   @default("sandbox") @db.VarChar(20)
+  kode_fasyankes        String?  @db.VarChar(50)
+  inm_api_url           String?  @db.VarChar(255)
+  inm_api_key           String?  @db.VarChar(255)
+  inm_secret_key        String?  @db.VarChar(255)
+  simar_api_url         String?  @db.VarChar(255)
+  simar_api_key         String?  @db.VarChar(255)
+  satusehat_org_id      String?  @db.VarChar(100)
+  satusehat_client_key  String?  @db.VarChar(255)
+  satusehat_secret_key  String?  @db.VarChar(255)
+  last_sync_at          DateTime?
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
 
   @@map("informasi_rumah_sakit")
+}
+
+model InmIndicatorMapping {
+  id                      Int      @id @default(autoincrement())
+  indicator_id            String   @unique @db.VarChar(100)
+  nama_indikator_internal String   @db.VarChar(150)
+  kode_inm_kemenkes       String?  @db.VarChar(50)
+  nama_inm_kemenkes       String?  @db.VarChar(150)
+  target_inm              Float?
+  satuan                  String?  @db.VarChar(20)
+  aktif                   Boolean  @default(true)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  @@map("inm_indicator_mappings")
+}
+
+model IntegrationLog {
+  id            Int      @id @default(autoincrement())
+  target_system String   @db.VarChar(50)
+  action        String   @db.VarChar(50)
+  status        String   @db.VarChar(20)
+  payload       String?  @db.Text
+  response      String?  @db.Text
+  error_message String?  @db.Text
+  created_by    Int?
+  created_at    DateTime @default(now())
+
+  @@map("integration_logs")
 }
 
 model KepuasanPasienPelayanan {

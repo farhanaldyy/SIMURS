@@ -3,7 +3,9 @@ const router = require('express').Router();
 // Auth
 router.use('/auth', require('./auth'));
 
-// Master data
+// Master data & Integration
+router.use('/settings', require('./settings'));
+router.use('/simar', require('./simar'));
 router.use('/informasi-rs', require('./informasi-rs'));
 router.use('/master-tindakan', require('./modules/master-tindakan'));
 router.use('/master-poliklinik', require('./modules/master-poliklinik'));
