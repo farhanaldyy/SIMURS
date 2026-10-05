@@ -13,25 +13,25 @@ const AVAILABLE_INDICATORS = [
     id: 'identifikasi_pasien',
     nama: 'Kepatuhan Identifikasi Pasien',
     standar: '100%',
-    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan']
+    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'inm']
   },
   {
     id: 'risiko_jatuh',
     nama: 'Kepatuhan Upaya Pencegahan Risiko Pasien Jatuh',
     standar: '100%',
-    kategori_default: ['rawat_inap', 'unit_khusus', 'rawat_jalan']
+    kategori_default: ['rawat_inap', 'unit_khusus', 'rawat_jalan', 'inm']
   },
   {
     id: 'visit_dokter',
     nama: 'Kepatuhan Visit Dokter Spesialis',
     standar: '≥ 80%',
-    kategori_default: ['rawat_inap', 'unit_khusus']
+    kategori_default: ['rawat_inap', 'unit_khusus', 'inm']
   },
   {
     id: 'alur_klinis',
     nama: 'Kepatuhan Terhadap Alur Klinis (Clinical Pathway)',
     standar: '≥ 80%',
-    kategori_default: ['rawat_inap', 'unit_khusus']
+    kategori_default: ['rawat_inap', 'unit_khusus', 'inm']
   },
   {
     id: 'double_check_high_alert',
@@ -115,13 +115,13 @@ const AVAILABLE_INDICATORS = [
     id: 'waktu_tunggu_poliklinik_rata_rata',
     nama: 'Waktu Tunggu Rawat Jalan (Rata-rata Poli)',
     standar: '-',
-    kategori_default: ['rawat_jalan']
+    kategori_default: ['rawat_jalan', 'inm']
   },
   {
     id: 'penundaan_operasi_elektif',
     nama: 'Penundaan Operasi Elektif',
     standar: '≤ 5%',
-    kategori_default: ['unit_khusus']
+    kategori_default: ['unit_khusus', 'inm']
   },
   {
     id: 'informed_consent_pembedahaan',
@@ -217,7 +217,7 @@ const AVAILABLE_INDICATORS = [
     id: 'waktu-tanggap-sc',
     nama: 'Waktu Tanggap Operasi Seksio Sesarea Emergency',
     standar: '≥ 80%',
-    kategori_default: ['unit_khusus']
+    kategori_default: ['unit_khusus', 'inm']
   },
   {
     id: 'insiden-pasien-jatuh-hd',
@@ -289,7 +289,7 @@ const AVAILABLE_INDICATORS = [
     id: 'kepatuhan-formula-nasional',
     nama: 'Kepatuhan Penggunaan Formularium Nasional',
     standar: '≥ 80%',
-    kategori_default: ['farmasi']
+    kategori_default: ['farmasi', 'inm']
   },
   {
     id: 'double-check-obat-farmasi',
@@ -301,7 +301,7 @@ const AVAILABLE_INDICATORS = [
     id: 'hasil-kritis-lab',
     nama: 'Pelaporan Hasil Kritis Laboratorium  ≤ 30 menit',
     standar: '100%',
-    kategori_default: ['penunjang', 'laboratorium']
+    kategori_default: ['penunjang', 'laboratorium', 'inm']
   },
   {
     id: 'waktu-tunggu-lab-kurangdari',
@@ -499,19 +499,19 @@ const AVAILABLE_INDICATORS = [
     id: 'kepuasan_pasien_pelayanan',
     nama: 'Kepuasan Pasien Pada Pelayanan',
     standar: '≥ 76,61%',
-    kategori_default: ['rawat_inap', 'rawat_jalan', 'unit_khusus', 'igd', 'penunjang']
+    kategori_default: ['rawat_inap', 'rawat_jalan', 'unit_khusus', 'igd', 'penunjang', 'inm']
   },
   {
     id: 'kepatuhan_kebersihan_tangan',
     nama: 'Kepatuhan Kebersihan Tangan',
     standar: '≥ 85%',
-    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang']
+    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang', 'inm']
   },
   {
     id: 'kepatuhan_apd',
     nama: 'Kepatuhan Penggunaan APD',
     standar: '100%',
-    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang']
+    kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang', 'inm']
   }
 ];
 

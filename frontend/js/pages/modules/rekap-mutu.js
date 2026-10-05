@@ -31,7 +31,7 @@ function getMonthPalette(monthNum) {
 export async function render(container) {
   container.innerHTML = `
     <div class="card" style="position: sticky; top: var(--header-height, 60px); z-index: 80; margin-bottom: 8px; padding: 6px 10px; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #cbd5e1; border-radius: 6px;">
-      
+
       <!-- Row 1: Header Title & Action Buttons -->
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -47,7 +47,7 @@ export async function render(container) {
           <button id="btn-reset-filter" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.7rem; height: 24px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="Reset filter ke default (Triwulan I 2026)">
             🔄 Reset
           </button>
-          
+
           <button id="btn-export-excel" class="btn" style="background: #10b981; color: white; border: none; padding: 2px 10px; border-radius: 4px; font-weight: 600; font-size: 0.7rem; height: 24px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 1px 3px rgba(16,185,129,0.2);">
             📥 Export Excel
           </button>
@@ -56,7 +56,7 @@ export async function render(container) {
 
       <!-- Row 2: Filter Toolbar (Ultra Compact for 720p+ Screens) -->
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; margin-bottom: 8px; display: flex; flex-wrap: nowrap; overflow-x: auto; align-items: center; gap: 4px 6px; scrollbar-width: thin;">
-        
+
         <!-- Filter Triwulan -->
         <div style="display: flex; align-items: center; gap: 3px; background: #eff6ff; padding: 1px 6px; border-radius: 4px; border: 1px solid #bfdbfe; flex-shrink: 0;">
           <label style="font-weight: 700; font-size: 0.68rem; color: #1e40af;">📊 Triwulan:</label>
@@ -111,6 +111,9 @@ export async function render(container) {
 
       <!-- Row 3: Category Sub-Menu Tabs (Horizontal Scrollable Pill Bar) -->
       <div style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin;">
+        <button class="tab-btn ${currentKategori === 'inm' ? 'active-tab' : ''}" data-kategori="inm" style="padding: 4px 12px; border: none; background: ${currentKategori === 'inm' ? '#ecfdf5' : 'transparent'}; font-weight: 600; font-size: 0.76rem; cursor: pointer; border-radius: 5px; color: ${currentKategori === 'inm' ? '#047857' : '#64748b'}; border: 1px solid ${currentKategori === 'inm' ? '#a7f3d0' : 'transparent'}; white-space: nowrap;">
+          🇮🇩 INM (Indikator Nasional Mutu)
+        </button>
         <button class="tab-btn ${currentKategori === 'rawat_inap' ? 'active-tab' : ''}" data-kategori="rawat_inap" style="padding: 4px 12px; border: none; background: ${currentKategori === 'rawat_inap' ? '#eff6ff' : 'transparent'}; font-weight: 600; font-size: 0.76rem; cursor: pointer; border-radius: 5px; color: ${currentKategori === 'rawat_inap' ? '#2563eb' : '#64748b'}; border: 1px solid ${currentKategori === 'rawat_inap' ? '#bfdbfe' : 'transparent'}; white-space: nowrap;">
           🛏️ Rawat Inap (Umum)
         </button>
@@ -168,6 +171,7 @@ export async function render(container) {
   updateFilterState();
 
   const tabStyles = {
+    inm: { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' },
     rawat_inap: { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
     unit_khusus: { bg: '#fce7f3', color: '#be185d', border: '#fbcfe8' },
     igd: { bg: '#fee2e2', color: '#b91c1c', border: '#fca5a5' },
@@ -413,9 +417,9 @@ function renderMatrixTables(container, data) {
   const legendHTML = `
     <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.75rem; color: #475569;">
       <div>
-        <strong>💡 Keterangan Kolom:</strong> 
-        <span style="margin-left: 6px; color: #1e293b;"><strong>N</strong> = Numerator</span> | 
-        <span style="margin-left: 4px; color: #1e293b;"><strong>D</strong> = Denumerator</span> | 
+        <strong>💡 Keterangan Kolom:</strong>
+        <span style="margin-left: 6px; color: #1e293b;"><strong>N</strong> = Numerator</span> |
+        <span style="margin-left: 4px; color: #1e293b;"><strong>D</strong> = Denumerator</span> |
         <span style="margin-left: 4px; color: #2563eb; font-weight: 700;"><strong>C</strong> = Capaian (%)</span>
         ${isSem ? `| <span style="margin-left: 6px; color: #78350f; font-weight: 700;"><strong>${semLabel}</strong> = Agregasi Semester</span>` : ''}
       </div>
@@ -427,9 +431,14 @@ function renderMatrixTables(container, data) {
 
   html += legendHTML;
 
-  // Render Empty State if no rooms exist for this category/unit filter
-  if (!data.rooms || data.rooms.length === 0) {
+  // Render Empty State if no data exists for this category/unit filter
+  const isCategoryEmpty = data.kategori === 'inm'
+    ? (!data.totalRs || data.totalRs.length === 0)
+    : (!data.rooms || data.rooms.length === 0);
+
+  if (isCategoryEmpty) {
     const categoryLabels = {
+      inm: '🇮🇩 Indikator Nasional Mutu (INM)',
       rawat_inap: 'Rawat Inap (Umum)',
       unit_khusus: 'Unit Khusus & Intensif',
       igd: 'IGD (Gawat Darurat)',
@@ -459,136 +468,140 @@ function renderMatrixTables(container, data) {
     return;
   }
 
-  // 1. Render Room Tables
-  data.rooms.forEach((room) => {
-    html += `
-      <div class="card" style="margin-bottom: 20px; padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); border: 1px solid #cbd5e1;">
-        <div style="background: #1e293b; color: white; padding: 8px 14px; font-weight: 700; font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;">
-          <span>🏥 RUANGAN: ${room.nama_unit}</span>
-          <span style="font-size: 0.75rem; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; font-weight: 500;">
-            ${data.tahun} (${data.bulanList.length} Bulan)
-          </span>
-        </div>
+  // 1. Render Room Tables (Excluded for INM category as only TOTAL CAPAIAN INM is required)
+  if (data.kategori !== 'inm' && data.rooms && data.rooms.length > 0) {
+    data.rooms.forEach((room) => {
+      html += `
+        <div class="card" style="margin-bottom: 20px; padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); border: 1px solid #cbd5e1;">
+          <div style="background: #1e293b; color: white; padding: 8px 14px; font-weight: 700; font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>🏥 RUANGAN: ${room.nama_unit}</span>
+            <span style="font-size: 0.75rem; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; font-weight: 500;">
+              ${data.tahun} (${data.bulanList.length} Bulan)
+            </span>
+          </div>
 
-        <div style="overflow-x: auto; max-width: 100%; position: relative;">
-          <table class="table-compact-matrix" style="width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.75rem; line-height: 1.2;">
-            <thead>
-              <tr style="background: #f1f5f9;">
-                <th rowspan="2" style="position: sticky; left: 0; z-index: 10; background: #f1f5f9; width: 28px; min-width: 28px; text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; vertical-align: middle; padding: 3px;">No</th>
-                <th rowspan="2" style="position: sticky; left: 28px; z-index: 10; background: #f1f5f9; min-width: 180px; max-width: 180px; border-right: 2px solid #94a3b8; border-bottom: 1px solid #cbd5e1; vertical-align: middle; padding: 4px 6px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">Indikator Mutu</th>
-                
-                ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
-                  const pal = getMonthPalette(b.bulan);
-                  return `
-                    <th colspan="3" style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; background: ${pal.headerBg}; color: ${pal.textColor}; font-weight: 700; padding: 4px 2px;">
-                      ${b.nama}
+          <div style="overflow-x: auto; max-width: 100%; position: relative;">
+            <table class="table-compact-matrix" style="width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.75rem; line-height: 1.2;">
+              <thead>
+                <tr style="background: #f1f5f9;">
+                  <th rowspan="2" style="position: sticky; left: 0; z-index: 10; background: #f1f5f9; width: 28px; min-width: 28px; text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; vertical-align: middle; padding: 3px;">No</th>
+                  <th rowspan="2" style="position: sticky; left: 28px; z-index: 10; background: #f1f5f9; min-width: 180px; max-width: 180px; border-right: 2px solid #94a3b8; border-bottom: 1px solid #cbd5e1; vertical-align: middle; padding: 4px 6px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">Indikator Mutu</th>
+
+                  ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
+                    const pal = getMonthPalette(b.bulan);
+                    return `
+                      <th colspan="3" style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; background: ${pal.headerBg}; color: ${pal.textColor}; font-weight: 700; padding: 4px 2px;">
+                        ${b.nama}
+                      </th>
+                    `;
+                  }).join('') : ''}
+
+                  ${isSem ? `
+                    <th colspan="3" style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1e293b; color: #ffffff; font-weight: 700; padding: 4px 2px;">
+                      ${data.bulanAwal === 1 ? 'TOTAL TRIWULAN I' : 'TOTAL TRIWULAN III'}
                     </th>
-                  `;
-                }).join('') : ''}
+                    <th colspan="3" style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1e293b; color: #ffffff; font-weight: 700; padding: 4px 2px;">
+                      ${data.bulanAwal === 1 ? 'TOTAL TRIWULAN II' : 'TOTAL TRIWULAN IV'}
+                    </th>
+                    <th colspan="3" style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; background: #78350f; color: #ffffff; font-weight: 700; padding: 4px 2px;">
+                      ${semLabel}
+                    </th>
+                  ` : `
+                    <th colspan="3" style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #0f172a; background: #0f172a; color: #ffffff; font-weight: 700; padding: 4px 2px;">
+                      ${data.triwulanLabel}
+                    </th>
+                  `}
+                </tr>
+                <tr style="background: #f8fafc;">
+                  ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
+                    const pal = getMonthPalette(b.bulan);
+                    return `
+                      <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">N</th>
+                      <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">D</th>
+                      <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 58px; min-width: 58px; font-size: 0.7rem; background: ${pal.capBg}; color: ${pal.textColor}; font-weight: 700; padding: 4px 2px;">C</th>
+                    `;
+                  }).join('') : ''}
 
-                ${isSem ? `
-                  <th colspan="3" style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1e293b; color: #ffffff; font-weight: 700; padding: 4px 2px;">
-                    ${data.bulanAwal === 1 ? 'TOTAL TRIWULAN I' : 'TOTAL TRIWULAN III'}
-                  </th>
-                  <th colspan="3" style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1e293b; color: #ffffff; font-weight: 700; padding: 4px 2px;">
-                    ${data.bulanAwal === 1 ? 'TOTAL TRIWULAN II' : 'TOTAL TRIWULAN IV'}
-                  </th>
-                  <th colspan="3" style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; background: #78350f; color: #ffffff; font-weight: 700; padding: 4px 2px;">
-                    ${semLabel}
-                  </th>
-                ` : `
-                  <th colspan="3" style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #0f172a; background: #0f172a; color: #ffffff; font-weight: 700; padding: 4px 2px;">
-                    ${data.triwulanLabel}
-                  </th>
-                `}
-              </tr>
-              <tr style="background: #f8fafc;">
-                ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
-                  const pal = getMonthPalette(b.bulan);
+                  ${isSem ? `
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
+                    <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                    <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                    <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 60px; min-width: 60px; font-size: 0.7rem; background: #78350f; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
+                  ` : `
+                    <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 4px 2px;">Tot N</th>
+                    <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 4px 2px;">Tot D</th>
+                    <th style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #0f172a; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
+                  `}
+                </tr>
+              </thead>
+              <tbody>
+                ${room.indicators.map((ind, idx) => {
+                  const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+                  const tot = ind.totalPeriode || { numerator: 0, denominator: 0, capaian: 0 };
+                  const sb = ind.semesterBreakdown;
                   return `
-                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">N</th>
-                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 52px; min-width: 52px; font-size: 0.7rem; background: ${pal.subBg}; color: ${pal.textColor}; padding: 4px 2px;">D</th>
-                    <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 58px; min-width: 58px; font-size: 0.7rem; background: ${pal.capBg}; color: ${pal.textColor}; font-weight: 700; padding: 4px 2px;">C</th>
+                    <tr style="background: ${rowBg};">
+                      <td style="position: sticky; left: 0; z-index: 5; background: ${rowBg}; text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #64748b; padding: 3px;">${ind.no}</td>
+                      <td style="position: sticky; left: 28px; z-index: 5; background: ${rowBg}; border-right: 2px solid #94a3b8; border-bottom: 1px solid #e2e8f0; padding: 4px 8px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">
+                        <div style="font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: normal;">${ind.nama_modul}</div>
+                        <div style="font-size: 0.68rem; color: #64748b; margin-top: 1px;">Standar: ${ind.standar}</div>
+                      </td>
+
+                      ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
+                        const pal = getMonthPalette(b.bulan);
+                        const mData = ind.monthlyData[b.bulan] || { numerator: 0, denominator: 0, capaian: 0 };
+                        const numVal = mData.numerator !== null && mData.numerator !== undefined ? mData.numerator : '-';
+                        const denVal = mData.denominator !== null && mData.denominator !== undefined ? mData.denominator : '-';
+                        return `
+                          <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; color: #334155; white-space: nowrap;">${numVal}</td>
+                          <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; color: #334155; white-space: nowrap;">${denVal}</td>
+                          <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: ${pal.textColor}; background: ${pal.capCellBg}; white-space: nowrap;">
+                            ${mData.capaian}
+                          </td>
+                        `;
+                      }).join('') : ''}
+
+                      ${isSem && sb ? `
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.numerator !== null && sb.tw1.numerator !== undefined ? sb.tw1.numerator : '-'}</td>
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.denominator}</td>
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw1.capaian}</td>
+
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.numerator !== null && sb.tw2.numerator !== undefined ? sb.tw2.numerator : '-'}</td>
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.denominator}</td>
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw2.capaian}</td>
+
+                        <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.numerator !== null && sb.totalSemester.numerator !== undefined ? sb.totalSemester.numerator : '-'}</td>
+                        <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.denominator}</td>
+                        <td style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #78350f;">${sb.totalSemester.capaian}</td>
+                      ` : `
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.numerator !== null && tot.numerator !== undefined ? tot.numerator : '-'}</td>
+                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.denominator}</td>
+                        <td style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${tot.capaian}</td>
+                      `}
+                    </tr>
                   `;
-                }).join('') : ''}
-
-                ${isSem ? `
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 55px; min-width: 55px; font-size: 0.7rem; background: #334155; color: #ffffff; padding: 4px 2px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 55px; min-width: 55px; font-size: 0.7rem; background: #92400e; color: #ffffff; padding: 4px 2px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #78350f; width: 60px; min-width: 60px; font-size: 0.7rem; background: #78350f; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
-                ` : `
-                  <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 4px 2px;">Tot N</th>
-                  <th style="text-align: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; width: 55px; min-width: 55px; font-size: 0.7rem; background: #1e293b; color: #ffffff; padding: 4px 2px;">Tot D</th>
-                  <th style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #0f172a; width: 60px; min-width: 60px; font-size: 0.7rem; background: #1e3a8a; color: #ffffff; font-weight: 700; padding: 4px 2px;">C</th>
-                `}
-              </tr>
-            </thead>
-            <tbody>
-              ${room.indicators.map((ind, idx) => {
-                const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-                const tot = ind.totalPeriode || { numerator: 0, denominator: 0, capaian: 0 };
-                const sb = ind.semesterBreakdown;
-                return `
-                  <tr style="background: ${rowBg};">
-                    <td style="position: sticky; left: 0; z-index: 5; background: ${rowBg}; text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #64748b; padding: 3px;">${ind.no}</td>
-                    <td style="position: sticky; left: 28px; z-index: 5; background: ${rowBg}; border-right: 2px solid #94a3b8; border-bottom: 1px solid #e2e8f0; padding: 4px 8px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">
-                      <div style="font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: normal;">${ind.nama_modul}</div>
-                      <div style="font-size: 0.68rem; color: #64748b; margin-top: 1px;">Standar: ${ind.standar}</div>
-                    </td>
-
-                    ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
-                      const pal = getMonthPalette(b.bulan);
-                      const mData = ind.monthlyData[b.bulan] || { numerator: 0, denominator: 0, capaian: 0 };
-                      const numVal = mData.numerator !== null && mData.numerator !== undefined ? mData.numerator : '-';
-                      const denVal = mData.denominator !== null && mData.denominator !== undefined ? mData.denominator : '-';
-                      return `
-                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; color: #334155; white-space: nowrap;">${numVal}</td>
-                        <td style="text-align: center; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; color: #334155; white-space: nowrap;">${denVal}</td>
-                        <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: ${pal.textColor}; background: ${pal.capCellBg}; white-space: nowrap;">
-                          ${mData.capaian}
-                        </td>
-                      `;
-                    }).join('') : ''}
-
-                    ${isSem && sb ? `
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.numerator !== null && sb.tw1.numerator !== undefined ? sb.tw1.numerator : '-'}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw1.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw1.capaian}</td>
-
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.numerator !== null && sb.tw2.numerator !== undefined ? sb.tw2.numerator : '-'}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${sb.tw2.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${sb.tw2.capaian}</td>
-
-                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.numerator !== null && sb.totalSemester.numerator !== undefined ? sb.totalSemester.numerator : '-'}</td>
-                      <td style="text-align: center; border-right: 1px solid #fde68a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #78350f; background: #fef3c7;">${sb.totalSemester.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #78350f; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #78350f;">${sb.totalSemester.capaian}</td>
-                    ` : `
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.numerator !== null && tot.numerator !== undefined ? tot.numerator : '-'}</td>
-                      <td style="text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 700; color: #0f172a; background: #f1f5f9;">${tot.denominator}</td>
-                      <td style="text-align: center; border-right: 1px solid #0f172a; border-bottom: 1px solid #e2e8f0; padding: 4px 6px; font-weight: 800; color: #ffffff; background: #1e3a8a;">${tot.capaian}</td>
-                    `}
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
+  }
 
-  // 2. Render Aggregated TOTAL MUTU RS Table (ONLY for rawat_inap category)
-  if (data.kategori === 'rawat_inap' && data.totalRs && data.totalRs.length > 0) {
+  // 2. Render Aggregated TOTAL MUTU RS Table (for rawat_inap & inm categories)
+  if ((data.kategori === 'rawat_inap' || data.kategori === 'inm') && data.totalRs && data.totalRs.length > 0) {
+    const isInm = data.kategori === 'inm';
+    const totalTitle = isInm ? 'TOTAL CAPAIAN INM RUMAH SAKIT ISLAM KARAWANG' : 'TOTAL CAPAIAN MUTU RUMAH SAKIT';
     html += `
-      <div class="card" style="margin-bottom: 20px; padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); border: 2px solid #2563eb;">
-        <div style="background: #1e40af; color: white; padding: 8px 14px; font-weight: 700; font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;">
-          <span>🏆 TOTAL CAPAIAN MUTU RUMAH SAKIT (GABUNGAN SEMUA RUANGAN)</span>
+      <div class="card" style="margin-bottom: 20px; padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); border: 2px solid ${isInm ? '#059669' : '#2563eb'};">
+        <div style="background: ${isInm ? '#047857' : '#1e40af'}; color: white; padding: 8px 14px; font-weight: 700; font-size: 0.88rem; display: flex; justify-content: space-between; align-items: center;">
+          <span>${totalTitle}</span>
           <span style="font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; font-weight: 500;">
             Rekapitulasi RS
           </span>
@@ -600,7 +613,7 @@ function renderMatrixTables(container, data) {
               <tr style="background: #eff6ff;">
                 <th rowspan="2" style="position: sticky; left: 0; z-index: 10; background: #eff6ff; width: 28px; min-width: 28px; text-align: center; border-right: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; vertical-align: middle; padding: 3px;">No</th>
                 <th rowspan="2" style="position: sticky; left: 28px; z-index: 10; background: #eff6ff; min-width: 180px; max-width: 180px; border-right: 2px solid #3b82f6; border-bottom: 1px solid #bfdbfe; vertical-align: middle; padding: 4px 6px; box-shadow: 3px 0 5px -2px rgba(0,0,0,0.12);">Indikator Mutu</th>
-                
+
                 ${(!isSem || currentViewMode === 'detail') ? data.bulanList.map(b => {
                   const pal = getMonthPalette(b.bulan);
                   return `

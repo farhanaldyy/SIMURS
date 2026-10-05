@@ -1415,7 +1415,61 @@ const ALL_INDICATOR_CONFIGS = [
   }
 ];
 
+function isINMIndicator(indId) {
+  if (!indId) return false;
+  const normalized = indId.replace(/-/g, '_');
+  const inmNormalized = [
+    'identifikasi_pasien',
+    'risiko_jatuh',
+    'visit_dokter',
+    'alur_klinis',
+    'waktu_tunggu_poliklinik_rata_rata',
+    'penundaan_operasi_elektif',
+    'waktu_tanggap_sc',
+    'kepatuhan_formula_nasional',
+    'hasil_kritis_lab',
+    'kepuasan_pasien_pelayanan',
+    'kepatuhan_kebersihan_tangan',
+    'kepatuhan_apd'
+  ];
+  return inmNormalized.includes(normalized);
+}
+
 function getActiveIndicatorsForRoom(room, roomConfig, kategori) {
+  if (kategori === 'inm') {
+    const hasParentWaktuTunggu = roomConfig && roomConfig.hasSaved && (
+      roomConfig.set.has('waktu_tunggu_poliklinik') || 
+      roomConfig.set.has('waktu-tunggu-poliklinik')
+    );
+
+    return ALL_INDICATOR_CONFIGS.filter(ind => isINMIndicator(ind.id)).filter(ind => {
+      if (roomConfig && roomConfig.hasSaved) {
+        const isSavedActive = roomConfig.set.has(ind.id) || 
+          roomConfig.set.has(ind.id.replace(/_/g, '-')) ||
+          roomConfig.set.has(ind.id.replace(/-/g, '_')) ||
+          (hasParentWaktuTunggu && ind.id.startsWith('waktu_tunggu_poliklinik'));
+        if (isSavedActive) return true;
+        if (roomConfig.allKnownIds && (roomConfig.allKnownIds.has(ind.id) || roomConfig.allKnownIds.has(ind.id.replace(/_/g, '-')) || roomConfig.allKnownIds.has(ind.id.replace(/-/g, '_')))) {
+          return false;
+        }
+      }
+      const ai = AVAILABLE_INDICATORS.find(a => a.id === ind.id || a.id.replace(/_/g, '-') === ind.id.replace(/_/g, '-'));
+      if (ai && ai.kategori_default) {
+        const roomNama = (room.nama_unit || room.nama || '').toLowerCase().replace(/\s+/g, '_');
+        const roomNamaRaw = (room.nama_unit || room.nama || '').toLowerCase();
+        const unitSpecificTags = ['radiologi', 'gizi', 'rekam_medis', 'laboratorium', 'farmasi', 'rehab_medis', 'icu', 'igd', 'laundry', 'sterilisasi', 'simrs'];
+        const hasUnitSpecificTag = ai.kategori_default.some(k => unitSpecificTags.includes(k));
+
+        if (hasUnitSpecificTag) {
+          return ai.kategori_default.some(k => roomNama.includes(k) || roomNamaRaw.includes(k.replace(/_/g, ' ')));
+        }
+
+        return ai.kategori_default.includes(room.kategori_unit) || ai.kategori_default.includes('inm');
+      }
+      return true;
+    });
+  }
+
   if (roomConfig && roomConfig.hasSaved) {
     const hasParentWaktuTunggu = roomConfig.set.has('waktu_tunggu_poliklinik') || roomConfig.set.has('waktu-tunggu-poliklinik');
     return ALL_INDICATOR_CONFIGS.filter(ind => {
@@ -1550,9 +1604,11 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
 
   // Determine indicators and units based on category
   let unitWhere = {
-    kategori_unit: kategori,
     aktif: true,
   };
+  if (kategori !== 'inm') {
+    unitWhere.kategori_unit = kategori;
+  }
 
   // Fetch all active units for this category from DB
   const allCategoryUnits = await prisma.unit.findMany({
@@ -1800,20 +1856,28 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
     })
   );
 
-  // Calculate Total MUTU RS (Aggregated across all rooms) ONLY for rawat_inap category
+  let filteredRoomResults = roomResults;
+  if (kategori === 'inm') {
+    filteredRoomResults = roomResults.filter(r => r.indicators && r.indicators.length > 0);
+  }
+
+  // Calculate Total MUTU RS (Aggregated across all rooms) for rawat_inap and inm categories
   let totalRs = [];
-  if (kategori === 'rawat_inap') {
-    // Dynamically collect unique active indicator IDs across all Rawat Inap rooms
+  if (kategori === 'rawat_inap' || kategori === 'inm') {
+    // Dynamically collect unique active indicator IDs across rooms
     const activeIndIdSet = new Set();
-    roomResults.forEach(r => {
+    filteredRoomResults.forEach(r => {
       if (r.indicators) {
         r.indicators.forEach(i => activeIndIdSet.add(i.id));
       }
     });
 
-    const rawatInapInds = ALL_INDICATOR_CONFIGS.filter(ind => activeIndIdSet.has(ind.id))
-      .map((ind, idx) => ({ ...ind, no: idx + 1 }));
-    totalRs = rawatInapInds.map(ind => {
+    const targetInds = ALL_INDICATOR_CONFIGS.filter(ind => {
+      if (kategori === 'inm') return isINMIndicator(ind.id);
+      return activeIndIdSet.has(ind.id);
+    }).map((ind, idx) => ({ ...ind, no: idx + 1 }));
+
+    totalRs = targetInds.map(ind => {
       const monthlyData = {};
       let rsPeriodNum = 0;
       let rsPeriodDen = 0;
@@ -1826,7 +1890,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
       let totNum = 0;
       let totDen = 0;
 
-      roomResults.forEach(r => {
+      filteredRoomResults.forEach(r => {
         const indData = r.indicators.find(i => i.id === ind.id);
         if (indData && indData.monthlyData[b]) {
           totNum += indData.monthlyData[b].numerator || 0;
@@ -1897,7 +1961,7 @@ async function getRekapMutuData({ kategori = 'rawat_inap', tahun = 2026, bulanAw
     isSemesterMode,
     bulanList,
     allCategoryUnits: allCategoryUnits.map(u => ({ id: u.id, nama_unit: u.nama_unit, kode_unit: u.kode_unit })),
-    rooms: roomResults,
+    rooms: filteredRoomResults,
     totalRs
   };
 }
@@ -1917,7 +1981,8 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
   // Title Row (Merged B2 to last column)
   ws.mergeCells(2, 2, 2, totalCols);
   const titleCell = ws.getCell(2, 2);
-  const katTitle = kategori === 'rawat_inap' || kategori === 'ranap' ? 'RAWAT INAP' : kategori.toUpperCase();
+  let katTitle = kategori === 'rawat_inap' || kategori === 'ranap' ? 'RAWAT INAP' : kategori.toUpperCase();
+  if (kategori === 'inm') katTitle = 'INDIKATOR NASIONAL MUTU (INM)';
   titleCell.value = `REKAP CAPAIAN MUTU ${katTitle} RUMAH SAKIT ISLAM KARAWANG TAHUN ${data.tahun}`;
   titleCell.font = { bold: true, size: 13 };
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -1955,8 +2020,9 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
     };
   };
 
-  // Render Table for Each Room
-  for (const room of data.rooms) {
+  // Render Table for Each Room (Excluded for INM category as only TOTAL CAPAIAN INM is required)
+  if (data.kategori !== 'inm' && data.rooms && data.rooms.length > 0) {
+    for (const room of data.rooms) {
     ws.mergeCells(currentRow, 2, currentRow, 3);
     const rUnitCell = ws.getCell(currentRow, 2);
     rUnitCell.value = `RUANGAN: ${room.nama_unit}`;
@@ -2132,13 +2198,14 @@ async function exportRekapMutuExcel({ kategori = 'rawat_inap', tahun = 2026, bul
     }
 
     currentRow += 2;
+    }
   }
 
-  // Render TOTAL MUTU RS Summary Table (ONLY for rawat_inap category)
-  if (data.kategori === 'rawat_inap' && data.totalRs && data.totalRs.length > 0) {
+  // Render TOTAL MUTU RS Summary Table (for rawat_inap and inm categories)
+  if ((data.kategori === 'rawat_inap' || data.kategori === 'inm') && data.totalRs && data.totalRs.length > 0) {
     ws.mergeCells(currentRow, 2, currentRow, 3);
     const rRsHeaderCell = ws.getCell(currentRow, 2);
-    rRsHeaderCell.value = 'TOTAL CAPAIAN MUTU RUMAH SAKIT';
+    rRsHeaderCell.value = data.kategori === 'inm' ? 'TOTAL CAPAIAN INM RUMAH SAKIT ISLAM KARAWANG' : 'TOTAL CAPAIAN MUTU RUMAH SAKIT';
     rRsHeaderCell.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
     rRsHeaderCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E40AF' } };
     rRsHeaderCell.alignment = { vertical: 'middle', horizontal: 'left' };
