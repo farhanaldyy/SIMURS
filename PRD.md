@@ -2,8 +2,8 @@
 ## Sistem Informasi Mutu Rumah Sakit (SIMURS)
 ### Versi Vanilla JS
 
-**Versi:** 1.3.0  
-**Tanggal:** Agustus 2026  
+**Versi:** 1.4.0  
+**Tanggal:** Oktober 2026  
 **Status:** Updated & Production-Ready  
 
 ---
@@ -49,8 +49,10 @@ Membangun aplikasi web berbasis Vanilla JS (tanpa framework frontend) untuk inpu
 | **Routing** | Hash-based SPA router (custom, `router.js`) | Navigasi `#/dashboard`, `#/rekap-mutu`, `#/risiko-jatuh`, dll — tanpa library eksternal |
 | **HTTP Client** | Native `fetch()` API (`client.js`) | Wrapper terpusat dengan auto-auth header, handling token refresh, auto cache-invalidation, & error handling |
 | **State Management** | Global Store (`store.js`) | Menyimpan state user, periode, unit, dan `indicatorSummariesCache` untuk navigasi instan (0 ms) |
-| **Chart** | Chart.js (CDN dengan tag `defer`) | Visualisasi grafik kepatuhan dan proporsi status (Tercapai, Belum Tercapai, Belum Ada Data) |
+| **Chart** | Chart.js (CDN dengan tag `defer`) + chartjs-plugin-datalabels | Visualisasi grafik kepatuhan dan proporsi status (Tercapai, Belum Tercapai, Belum Ada Data) |
 | **Export Excel** | SheetJS (`xlsx.full.min.js` dengan `defer`) | Ekspor laporan mutu bulanan & matrix rekap mutu ke .xlsx |
+| **Export PDF** | html2pdf.js | Ekspor halaman INM Chart ke PDF (A3 landscape) |
+| **Export PPT** | pptxgenjs | Ekspor per-chart INM ke slide presentasi (1 slide/indikator) |
 | **UI Components** | Custom Generic Indicator Page (`createGenericIndicatorPage`) | Factory function frontend untuk pembuatan halaman indikator secara instan dan standar |
 | **Validasi Form** | Custom validation helper (`/js/utils/validator.js`) | Validasi data client-side (No RM, Usia, Waktu, Format ISO, dsb.) |
 | **Notifikasi & Modal** | Custom toast (`toast.js`) & Modal (`modal.js`) | UI Feedback reusable tanpa library eksternal |
@@ -208,6 +210,10 @@ Aplikasi SIMURS mencakup **82+ indikator mutu pelayanan** yang terdaftar pada si
 14. **💻 SIMRS IT (1 Indikator)**:
     - Response Time SIMRS IT (`≤ 15 Menit`)
 
+15. **😊 Kepuasan Pelayanan (2 Indikator)**:
+    - Kepuasan Pasien Pada Pelayanan (`≥ 76,61%`)
+    - Kecepatan Waktu Tanggap Komplain (`≥ 80%`) — Kepatuhan dihitung otomatis dari `kategori_komplain` dan `lama_tanggap_jam` terhadap batas standar grading risiko: Merah ≤ 24 jam, Kuning ≤ 3 hari, Hijau ≤ 7 hari.
+
 ---
 
 ## 4. Pola Arsitektur Frontend (Vanilla JS)
@@ -264,7 +270,8 @@ const Store = {
 1. **Role-Based Access Control (RBAC) & Granular Assignment**: Pembatasan hak akses menu & modul per user yang ditentukan secara dinamis oleh Admin melalui checklist pengguna. Modul yang tidak dicentang otomatis disembunyikan dari sidebar dan diblokir oleh Router.
 2. **Penguncian Periode (Data Locking)**: Setelah periode ditutel/ditutup (`closed`), seluruh data pada periode tersebut otomatis terkunci dan tidak dapat diubah/dihapus demi integritas laporan.
 3. **Rekap Data Mutu Matrix**: Modul agregasi matrix kepatuhan bulanan, triwulan, dan semester per unit kerja maupun total rumah sakit, dilengkapi fungsi ekspor file Excel (.xlsx) dengan skema warna bulanan dinamis (*month color palette*).
-4. **Import Data Massal Excel**: Kemampuan mengunggah file Excel berisi banyak sheet indikator sekaligus dengan pencocokan nama sheet, otomatisasi pengisian `periode_id` aktif dan `created_by`, serta validasi tipe data server-side (*type coercion*).
-5. **Konfigurasi Indikator Unit**: Fitur per unit untuk menentukan indikator mana saja yang aktif dan berlaku untuk ruangan/unit kerja tertentu.
-6. **Audit Trail**: Pencatatan riwayat transaksi `create`, `update`, `delete` secara otomatis ke tabel `audit_log`.
-7. **Validasi Skema Server & Client**: Validasi berlapis untuk menjamin integritas data (No RM, Usia, Waktu, Enum) sebelum masuk ke database.
+4. **INM Chart (Full Dashboard)**: Halaman baru dengan 13 chart garis indikator INM (capaian vs standar), filter tahun/bulan/unit, tabel ringkasan, serta ekspor PDF dan PPT.
+5. **Import Data Massal Excel**: Kemampuan mengunggah file Excel berisi banyak sheet indikator sekaligus dengan pencocokan nama sheet, otomatisasi pengisian `periode_id` aktif dan `created_by`, serta validasi tipe data server-side (*type coercion*).
+6. **Konfigurasi Indikator Unit**: Fitur per unit untuk menentukan indikator mana saja yang aktif dan berlaku untuk ruangan/unit kerja tertentu.
+7. **Audit Trail**: Pencatatan riwayat transaksi `create`, `update`, `delete` secara otomatis ke tabel `audit_log`.
+8. **Validasi Skema Server & Client**: Validasi berlapis untuk menjamin integritas data (No RM, Usia, Waktu, Enum) sebelum masuk ke database.

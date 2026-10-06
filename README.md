@@ -31,6 +31,14 @@ graph TD
 ### 2. Rekap Data Mutu Matrix
 * **Agregasi Periode Multilevel**: Perhitungan otomatis capaian mutu bulanan, triwulan (I–IV), dan semester (I–II) per unit kerja maupun total akumulasi rumah sakit.
 * **Format Ekspor Matrix Excel**: Ekspor rekapitulasi data mutu dalam bentuk spreadsheet matrix berwarna per bulan (*month color palette*) yang siap dipresentasikan.
+* **Tabel INM (Indikator Nasional Mutu)**: 13 indikator INM teragregasi otomatis per bulan/triwulan/semester, termasuk Kecepatan Waktu Tanggap Komplain.
+
+### 2a. Halaman INM Chart (Dashboard Full Chart)
+* **13 Chart Garis** untuk seluruh indikator INM (identik format: PENCAPAIAN biru berlian vs STANDAR merah kotak, sumbu Y 0–100%, tabel data bulanan di bawah chart).
+* **Filter Data**: tahun, rentang bulan, dan unit kerja.
+* **Tabel Ringkasan** capaian 13 indikator (N, D, capaian %, standar).
+* **Unduh PDF**: ekspor halaman chart lengkap dalam format A3 landscape siap cetak.
+* **Unduh PPT**: ekspor tiap chart dalam slide presentasi (1 slide/indikator) lengkap dengan keterangan singkat masing-masing.
 
 ### 3. 82+ Modul Indikator Mutu Pelayanan
 Modul pencatatan data yang dikelompokkan ke dalam 14 kategori pelayanan utama:
@@ -48,6 +56,7 @@ Modul pencatatan data yang dikelompokkan ke dalam 14 kategori pelayanan utama:
 * **🩻 Radiologi (6 Indikator)**: Jadwal Dokter Radiologi, Waktu Tunggu Thorax Sesuai Jadwal, Waktu Tunggu Thorax Diluar Jadwal, Kejadian Foto Ulang Pasien, Kelengkapan Info Tindakan, Kepatuhan Identifikasi Pasien.
 * **🧪 Laboratorium (9 Indikator)**: Jadwal Dokter Laboratorium, Waktu Tunggu Lab < 140 Menit, Waktu Tunggu Lab > 140 Menit, Pelaporan Hasil Kritis Lab ≤ 30 Menit, Tidak Adanya Kesalahan Input Lab, Tidak Adanya Kerusakan Sampel Lab, Kepatuhan Identifikasi Pasien Lab, Data Ekspertisi Oleh Dokter Lab, Kesalahan Penyerahan Hasil Lab.
 * **💻 SIMRS IT (1 Indikator)**: Response Time SIMRS IT.
+* **😊 Kepuasan Pelayanan (2 Indikator)**: Kepuasan Pasien Pada Pelayanan, Kecepatan Waktu Tanggap Komplain (kepatuhan dihitung otomatis berdasarkan grading risiko: Merah ≤ 24 jam, Kuning ≤ 3 hari, Hijau ≤ 7 hari).
 
 ### 4. Import Data Massal Excel
 * **Struktur Template Otomatis**: Download template Excel berstruktur resmi yang sesuai dengan skema database seluruh indikator.
@@ -87,6 +96,7 @@ Aplikasi SIMURS telah melalui serangkaian proses audit dan optimasi performa men
 ## Arsitektur Teknologi
 
 * **Frontend**: HTML5 Semantic, Vanilla CSS3 (Custom Variables, Glassmorphism), Vanilla Javascript (ES Modules / SPA Client-side Router).
+* **Chart & Export**: Chart.js + chartjs-plugin-datalabels, SheetJS, html2pdf.js, pptxgenjs (semua via CDN).
 * **Backend**: Node.js 20 LTS, Express.js 5.x (dengan `compression` middleware), Prisma ORM 6.x.
 * **Database**: MariaDB / MySQL (dengan 47 Composite Indexes `@@index([periode_id, unit_id])`).
 
