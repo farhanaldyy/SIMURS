@@ -147,7 +147,8 @@ const serviceToHash = {
   'Antrian Mobile JKN': '#/mutu-rekam-medis',
 
   // Pelayanan
-  'Kepuasan Pasien Pada Pelayanan': '#/kepuasan-pasien-pelayanan'
+  'Kepuasan Pasien Pada Pelayanan': '#/kepuasan-pasien-pelayanan',
+  'Kecepatan Waktu Tanggap Komplain': '#/waktu-tanggap-komplain'
 };
 
 function renderReportTable() {

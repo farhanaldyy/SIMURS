@@ -102,6 +102,7 @@ const services = {
   
   // Pelayanan
   'Kepuasan Pasien Pada Pelayanan': { service: require('../services/modules/kepuasan-pasien-pelayanan.service'), table: 'kepuasanPasienPelayanan', category: 'Pelayanan' },
+  'Kecepatan Waktu Tanggap Komplain': { service: require('../services/modules/waktu-tanggap-komplain.service'), table: 'waktuTanggapKomplain', category: 'Kepuasan Pasien' },
 };
 
 async function exportExcel(req, res, next) {
@@ -552,6 +553,10 @@ async function downloadTemplate(req, res, next) {
       {
         name: 'Response Time SIMRS IT',
         sample: [{ 'Tanggal': '2026-08-01', 'Unit Pemohon': 'Rawat Inap Mawar', 'Kategori Komplain': 'Printer E-Resep Jammed', 'Response Time Menit': 12, 'Keterangan': 'Selesai cepat' }]
+      },
+      {
+        name: 'Kecepatan Waktu Tanggap Komplain',
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Andi Wijaya', 'No RM': 'RM-100264', 'Kategori Komplain': 'Merah', 'Lama Tanggap Jam': 2, 'Keterangan Komplain': 'Ditanggapi cepat' }]
       },
       {
         name: 'Kepuasan Pasien Pada Pelayanan',

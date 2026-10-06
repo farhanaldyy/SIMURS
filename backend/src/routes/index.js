@@ -108,5 +108,6 @@ router.use('/simrs-response-time-it', require('./modules/simrs-response-time-it'
 
 // Kepuasan Pelayanan
 router.use('/kepuasan-pasien-pelayanan', require('./modules/kepuasan-pasien-pelayanan'));
+router.use('/waktu-tanggap-komplain', require('./modules/waktu-tanggap-komplain'));
 
 module.exports = router;

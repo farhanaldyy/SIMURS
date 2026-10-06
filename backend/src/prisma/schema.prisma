@@ -1792,4 +1792,26 @@ model KepuasanPasienPelayanan {
   @@map("kepuasan_pasien_pelayanan")
 }
 
+model WaktuTanggapKomplain {
+  id                  Int      @id @default(autoincrement())
+  periode_id          Int
+  unit_id             Int
+  tanggal             DateTime @db.Date
+  nama_pasien         String   @db.VarChar(150)
+  no_rm               String?  @db.VarChar(50)
+  kategori_komplain   String   @default("Hijau") @db.VarChar(50)
+  lama_tanggap_jam    Float    @default(0)
+  kepatuhan           Int      @default(1)
+  keterangan          String?  @db.Text
+  created_by          Int      @default(1)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  @@index([periode_id])
+  @@index([unit_id])
+  @@index([periode_id, unit_id])
+  @@map("waktu_tanggap_komplain")
+}
+
+
 

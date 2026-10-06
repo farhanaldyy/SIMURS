@@ -25,7 +25,7 @@ async function getSummary(req, res, next) {
       laboratoriumJadwalDokter, laboratoriumWaktuTungguLt140, laboratoriumWaktuTungguGt140,
       laboratoriumHasilKritis, laboratoriumKesalahanInput,
       laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter,
-      simrsResponseTimeIt
+      simrsResponseTimeIt, waktuTanggapKomplain
     ] = await Promise.all([
       prisma.risikoJatuh.count({ where }),
       prisma.insidenKeselamatan.count({ where }),
@@ -84,6 +84,7 @@ async function getSummary(req, res, next) {
       prisma.laboratoriumKepatuhanIdentifikasi.count({ where }),
       prisma.laboratoriumEkspertisiDokter.count({ where }),
       prisma.simrsResponseTimeIt.count({ where }),
+      prisma.waktuTanggapKomplain.count({ where }),
     ]);
 
     res.json({
@@ -106,7 +107,7 @@ async function getSummary(req, res, next) {
           laboratoriumJadwalDokter, laboratoriumWaktuTungguLt140, laboratoriumWaktuTungguGt140,
           laboratoriumHasilKritis, laboratoriumKesalahanInput,
           laboratoriumKerusakanSampel, laboratoriumKepatuhanIdentifikasi, laboratoriumEkspertisiDokter,
-          simrsResponseTimeIt
+          simrsResponseTimeIt, waktuTanggapKomplain
         },
       },
     });
@@ -122,6 +123,7 @@ const services = {
   'Serah Terima Pasien': { service: require('../services/modules/serah-terima-pasien.service'), category: 'Keselamatan Pasien' },
   'Kepatuhan Kebersihan Tangan': { service: require('../services/modules/kepatuhan-kebersihan-tangan.service'), category: 'Keselamatan Pasien' },
   'Kepatuhan Penggunaan APD': { service: require('../services/modules/kepatuhan-apd.service'), category: 'Keselamatan Pasien' },
+  'Kecepatan Waktu Tanggap Komplain': { service: require('../services/modules/waktu-tanggap-komplain.service'), category: 'Kepuasan Pasien' },
   
   'Angka Kematian Ranap': { service: require('../services/modules/angka-kematian-ranap.service'), category: 'Rawat Inap', extraWhere: { lokasi: 'ranap' } },
   'Double Check High Alert': { service: require('../services/modules/double-check-high-alert.service'), category: 'Rawat Inap' },

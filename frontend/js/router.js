@@ -113,6 +113,8 @@ const routes = {
 
   // Kepuasan Pelayanan
   '#/kepuasan-pasien-pelayanan':              { module: () => import('./pages/modules/kepuasan-pasien-pelayanan.js'), title: 'Kepuasan Pasien Pada Pelayanan' },
+  '#/waktu-tanggap-komplain':                 { module: () => import('./pages/modules/waktu-tanggap-komplain.js'), title: 'Kecepatan Waktu Tanggap Komplain' },
+  '#/inm':                                    { module: () => import('./pages/inm.js'), title: 'INM Chart' },
 };
 
 let currentPage = null;
@@ -169,13 +171,13 @@ async function handleRoute(contentContainer) {
     const isPoliAccess = hash === '#/master-poliklinik' && isPoliUser;
 
     // petugas can access login, laporan, rekap-mutu, modul, their allowed modules, or master-poliklinik if in poli unit
-    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && hash !== '#/rekap-mutu' && hash !== '#/modul' && !isPoliAccess && !Store.hasAllowedModule(hash, user))) {
+    if (hash === '#/dashboard' || isAdminRoute || (hash !== '#/laporan' && hash !== '#/rekap-mutu' && hash !== '#/modul' && hash !== '#/inm' && !isPoliAccess && !Store.hasAllowedModule(hash, user))) {
       renderAccessDenied(contentContainer);
       return;
     }
   } else if (role === 'pic_mutu') {
     // pic_mutu can access dashboard, laporan, rekap-mutu, master data, modul, and their allowed modules
-    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/rekap-mutu' || hash === '#/master-tindakan' || hash === '#/master-poliklinik' || hash === '#/master-dokter' || hash === '#/modul';
+    const isGeneralRoute = hash === '#/dashboard' || hash === '#/laporan' || hash === '#/rekap-mutu' || hash === '#/master-tindakan' || hash === '#/master-poliklinik' || hash === '#/master-dokter' || hash === '#/modul' || hash === '#/inm';
     if (!isGeneralRoute && !Store.hasAllowedModule(hash, user)) {
       renderAccessDenied(contentContainer);
       return;

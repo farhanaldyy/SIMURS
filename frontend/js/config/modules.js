@@ -6,7 +6,8 @@ export const NAV_GROUPS = [
       { label: 'Dashboard', hash: '#/dashboard' },
       { label: 'Cetak Laporan', hash: '#/laporan' },
       { label: 'Rekap Data Mutu', hash: '#/rekap-mutu' },
-      { label: 'Daftar Modul', hash: '#/modul' }
+      { label: 'Daftar Modul', hash: '#/modul' },
+      { label: 'INM Chart', hash: '#/inm' }
     ],
   },
   {
@@ -146,7 +147,8 @@ export const NAV_GROUPS = [
   {
     title: '😊 Kepuasan Pelayanan',
     items: [
-      { label: 'Kepuasan Pasien Pelayanan', hash: '#/kepuasan-pasien-pelayanan' }
+      { label: 'Kepuasan Pasien Pelayanan', hash: '#/kepuasan-pasien-pelayanan' },
+      { label: 'Kecepatan Waktu Tanggap Komplain', hash: '#/waktu-tanggap-komplain' }
     ],
   },
   {

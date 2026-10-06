@@ -512,6 +512,12 @@ const AVAILABLE_INDICATORS = [
     nama: 'Kepatuhan Penggunaan APD',
     standar: '100%',
     kategori_default: ['rawat_inap', 'unit_khusus', 'igd', 'rawat_jalan', 'farmasi', 'penunjang', 'inm']
+  },
+  {
+    id: 'waktu_tanggap_komplain',
+    nama: 'Kecepatan Waktu Tanggap Komplain',
+    standar: '≥ 80%',
+    kategori_default: ['rawat_inap', 'rawat_jalan', 'unit_khusus', 'igd', 'penunjang', 'inm']
   }
 ];
 

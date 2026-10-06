@@ -1412,6 +1412,22 @@ const ALL_INDICATOR_CONFIGS = [
       const den = summary.denominator !== undefined ? summary.denominator : 0;
       return { num, den };
     }
+  },
+  {
+    no: 86,
+    id: 'waktu_tanggap_komplain',
+    nama: 'Kecepatan Waktu Tanggap Komplain ( ≥ 80% ) - Nama Modul: Kecepatan Waktu Tanggap Komplain',
+    nama_modul: 'Kecepatan Waktu Tanggap Komplain',
+    standar: '≥ 80%',
+    label_numerator: 'Komplain Sesuai Standar Waktu (“N”)',
+    label_denominator: 'Total Komplain Diterima (“D”)',
+    formula: 'Numerator / Denumerator * 100',
+    service: require('./modules/waktu-tanggap-komplain.service'),
+    extract: (summary) => {
+      const num = summary.numerator !== undefined ? summary.numerator : 0;
+      const den = summary.denominator !== undefined ? summary.denominator : 0;
+      return { num, den, capaian: summary.persen !== undefined ? summary.persen : (den > 0 ? parseFloat(((num / den) * 100).toFixed(2)) : 0) };
+    }
   }
 ];
 
@@ -1429,6 +1445,7 @@ function isINMIndicator(indId) {
     'kepatuhan_formula_nasional',
     'hasil_kritis_lab',
     'kepuasan_pasien_pelayanan',
+    'waktu_tanggap_komplain',
     'kepatuhan_kebersihan_tangan',
     'kepatuhan_apd'
   ];
