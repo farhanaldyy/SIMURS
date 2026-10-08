@@ -171,5 +171,6 @@ export const ADMIN_GROUP = {
     { label: 'Kelola Periode', hash: '#/admin/periode' },
     { label: 'Import Data Massal', hash: '#/admin/import-data' },
     { label: 'Audit Trail', hash: '#/admin/audit-log' },
+    { label: 'Backup Database', hash: '#/admin/backup' },
   ],
 };

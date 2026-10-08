@@ -23,6 +23,7 @@ router.use('/dashboard', require('./dashboard'));
 router.use('/laporan', require('./laporan'));
 router.use('/rekap-mutu', require('./modules/rekap-mutu'));
 router.use('/unit-indicator-configs', require('./unit-indicator-config.routes'));
+router.use('/backup', require('./backup'));
 
 // Indicator modules (Phase 1)
 router.use('/risiko-jatuh', require('./modules/risiko-jatuh'));

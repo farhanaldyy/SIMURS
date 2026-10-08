@@ -71,6 +71,7 @@ const routes = {
   '#/admin/periode':              { module: () => import('./pages/admin/periode.js'), title: 'Kelola Periode' },
   '#/admin/import-data':          { module: () => import('./pages/admin/import-data.js'), title: 'Import Data Massal' },
   '#/admin/audit-log':            { module: () => import('./pages/admin/audit-log.js'), title: 'Audit Trail' },
+  '#/admin/backup':               { module: () => import('./pages/admin/backup.js'), title: 'Backup Database' },
   '#/master-tindakan':            { module: () => import('./pages/modules/master-tindakan.js'), title: 'Master Tindakan' },
   '#/master-poliklinik':          { module: () => import('./pages/modules/master-poliklinik.js'), title: 'Master Poliklinik' },
   '#/master-dokter':              { module: () => import('./pages/modules/master-dokter.js'), title: 'Master Dokter' },
