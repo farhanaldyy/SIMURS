@@ -1,4 +1,6 @@
 import { api } from '../../api/client.js';
+import { renderTable } from '../../components/table.js';
+import { showToast } from '../../components/toast.js';
 
 export default { render, destroy };
 
@@ -11,39 +13,29 @@ async function render(container) {
       <div class="page-header">
         <div>
           <h1 class="page-title">Backup Database</h1>
-          <p class="page-subtitle">Backup, restore, unduh, dan kelola backup database MariaDB</p>
+          <p class="page-subtitle">Kelola backup & restore database MariaDB</p>
         </div>
-      </div>
-
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="card-header" style="margin-bottom: 12px;">
-          <h3 class="card-title" style="margin: 0;">Kelola Backup & Restore</h3>
-        </div>
-        <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin: 0 0 16px 0;">
-          Buat backup database MariaDB, restore dari backup yang ada, atau upload file backup .sql untuk dipulihkan.
-          <strong style="color: var(--color-danger);">Peringatan:</strong> Operasi restore akan mengganti seluruh data database saat ini dan tidak dapat dikembalikan.
-        </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 12px;">
+        <div style="display:flex; gap: 8px; flex-wrap: wrap; align-items: center;">
           <button id="btn-backup-create" class="btn btn-primary">⚡ Backup Sekarang</button>
           <button id="btn-backup-refresh" class="btn btn-outline">🔄 Refresh</button>
-          <label id="btn-backup-upload" for="backup-upload-input" class="btn btn-success" style="display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
+          <label id="btn-backup-upload" for="backup-upload-input" class="btn btn-success" style="display:inline-flex; align-items:center; gap:4px; cursor:pointer; margin:0;">
             📤 Upload & Restore
             <input type="file" id="backup-upload-input" accept=".sql" style="display:none;" />
           </label>
         </div>
-
-        <div id="backup-status" style="font-size:0.875rem; color: var(--color-text-secondary); min-height: 20px;"></div>
       </div>
 
-      <div class="card" style="padding: 0;">
-        <div class="card-header" style="padding: 16px 20px; margin-bottom: 0; border-bottom: 1px solid var(--color-border);">
-          <h3 class="card-title" style="margin: 0; font-size: 1rem;">Daftar File Backup</h3>
-        </div>
-        <div id="backup-table-container">
-          <div class="empty-state" style="padding: 40px 24px;">
-            <div class="empty-state-icon">⏳</div>
-            <p>Memuat daftar backup...</p>
-          </div>
+      <div id="backup-status" style="min-height: 0;"></div>
+
+      <div style="margin-bottom: 20px; padding: 12px 16px; background: rgba(239, 68, 68, 0.08); border-left: 4px solid var(--color-danger); border-radius: var(--radius-md); font-size: 0.875rem;">
+        <strong>⚠️ Peringatan:</strong> Restore database akan <strong>mengganti seluruh data</strong> yang ada saat ini dan <strong>tidak dapat dikembalikan</strong>.
+        Pastikan Anda memiliki backup terbaru sebelum melakukan restore.
+      </div>
+
+      <div id="backup-table-container">
+        <div class="empty-state" style="padding: 40px 24px;">
+          <div class="empty-state-icon">⏳</div>
+          <p>Memuat daftar backup...</p>
         </div>
       </div>
     </div>
@@ -68,23 +60,32 @@ async function createBackup() {
   const btn = document.getElementById('btn-backup-create');
   btn.disabled = true;
   btn.textContent = '⏳ Membuat backup...';
-  statusEl.innerHTML = 'Sedang mengeksport database... ini dapat memakan beberapa saat.';
+  statusEl.innerHTML = `
+    <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(59, 130, 246, 0.08); border-left: 4px solid var(--color-primary); border-radius: var(--radius-md); font-size: 0.875rem;">
+      ⏳ Sedang mengeksport database... ini dapat memakan beberapa saat.
+    </div>
+  `;
   try {
     const res = await api.post('/backup');
-    statusEl.innerHTML = `<span style="color: var(--color-success);">✅ Backup berhasil: <strong>${res.data?.filename || ''}</strong></span>`;
+    statusEl.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(34, 197, 94, 0.08); border-left: 4px solid var(--color-success); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-success);">
+        ✅ Backup berhasil: <strong>${res.data?.filename || ''}</strong>
+      </div>
+    `;
     showToast('Backup berhasil dibuat', 'success');
     await loadList();
   } catch (err) {
-    statusEl.innerHTML = `<span style="color: var(--color-danger);">❌ ${err.message || 'Gagal membuat backup'}</span>`;
+    statusEl.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(239, 68, 68, 0.08); border-left: 4px solid var(--color-danger); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-danger);">
+        ❌ ${err.message || 'Gagal membuat backup'}
+      </div>
+    `;
     showToast(err.message || 'Gagal membuat backup', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = '⚡ Backup Sekarang';
   }
 }
-
-import { renderTable } from '../../components/table.js';
-import { showToast } from '../../components/toast.js';
 
 async function loadList() {
   const tableEl = document.getElementById('backup-table-container');
@@ -105,8 +106,8 @@ async function loadList() {
         label: 'Aksi',
         align: 'center',
         render: (r) => `
-          <div style="display:flex; gap:4px; justify-content:center; flex-wrap:wrap;">
-            <button data-dl="${r.filename}" class="btn btn-primary btn-sm">⬇️ Unduh</button>
+          <div style="display:flex; gap:4px; justify-content:center;">
+            <button data-dl="${r.filename}" class="btn btn-outline btn-sm">⬇️ Unduh</button>
             <button data-restore="${r.filename}" class="btn btn-warning btn-sm">🔄 Restore</button>
             <button data-del="${r.filename}" class="btn btn-danger btn-sm">🗑️ Hapus</button>
           </div>
@@ -147,15 +148,27 @@ async function restoreFile(filename) {
   const statusEl = document.getElementById('backup-status');
   const btns = document.querySelectorAll('#backup-table-container button');
   btns.forEach(b => b.disabled = true);
-  statusEl.innerHTML = `<span style="color: var(--color-warning);">⏳ Sedang memulihkan database... ini dapat memakan beberapa saat.</span>`;
+  statusEl.innerHTML = `
+    <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(245, 158, 11, 0.08); border-left: 4px solid var(--color-warning); border-radius: var(--radius-md); font-size: 0.875rem;">
+      ⏳ Sedang memulihkan database... ini dapat memakan beberapa saat.
+    </div>
+  `;
   
   try {
     const res = await api.post(`/backup/restore/${encodeURIComponent(filename)}`);
-    statusEl.innerHTML = `<span style="color: var(--color-success);">✅ ${res.message || 'Database berhasil dipulihkan'}</span>`;
+    statusEl.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(34, 197, 94, 0.08); border-left: 4px solid var(--color-success); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-success);">
+        ✅ ${res.message || 'Database berhasil dipulihkan'}
+      </div>
+    `;
     showToast('Database berhasil dipulihkan', 'success');
     await loadList();
   } catch (err) {
-    statusEl.innerHTML = `<span style="color: var(--color-danger);">❌ ${err.message || 'Gagal memulihkan database'}</span>`;
+    statusEl.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(239, 68, 68, 0.08); border-left: 4px solid var(--color-danger); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-danger);">
+        ❌ ${err.message || 'Gagal memulihkan database'}
+      </div>
+    `;
     showToast(err.message || 'Gagal memulihkan database', 'error');
   } finally {
     btns.forEach(b => b.disabled = false);
@@ -195,15 +208,27 @@ async function uploadAndRestore(e) {
   formData.append('file', file);
   
   btn.disabled = true;
-  statusEl.innerHTML = `<span style="color: var(--color-warning);">⏳ Mengunggah dan memulihkan database... ini dapat memakan beberapa saat.</span>`;
+  statusEl.innerHTML = `
+    <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(245, 158, 11, 0.08); border-left: 4px solid var(--color-warning); border-radius: var(--radius-md); font-size: 0.875rem;">
+      ⏳ Mengunggah dan memulihkan database... ini dapat memakan beberapa saat.
+    </div>
+  `;
   
   try {
     const res = await api.upload('/backup/upload-restore', formData);
-    statusEl.innerHTML = `<span style="color: var(--color-success);">✅ ${res.message || 'Database berhasil dipulihkan'}</span>`;
+    statusEl.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(34, 197, 94, 0.08); border-left: 4px solid var(--color-success); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-success);">
+        ✅ ${res.message || 'Database berhasil dipulihkan'}
+      </div>
+    `;
     showToast('Database berhasil dipulihkan', 'success');
     await loadList();
   } catch (err) {
-    statusEl.innerHTML = `<span style="color: var(--color-danger);">❌ ${err.message || 'Gagal memulihkan database'}</span>`;
+    statusEl.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(239, 68, 68, 0.08); border-left: 4px solid var(--color-danger); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-danger);">
+        ❌ ${err.message || 'Gagal memulihkan database'}
+      </div>
+    `;
     showToast(err.message || 'Gagal memulihkan database', 'error');
   } finally {
     btn.disabled = false;
