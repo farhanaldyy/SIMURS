@@ -128,31 +128,53 @@ async function restoreBackup(name) {
   const mysqlBin = await findMysqlBinary();
 
   const args = [
-    'exec', DB_CONTAINER, mysqlBin,
+    'exec', '-i', DB_CONTAINER, mysqlBin,
     `-u${user}`, `-p${password}`,
     db,
   ];
 
   return new Promise((resolve, reject) => {
+    let rejected = false;
+    const fail = (err) => {
+      if (rejected) return;
+      rejected = true;
+      reject(err);
+    };
+
     const child = spawn('docker', args);
     const fileStream = fs.createReadStream(filepath);
     let stderr = '';
+
+    // Handle EPIPE: when child process exits early, writing to its stdin
+    // emits an error. Catch it here to prevent crashing the process.
+    child.stdin.on('error', (err) => {
+      fileStream.destroy();
+      // EPIPE is expected when child exits early; the real error will
+      // be surfaced via the 'close' event with a non-zero exit code.
+      if (err.code !== 'EPIPE') {
+        fail(new Error(`Gagal menulis ke proses restore: ${err.message}`));
+      }
+    });
 
     fileStream.pipe(child.stdin);
     child.stderr.on('data', d => { stderr += d.toString(); });
     child.on('error', err => {
       fileStream.destroy();
-      reject(new Error(`Gagal menjalankan docker exec: ${err.message}`));
+      fail(new Error(`Gagal menjalankan docker exec: ${err.message}`));
     });
     fileStream.on('error', err => {
+      child.stdin.end();
       child.kill();
-      reject(new Error(`Gagal membaca file backup: ${err.message}`));
+      fail(new Error(`Gagal membaca file backup: ${err.message}`));
     });
     child.on('close', code => {
+      fileStream.destroy();
       if (code !== 0) {
-        return reject(new Error(`Gagal restore backup (exit ${code}): ${stderr.trim() || 'unknown error'}`));
+        return fail(new Error(`Gagal restore backup (exit ${code}): ${stderr.trim() || 'unknown error'}`));
       }
-      resolve({ filename: path.basename(filepath), restored: true });
+      if (!rejected) {
+        resolve({ filename: path.basename(filepath), restored: true });
+      }
     });
   });
 }
