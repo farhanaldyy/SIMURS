@@ -54,42 +54,89 @@ function fileExists(p) {
   }
 }
 
+function resolveBinaryPath(candidatePath, binNames) {
+  if (!candidatePath) return null;
+  const clean = candidatePath.trim().replace(/^["']|["']$/g, '');
+  if (!clean) return null;
+
+  // Direct file check
+  if (fileExists(clean)) return clean;
+
+  // Directory check (e.g. C:\laragon\bin\mysql\mysql-5.7.33-winx64 or ...\bin)
+  try {
+    if (fs.existsSync(clean) && fs.statSync(clean).isDirectory()) {
+      for (const name of binNames) {
+        const exeName = isWindows && !name.endsWith('.exe') ? `${name}.exe` : name;
+        const inBin = path.join(clean, 'bin', exeName);
+        if (fileExists(inBin)) return inBin;
+        const inDir = path.join(clean, exeName);
+        if (fileExists(inDir)) return inDir;
+      }
+    }
+  } catch {
+    // Ignore
+  }
+
+  return null;
+}
+
 function findInWindowsPaths(binNames) {
-  const drives = ['C:', 'D:'];
+  // Explicit check for user's confirmed Laragon path
+  const laragonConfirmed = 'C:\\laragon\\bin\\mysql\\mysql-5.7.33-winx64\\bin';
+  if (fs.existsSync(laragonConfirmed)) {
+    for (const name of binNames) {
+      const targetFile = path.join(laragonConfirmed, name.endsWith('.exe') ? name : `${name}.exe`);
+      if (fileExists(targetFile)) return targetFile;
+    }
+  }
+
+  const customLaragon = process.env.LARAGON_DIR || process.env.LARAGON_ROOT;
+  const drives = ['C:', 'D:', 'E:'];
   const baseDirs = [
+    'laragon\\bin\\mysql',
+    'laragon\\bin\\mariadb',
     'Program Files\\MariaDB',
     'Program Files (x86)\\MariaDB',
     'Program Files\\MySQL',
     'Program Files (x86)\\MySQL',
     'xampp\\mysql\\bin',
-    'laragon\\bin\\mysql',
   ];
 
+  const searchRoots = [];
+  if (customLaragon) {
+    searchRoots.push(path.join(customLaragon, 'bin', 'mysql'));
+    searchRoots.push(path.join(customLaragon, 'bin', 'mariadb'));
+  }
   for (const drive of drives) {
     for (const base of baseDirs) {
-      const fullBase = `${drive}\\${base}`;
-      try {
-        if (!fs.existsSync(fullBase)) continue;
-        for (const name of binNames) {
-          const directFile = path.join(fullBase, name.endsWith('.exe') ? name : `${name}.exe`);
-          if (fileExists(directFile)) return directFile;
-        }
+      searchRoots.push(`${drive}\\${base}`);
+    }
+  }
 
-        const entries = fs.readdirSync(fullBase, { withFileTypes: true });
-        for (const entry of entries) {
-          if (entry.isDirectory()) {
-            const subBinDir = path.join(fullBase, entry.name, 'bin');
-            if (fs.existsSync(subBinDir)) {
-              for (const name of binNames) {
-                const targetFile = path.join(subBinDir, name.endsWith('.exe') ? name : `${name}.exe`);
-                if (fileExists(targetFile)) return targetFile;
-              }
+  for (const fullBase of searchRoots) {
+    try {
+      if (!fs.existsSync(fullBase)) continue;
+      // Direct file in bin directory
+      for (const name of binNames) {
+        const directFile = path.join(fullBase, name.endsWith('.exe') ? name : `${name}.exe`);
+        if (fileExists(directFile)) return directFile;
+      }
+
+      // Versioned subdirectories (e.g. mysql-5.7.33-winx64/bin)
+      const entries = fs.readdirSync(fullBase, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const subBinDir = path.join(fullBase, entry.name, 'bin');
+          if (fs.existsSync(subBinDir)) {
+            for (const name of binNames) {
+              const targetFile = path.join(subBinDir, name.endsWith('.exe') ? name : `${name}.exe`);
+              if (fileExists(targetFile)) return targetFile;
             }
           }
         }
-      } catch {
-        // Ignore read errors
       }
+    } catch {
+      // Ignore read errors
     }
   }
   return null;
@@ -155,16 +202,22 @@ async function findContainerMysqlBinary() {
 }
 
 async function getDumpCommand(host) {
-  const envPath = (process.env.MYSQL_DUMP_PATH || process.env.MYSQLDUMP_PATH || '').trim().replace(/^["']|["']$/g, '');
-  if (envPath && fileExists(envPath)) {
-    return { isDocker: false, bin: envPath };
+  // 1. Check custom path in .env (file or folder, e.g. C:\laragon\bin\mysql\mysql-5.7.33-winx64)
+  const envCustom = resolveBinaryPath(
+    process.env.MYSQL_DUMP_PATH || process.env.MYSQLDUMP_PATH || process.env.MYSQL_PATH || process.env.MYSQL_DIR,
+    ['mariadb-dump', 'mysqldump']
+  );
+  if (envCustom) {
+    return { isDocker: false, bin: envCustom };
   }
 
+  // 2. Check system PATH and auto-discovery (including Laragon)
   const hostBin = await checkSystemBinary(['mariadb-dump', 'mysqldump']);
   if (hostBin) {
     return { isDocker: false, bin: hostBin };
   }
 
+  // 3. Fallback to local Docker container ONLY if database host is localhost/127.0.0.1
   const isLocalHost = !host || host === 'localhost' || host === '127.0.0.1';
   if (isLocalHost) {
     const containerBin = await findContainerDumpBinary();
@@ -176,8 +229,8 @@ async function getDumpCommand(host) {
   if (isWindows) {
     throw new Error(
       'Client mariadb-dump / mysqldump tidak ditemukan di Windows. ' +
-      'Silakan install MariaDB/MySQL client (misal: "winget install MariaDB.Server" atau XAMPP/Laragon) ' +
-      'atau tentukan lokasi binary di backend/.env: MYSQL_DUMP_PATH="C:\\\\Program Files\\\\MariaDB 10.11\\\\bin\\\\mariadb-dump.exe"'
+      'Pastikan Laragon berjalan atau tentukan lokasi di backend/.env: ' +
+      'MYSQL_PATH="C:\\\\laragon\\\\bin\\\\mysql\\\\mysql-5.7.33-winx64"'
     );
   } else {
     throw new Error(
@@ -188,16 +241,22 @@ async function getDumpCommand(host) {
 }
 
 async function getMysqlCommand(host) {
-  const envPath = (process.env.MYSQL_BIN_PATH || process.env.MYSQL_PATH || '').trim().replace(/^["']|["']$/g, '');
-  if (envPath && fileExists(envPath)) {
-    return { isDocker: false, bin: envPath };
+  // 1. Check custom path in .env (file or folder, e.g. C:\laragon\bin\mysql\mysql-5.7.33-winx64)
+  const envCustom = resolveBinaryPath(
+    process.env.MYSQL_BIN_PATH || process.env.MYSQL_PATH || process.env.MYSQL_DIR,
+    ['mariadb', 'mysql']
+  );
+  if (envCustom) {
+    return { isDocker: false, bin: envCustom };
   }
 
+  // 2. Check system PATH and auto-discovery (including Laragon)
   const hostBin = await checkSystemBinary(['mariadb', 'mysql']);
   if (hostBin) {
     return { isDocker: false, bin: hostBin };
   }
 
+  // 3. Fallback to local Docker container ONLY if database host is localhost/127.0.0.1
   const isLocalHost = !host || host === 'localhost' || host === '127.0.0.1';
   if (isLocalHost) {
     const containerBin = await findContainerMysqlBinary();
@@ -209,8 +268,8 @@ async function getMysqlCommand(host) {
   if (isWindows) {
     throw new Error(
       'Client mariadb / mysql tidak ditemukan di Windows. ' +
-      'Silakan install MariaDB/MySQL client atau tentukan lokasi binary di backend/.env: ' +
-      'MYSQL_BIN_PATH="C:\\\\Program Files\\\\MariaDB 10.11\\\\bin\\\\mariadb.exe"'
+      'Pastikan Laragon berjalan atau tentukan lokasi di backend/.env: ' +
+      'MYSQL_PATH="C:\\\\laragon\\\\bin\\\\mysql\\\\mysql-5.7.33-winx64"'
     );
   } else {
     throw new Error(
