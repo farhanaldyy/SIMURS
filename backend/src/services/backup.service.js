@@ -44,9 +44,95 @@ function sanitizeName(name) {
   return clean;
 }
 
-function checkHostBinary(binNames) {
+const isWindows = process.platform === 'win32';
+
+function fileExists(p) {
+  try {
+    return !!p && fs.existsSync(p) && fs.statSync(p).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function findInWindowsPaths(binNames) {
+  const drives = ['C:', 'D:'];
+  const baseDirs = [
+    'Program Files\\MariaDB',
+    'Program Files (x86)\\MariaDB',
+    'Program Files\\MySQL',
+    'Program Files (x86)\\MySQL',
+    'xampp\\mysql\\bin',
+    'laragon\\bin\\mysql',
+  ];
+
+  for (const drive of drives) {
+    for (const base of baseDirs) {
+      const fullBase = `${drive}\\${base}`;
+      try {
+        if (!fs.existsSync(fullBase)) continue;
+        for (const name of binNames) {
+          const directFile = path.join(fullBase, name.endsWith('.exe') ? name : `${name}.exe`);
+          if (fileExists(directFile)) return directFile;
+        }
+
+        const entries = fs.readdirSync(fullBase, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            const subBinDir = path.join(fullBase, entry.name, 'bin');
+            if (fs.existsSync(subBinDir)) {
+              for (const name of binNames) {
+                const targetFile = path.join(subBinDir, name.endsWith('.exe') ? name : `${name}.exe`);
+                if (fileExists(targetFile)) return targetFile;
+              }
+            }
+          }
+        }
+      } catch {
+        // Ignore read errors
+      }
+    }
+  }
+  return null;
+}
+
+function checkSystemBinary(binNames) {
   return new Promise((resolve) => {
-    const cmd = `command -v ${binNames.join(' || command -v ')}`;
+    if (isWindows) {
+      const namesWithExe = binNames.map(n => n.endsWith('.exe') ? n : `${n}.exe`);
+      const cmd = `where.exe ${namesWithExe.join(' ')}`;
+      exec(cmd, (err, stdout) => {
+        if (!err && stdout) {
+          const firstPath = stdout.trim().split(/\r?\n/)[0].trim();
+          if (firstPath && fileExists(firstPath)) return resolve(firstPath);
+        }
+        const found = findInWindowsPaths(binNames);
+        resolve(found);
+      });
+    } else {
+      const cmd = `command -v ${binNames.join(' || command -v ')}`;
+      exec(cmd, (err, stdout) => {
+        const bin = (stdout || '').trim().split('\n').pop();
+        if (!err && bin) resolve(path.basename(bin));
+        else resolve(null);
+      });
+    }
+  });
+}
+
+function checkDockerAvailable() {
+  return new Promise((resolve) => {
+    const cmd = isWindows ? 'where.exe docker.exe' : 'command -v docker';
+    exec(cmd, (err, stdout) => {
+      resolve(!err && !!(stdout || '').trim());
+    });
+  });
+}
+
+async function findContainerDumpBinary() {
+  const hasDocker = await checkDockerAvailable();
+  if (!hasDocker) return null;
+  const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb-dump || command -v mysqldump'`;
+  return new Promise((resolve) => {
     exec(cmd, (err, stdout) => {
       const bin = (stdout || '').trim().split('\n').pop();
       if (!err && bin) resolve(path.basename(bin));
@@ -55,78 +141,83 @@ function checkHostBinary(binNames) {
   });
 }
 
-function checkDockerAvailable() {
-  return new Promise((resolve) => {
-    exec('command -v docker', (err, stdout) => {
-      resolve(!err && !!(stdout || '').trim());
-    });
-  });
-}
-
-async function findContainerDumpBinary() {
-  const hasDocker = await checkDockerAvailable();
-  if (!hasDocker) {
-    throw new Error(
-      'Client mariadb-dump / mysqldump tidak ditemukan di server host dan Docker tidak tersedia. ' +
-      'Silakan install client MariaDB pada host (contoh: "sudo apt-get install -y mariadb-client")'
-    );
-  }
-  const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb-dump || command -v mysqldump'`;
-  return new Promise((resolve, reject) => {
-    exec(cmd, (err, stdout) => {
-      const bin = (stdout || '').trim().split('\n').pop();
-      if (err || !bin) {
-        return reject(new Error(
-          `Tidak menemukan mariadb-dump/mysqldump di host maupun di container "${DB_CONTAINER}". ` +
-          `Pastikan client MariaDB/MySQL terinstall di host ("sudo apt install -y mariadb-client") ` +
-          `atau container database aktif.`
-        ));
-      }
-      resolve(path.basename(bin));
-    });
-  });
-}
-
 async function findContainerMysqlBinary() {
   const hasDocker = await checkDockerAvailable();
-  if (!hasDocker) {
-    throw new Error(
-      'Client mariadb / mysql tidak ditemukan di server host dan Docker tidak tersedia. ' +
-      'Silakan install client MariaDB pada host (contoh: "sudo apt-get install -y mariadb-client")'
-    );
-  }
+  if (!hasDocker) return null;
   const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb || command -v mysql'`;
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     exec(cmd, (err, stdout) => {
       const bin = (stdout || '').trim().split('\n').pop();
-      if (err || !bin) {
-        return reject(new Error(
-          `Tidak menemukan client mariadb/mysql di host maupun di container "${DB_CONTAINER}". ` +
-          `Pastikan client MariaDB/MySQL terinstall di host ("sudo apt install -y mariadb-client") ` +
-          `atau container database aktif.`
-        ));
-      }
-      resolve(path.basename(bin));
+      if (!err && bin) resolve(path.basename(bin));
+      else resolve(null);
     });
   });
 }
 
-async function getDumpCommand() {
-  const hostBin = await checkHostBinary(['mariadb-dump', 'mysqldump']);
+async function getDumpCommand(host) {
+  const envPath = (process.env.MYSQL_DUMP_PATH || process.env.MYSQLDUMP_PATH || '').trim().replace(/^["']|["']$/g, '');
+  if (envPath && fileExists(envPath)) {
+    return { isDocker: false, bin: envPath };
+  }
+
+  const hostBin = await checkSystemBinary(['mariadb-dump', 'mysqldump']);
   if (hostBin) {
     return { isDocker: false, bin: hostBin };
   }
-  const containerBin = await findContainerDumpBinary();
-  return { isDocker: true, bin: containerBin, container: DB_CONTAINER };
+
+  const isLocalHost = !host || host === 'localhost' || host === '127.0.0.1';
+  if (isLocalHost) {
+    const containerBin = await findContainerDumpBinary();
+    if (containerBin) {
+      return { isDocker: true, bin: containerBin, container: DB_CONTAINER };
+    }
+  }
+
+  if (isWindows) {
+    throw new Error(
+      'Client mariadb-dump / mysqldump tidak ditemukan di Windows. ' +
+      'Silakan install MariaDB/MySQL client (misal: "winget install MariaDB.Server" atau XAMPP/Laragon) ' +
+      'atau tentukan lokasi binary di backend/.env: MYSQL_DUMP_PATH="C:\\\\Program Files\\\\MariaDB 10.11\\\\bin\\\\mariadb-dump.exe"'
+    );
+  } else {
+    throw new Error(
+      'Client mariadb-dump / mysqldump tidak ditemukan di server host. ' +
+      'Silakan install client MariaDB pada host (contoh: "sudo apt-get install -y mariadb-client")'
+    );
+  }
 }
 
-async function getMysqlCommand() {
-  const hostBin = await checkHostBinary(['mariadb', 'mysql']);
+async function getMysqlCommand(host) {
+  const envPath = (process.env.MYSQL_BIN_PATH || process.env.MYSQL_PATH || '').trim().replace(/^["']|["']$/g, '');
+  if (envPath && fileExists(envPath)) {
+    return { isDocker: false, bin: envPath };
+  }
+
+  const hostBin = await checkSystemBinary(['mariadb', 'mysql']);
   if (hostBin) {
     return { isDocker: false, bin: hostBin };
   }
-  const containerBin = await findContainerMysqlBinary();
-  return { isDocker: true, bin: containerBin, container: DB_CONTAINER };
+
+  const isLocalHost = !host || host === 'localhost' || host === '127.0.0.1';
+  if (isLocalHost) {
+    const containerBin = await findContainerMysqlBinary();
+    if (containerBin) {
+      return { isDocker: true, bin: containerBin, container: DB_CONTAINER };
+    }
+  }
+
+  if (isWindows) {
+    throw new Error(
+      'Client mariadb / mysql tidak ditemukan di Windows. ' +
+      'Silakan install MariaDB/MySQL client atau tentukan lokasi binary di backend/.env: ' +
+      'MYSQL_BIN_PATH="C:\\\\Program Files\\\\MariaDB 10.11\\\\bin\\\\mariadb.exe"'
+    );
+  } else {
+    throw new Error(
+      'Client mariadb / mysql tidak ditemukan di server host. ' +
+      'Silakan install client MariaDB pada host (contoh: "sudo apt-get install -y mariadb-client")'
+    );
+  }
 }
 
 async function createBackup() {
@@ -136,7 +227,7 @@ async function createBackup() {
   const filename = `backup_${db}_${timestamp}.sql`;
   const filepath = path.join(BACKUP_DIR, filename);
 
-  const dumpCmd = await getDumpCommand();
+  const dumpCmd = await getDumpCommand(host);
   let spawnCmd, spawnArgs;
 
   const baseArgs = [
@@ -213,7 +304,7 @@ async function deleteBackup(name) {
 async function restoreBackup(name) {
   const filepath = await resolveBackupPath(name);
   const { user, password, host, port, db } = parseDbUrl();
-  const mysqlCmd = await getMysqlCommand();
+  const mysqlCmd = await getMysqlCommand(host);
 
   let spawnCmd, spawnArgs;
   const baseArgs = [
