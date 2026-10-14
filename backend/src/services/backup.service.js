@@ -2,7 +2,7 @@ const { exec, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const BACKUP_DIR = process.env.BACKUP_DIR || path.join(process.cwd(), '..', 'uploads', 'backups');
+const BACKUP_DIR = process.env.BACKUP_DIR || path.resolve(__dirname, '../../../uploads/backups');
 const DB_CONTAINER = process.env.DB_CONTAINER_NAME || 'mariadb-local';
 
 function ensureDir() {
@@ -10,7 +10,8 @@ function ensureDir() {
 }
 
 function parseDbUrl() {
-  const urlStr = process.env.DATABASE_URL || '';
+  const rawUrl = process.env.DATABASE_URL || '';
+  const urlStr = rawUrl.trim().replace(/^["']|["']$/g, '');
   if (!urlStr) throw new Error('DATABASE_URL tidak diset');
   try {
     const parsed = new URL(urlStr);
@@ -54,7 +55,22 @@ function checkHostBinary(binNames) {
   });
 }
 
-function findContainerDumpBinary() {
+function checkDockerAvailable() {
+  return new Promise((resolve) => {
+    exec('command -v docker', (err, stdout) => {
+      resolve(!err && !!(stdout || '').trim());
+    });
+  });
+}
+
+async function findContainerDumpBinary() {
+  const hasDocker = await checkDockerAvailable();
+  if (!hasDocker) {
+    throw new Error(
+      'Client mariadb-dump / mysqldump tidak ditemukan di server host dan Docker tidak tersedia. ' +
+      'Silakan install client MariaDB pada host (contoh: "sudo apt-get install -y mariadb-client")'
+    );
+  }
   const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb-dump || command -v mysqldump'`;
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout) => {
@@ -62,7 +78,8 @@ function findContainerDumpBinary() {
       if (err || !bin) {
         return reject(new Error(
           `Tidak menemukan mariadb-dump/mysqldump di host maupun di container "${DB_CONTAINER}". ` +
-          `Pastikan client MariaDB/MySQL terinstall atau container database aktif.`
+          `Pastikan client MariaDB/MySQL terinstall di host ("sudo apt install -y mariadb-client") ` +
+          `atau container database aktif.`
         ));
       }
       resolve(path.basename(bin));
@@ -70,7 +87,14 @@ function findContainerDumpBinary() {
   });
 }
 
-function findContainerMysqlBinary() {
+async function findContainerMysqlBinary() {
+  const hasDocker = await checkDockerAvailable();
+  if (!hasDocker) {
+    throw new Error(
+      'Client mariadb / mysql tidak ditemukan di server host dan Docker tidak tersedia. ' +
+      'Silakan install client MariaDB pada host (contoh: "sudo apt-get install -y mariadb-client")'
+    );
+  }
   const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb || command -v mysql'`;
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout) => {
@@ -78,7 +102,8 @@ function findContainerMysqlBinary() {
       if (err || !bin) {
         return reject(new Error(
           `Tidak menemukan client mariadb/mysql di host maupun di container "${DB_CONTAINER}". ` +
-          `Pastikan client MariaDB/MySQL terinstall atau container database aktif.`
+          `Pastikan client MariaDB/MySQL terinstall di host ("sudo apt install -y mariadb-client") ` +
+          `atau container database aktif.`
         ));
       }
       resolve(path.basename(bin));
@@ -114,26 +139,23 @@ async function createBackup() {
   const dumpCmd = await getDumpCommand();
   let spawnCmd, spawnArgs;
 
+  const baseArgs = [
+    '-h', host,
+    '-P', String(port),
+    `-u${user}`,
+    `-p${password}`,
+    '--single-transaction',
+    '--routines',
+    '--triggers',
+    db,
+  ];
+
   if (dumpCmd.isDocker) {
     spawnCmd = 'docker';
-    spawnArgs = [
-      'exec', dumpCmd.container, dumpCmd.bin,
-      `-u${user}`, `-p${password}`,
-      '--single-transaction', '--routines', '--triggers',
-      db,
-    ];
+    spawnArgs = ['exec', dumpCmd.container, dumpCmd.bin, ...baseArgs];
   } else {
     spawnCmd = dumpCmd.bin;
-    spawnArgs = [
-      '-h', host,
-      '-P', port,
-      `-u${user}`,
-      `-p${password}`,
-      '--single-transaction',
-      '--routines',
-      '--triggers',
-      db,
-    ];
+    spawnArgs = baseArgs;
   }
 
   return new Promise((resolve, reject) => {
@@ -194,22 +216,20 @@ async function restoreBackup(name) {
   const mysqlCmd = await getMysqlCommand();
 
   let spawnCmd, spawnArgs;
+  const baseArgs = [
+    '-h', host,
+    '-P', String(port),
+    `-u${user}`,
+    `-p${password}`,
+    db,
+  ];
+
   if (mysqlCmd.isDocker) {
     spawnCmd = 'docker';
-    spawnArgs = [
-      'exec', '-i', mysqlCmd.container, mysqlCmd.bin,
-      `-u${user}`, `-p${password}`,
-      db,
-    ];
+    spawnArgs = ['exec', '-i', mysqlCmd.container, mysqlCmd.bin, ...baseArgs];
   } else {
     spawnCmd = mysqlCmd.bin;
-    spawnArgs = [
-      '-h', host,
-      '-P', port,
-      `-u${user}`,
-      `-p${password}`,
-      db,
-    ];
+    spawnArgs = baseArgs;
   }
 
   return new Promise((resolve, reject) => {

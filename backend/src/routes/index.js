@@ -10,7 +10,6 @@ router.use('/informasi-rs', require('./informasi-rs'));
 router.use('/master-tindakan', require('./modules/master-tindakan'));
 router.use('/master-poliklinik', require('./modules/master-poliklinik'));
 router.use('/master-dokter', require('./modules/master-dokter'));
-router.use('/', require('./master'));
 
 // Rawat Jalan / Outpatient modules
 router.use('/waktu-tunggu-poliklinik', require('./modules/waktu-tunggu-poliklinik'));
@@ -110,5 +109,8 @@ router.use('/simrs-response-time-it', require('./modules/simrs-response-time-it'
 // Kepuasan Pelayanan
 router.use('/kepuasan-pasien-pelayanan', require('./modules/kepuasan-pasien-pelayanan'));
 router.use('/waktu-tanggap-komplain', require('./modules/waktu-tanggap-komplain'));
+
+// Master base routes (/units, /periode, /users, /audit-log)
+router.use('/', require('./master'));
 
 module.exports = router;
