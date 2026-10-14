@@ -1,3 +1,4 @@
+const prisma = require('../../config/database');
 const { createGenericService } = require('./generic.service');
 
 function hitungKepatuhan(kategori, lamaJam) {
@@ -15,10 +16,19 @@ const baseService = createGenericService('waktuTanggapKomplain', {
     data.kepatuhan = hitungKepatuhan(data.kategori_komplain, data.lama_tanggap_jam);
     return data;
   },
-  beforeUpdate(data) {
+  async beforeUpdate(data, id) {
     if (data.lama_tanggap_jam !== undefined) data.lama_tanggap_jam = parseFloat(data.lama_tanggap_jam) || 0;
-    if (data.kategori_komplain !== undefined && data.lama_tanggap_jam !== undefined) {
-      data.kepatuhan = hitungKepatuhan(data.kategori_komplain, data.lama_tanggap_jam);
+    if (data.kategori_komplain !== undefined || data.lama_tanggap_jam !== undefined) {
+      let kat = data.kategori_komplain;
+      let lama = data.lama_tanggap_jam;
+      if (kat === undefined || lama === undefined) {
+        const existing = await prisma.waktuTanggapKomplain.findUnique({ where: { id: parseInt(id) } });
+        if (existing) {
+          if (kat === undefined) kat = existing.kategori_komplain;
+          if (lama === undefined) lama = existing.lama_tanggap_jam;
+        }
+      }
+      data.kepatuhan = hitungKepatuhan(kat, lama);
     }
     return data;
   },
@@ -47,5 +57,7 @@ baseService.getAll = async function(where, page, limit) {
   }));
   return result;
 };
+
+baseService.hitungKepatuhan = hitungKepatuhan;
 
 module.exports = baseService;

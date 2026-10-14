@@ -67,6 +67,9 @@ async function createBackup() {
   `;
   try {
     const res = await api.post('/backup');
+    if (!res || !res.success) {
+      throw new Error(res?.message || 'Gagal membuat backup');
+    }
     statusEl.innerHTML = `
       <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(34, 197, 94, 0.08); border-left: 4px solid var(--color-success); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-success);">
         ✅ Backup berhasil: <strong>${res.data?.filename || ''}</strong>
@@ -98,6 +101,9 @@ async function loadList() {
   `;
   try {
     const res = await api.get('/backup');
+    if (!res || !res.success) {
+      throw new Error(res?.message || 'Gagal memuat daftar backup');
+    }
     const columns = [
       { label: 'Nama File', key: 'filename' },
       { label: 'Ukuran', key: 'size', align: 'center', render: (r) => formatSize(r.size) },
@@ -128,8 +134,14 @@ async function loadList() {
 }
 
 async function download(filename) {
-  try { await api.download(`/backup/${encodeURIComponent(filename)}/download`, filename); showToast('File backup berhasil diunduh', 'success'); }
-  catch (err) { showToast('Gagal mengunduh: ' + (err.message || 'error'), 'error'); }
+  try {
+    const success = await api.download(`/backup/${encodeURIComponent(filename)}/download`, filename);
+    if (success) {
+      showToast('File backup berhasil diunduh', 'success');
+    }
+  } catch (err) {
+    showToast('Gagal mengunduh: ' + (err.message || 'error'), 'error');
+  }
 }
 
 async function restoreFile(filename) {
@@ -156,6 +168,9 @@ async function restoreFile(filename) {
   
   try {
     const res = await api.post(`/backup/restore/${encodeURIComponent(filename)}`);
+    if (!res || !res.success) {
+      throw new Error(res?.message || 'Gagal memulihkan database');
+    }
     statusEl.innerHTML = `
       <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(34, 197, 94, 0.08); border-left: 4px solid var(--color-success); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-success);">
         ✅ ${res.message || 'Database berhasil dipulihkan'}
@@ -216,6 +231,9 @@ async function uploadAndRestore(e) {
   
   try {
     const res = await api.upload('/backup/upload-restore', formData);
+    if (!res || !res.success) {
+      throw new Error(res?.message || 'Gagal memulihkan database');
+    }
     statusEl.innerHTML = `
       <div style="margin-bottom: 16px; padding: 12px 16px; background: rgba(34, 197, 94, 0.08); border-left: 4px solid var(--color-success); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-success);">
         ✅ ${res.message || 'Database berhasil dipulihkan'}
@@ -239,7 +257,10 @@ async function uploadAndRestore(e) {
 async function removeFile(filename) {
   if (!confirm(`Hapus backup ${filename}?`)) return;
   try {
-    await api.delete(`/backup/${encodeURIComponent(filename)}`);
+    const res = await api.delete(`/backup/${encodeURIComponent(filename)}`);
+    if (!res || !res.success) {
+      throw new Error(res?.message || 'Gagal menghapus file');
+    }
     showToast('File backup berhasil dihapus', 'success');
     await loadList();
   } catch (err) { showToast('Gagal menghapus: ' + (err.message || 'error'), 'error'); }

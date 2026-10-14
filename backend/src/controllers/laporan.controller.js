@@ -556,7 +556,7 @@ async function downloadTemplate(req, res, next) {
       },
       {
         name: 'Kecepatan Waktu Tanggap Komplain',
-        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Andi Wijaya', 'No RM': 'RM-100264', 'Kategori Komplain': 'Merah', 'Lama Tanggap Jam': 2, 'Keterangan Komplain': 'Ditanggapi cepat' }]
+        sample: [{ 'Tanggal': '2026-08-01', 'Nama Pasien': 'Andi Wijaya', 'No RM': 'RM-100264', 'Kategori Komplain': 'Merah', 'Lama Tanggap Jam': 2, 'Keterangan': 'Ditanggapi cepat' }]
       },
       {
         name: 'Kepuasan Pasien Pada Pelayanan',
@@ -730,6 +730,31 @@ async function importExcel(req, res, next) {
 
         if (cfg.extraWhere) {
           Object.assign(payload, cfg.extraWhere);
+        }
+
+        // Compatibility alias for waktuTanggapKomplain keterangan field
+        if (payload.keterangan_komplain !== undefined && payload.keterangan === undefined) {
+          payload.keterangan = payload.keterangan_komplain;
+          delete payload.keterangan_komplain;
+        }
+
+        // Calculate kepatuhan for waktuTanggapKomplain
+        if (cfg.table === 'waktuTanggapKomplain') {
+          const kat = payload.kategori_komplain || 'Hijau';
+          const lama = parseFloat(payload.lama_tanggap_jam) || 0;
+          let batas = 168;
+          const katLower = String(kat).toLowerCase();
+          if (katLower.includes('merah')) batas = 24;
+          else if (katLower.includes('kuning')) batas = 72;
+          payload.kepatuhan = lama <= batas ? 1 : 0;
+          payload.lama_tanggap_jam = lama;
+        }
+
+        // Parse numerical fields for kepuasanPasienPelayanan
+        if (cfg.table === 'kepuasanPasienPelayanan') {
+          if (payload.total_pasien !== undefined) payload.total_pasien = parseInt(payload.total_pasien, 10) || 0;
+          if (payload.rata_rata_penilaian !== undefined) payload.rata_rata_penilaian = parseFloat(payload.rata_rata_penilaian) || 0;
+          payload.persentase = payload.rata_rata_penilaian || 0;
         }
 
         for (const key in payload) {

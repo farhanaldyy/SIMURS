@@ -27,6 +27,12 @@ export function destroy() {
 }
 
 export async function render(container) {
+  if (window.Chart && window.ChartDataLabels) {
+    try {
+      Chart.register(window.ChartDataLabels);
+    } catch (e) {}
+  }
+
   container.innerHTML = `
     <div class="card" style="padding: 16px 20px; margin-bottom: 16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">

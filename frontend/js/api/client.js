@@ -117,9 +117,11 @@ export const api = {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+      return true;
     } catch (err) {
       console.error('Download Error:', err);
       showToast('Gagal mengunduh file', 'error');
+      return false;
     }
   }
 };

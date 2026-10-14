@@ -4,7 +4,10 @@ const { verifyToken } = require('../middleware/auth');
 const { checkRole } = require('../middleware/authorize');
 const ctrl = require('../controllers/backup.controller');
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 } // 100 MB max
+});
 
 router.use(verifyToken);
 router.use(checkRole('admin'));

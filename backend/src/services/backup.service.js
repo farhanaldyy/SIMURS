@@ -10,27 +10,59 @@ function ensureDir() {
 }
 
 function parseDbUrl() {
-  const url = process.env.DATABASE_URL || '';
-  const m = url.match(/mysql:\/\/([^:]+):([^@]+)@([^:/]+):(\d+)\/(.+)/);
-  if (!m) throw new Error('DATABASE_URL tidak valid');
-  return { user: m[1], password: m[2], db: m[5] };
+  const urlStr = process.env.DATABASE_URL || '';
+  if (!urlStr) throw new Error('DATABASE_URL tidak diset');
+  try {
+    const parsed = new URL(urlStr);
+    const user = decodeURIComponent(parsed.username);
+    const password = decodeURIComponent(parsed.password);
+    const host = parsed.hostname || 'localhost';
+    const port = parsed.port || '3306';
+    const db = parsed.pathname.replace(/^\//, '').split('?')[0];
+    if (!db) throw new Error('Nama database tidak ditemukan di DATABASE_URL');
+    return { user, password, host, port, db };
+  } catch (err) {
+    const m = urlStr.match(/mysql:\/\/([^:]+):([^@]+)@([^:/]+)(?::(\d+))?\/([^?]+)/);
+    if (!m) throw new Error('DATABASE_URL tidak valid: ' + err.message);
+    return {
+      user: decodeURIComponent(m[1]),
+      password: decodeURIComponent(m[2]),
+      host: m[3] || 'localhost',
+      port: m[4] || '3306',
+      db: m[5].split('?')[0],
+    };
+  }
 }
 
 function sanitizeName(name) {
-  if (!name || !/^[\w.-]+\.sql$/.test(name)) throw new Error('Nama file tidak valid');
-  return name;
+  if (!name || typeof name !== 'string') throw new Error('Nama file tidak valid');
+  const clean = path.basename(name).trim();
+  if (!clean.endsWith('.sql') || !/^[\w\s().-]+\.sql$/i.test(clean) || clean.includes('..')) {
+    throw new Error('Nama file tidak valid (hanya file .sql)');
+  }
+  return clean;
 }
 
-// Cari binary dump di dalam container (mariadb-dump untuk MariaDB >= 10.5, mysqldump untuk versi lama)
-function findDumpBinary() {
+function checkHostBinary(binNames) {
+  return new Promise((resolve) => {
+    const cmd = `command -v ${binNames.join(' || command -v ')}`;
+    exec(cmd, (err, stdout) => {
+      const bin = (stdout || '').trim().split('\n').pop();
+      if (!err && bin) resolve(path.basename(bin));
+      else resolve(null);
+    });
+  });
+}
+
+function findContainerDumpBinary() {
   const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb-dump || command -v mysqldump'`;
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout) => {
       const bin = (stdout || '').trim().split('\n').pop();
       if (err || !bin) {
         return reject(new Error(
-          `Tidak menemukan mariadb-dump/mysqldump di container "${DB_CONTAINER}". ` +
-          `Pastikan container berjalan dan memiliki client MariaDB/MySQL.`
+          `Tidak menemukan mariadb-dump/mysqldump di host maupun di container "${DB_CONTAINER}". ` +
+          `Pastikan client MariaDB/MySQL terinstall atau container database aktif.`
         ));
       }
       resolve(path.basename(bin));
@@ -38,16 +70,15 @@ function findDumpBinary() {
   });
 }
 
-// Cari binary mysql client di dalam container
-function findMysqlBinary() {
+function findContainerMysqlBinary() {
   const cmd = `docker exec ${DB_CONTAINER} sh -c 'command -v mariadb || command -v mysql'`;
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout) => {
       const bin = (stdout || '').trim().split('\n').pop();
       if (err || !bin) {
         return reject(new Error(
-          `Tidak menemukan mariadb/mysql client di container "${DB_CONTAINER}". ` +
-          `Pastikan container berjalan dan memiliki client MariaDB/MySQL.`
+          `Tidak menemukan client mariadb/mysql di host maupun di container "${DB_CONTAINER}". ` +
+          `Pastikan client MariaDB/MySQL terinstall atau container database aktif.`
         ));
       }
       resolve(path.basename(bin));
@@ -55,23 +86,58 @@ function findMysqlBinary() {
   });
 }
 
+async function getDumpCommand() {
+  const hostBin = await checkHostBinary(['mariadb-dump', 'mysqldump']);
+  if (hostBin) {
+    return { isDocker: false, bin: hostBin };
+  }
+  const containerBin = await findContainerDumpBinary();
+  return { isDocker: true, bin: containerBin, container: DB_CONTAINER };
+}
+
+async function getMysqlCommand() {
+  const hostBin = await checkHostBinary(['mariadb', 'mysql']);
+  if (hostBin) {
+    return { isDocker: false, bin: hostBin };
+  }
+  const containerBin = await findContainerMysqlBinary();
+  return { isDocker: true, bin: containerBin, container: DB_CONTAINER };
+}
+
 async function createBackup() {
   ensureDir();
-  const { user, password, db } = parseDbUrl();
+  const { user, password, host, port, db } = parseDbUrl();
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const filename = `backup_${db}_${timestamp}.sql`;
   const filepath = path.join(BACKUP_DIR, filename);
 
-  const dumpBin = await findDumpBinary();
-  const args = [
-    'exec', DB_CONTAINER, dumpBin,
-    `-u${user}`, `-p${password}`,
-    '--single-transaction', '--routines', '--triggers',
-    db,
-  ];
+  const dumpCmd = await getDumpCommand();
+  let spawnCmd, spawnArgs;
+
+  if (dumpCmd.isDocker) {
+    spawnCmd = 'docker';
+    spawnArgs = [
+      'exec', dumpCmd.container, dumpCmd.bin,
+      `-u${user}`, `-p${password}`,
+      '--single-transaction', '--routines', '--triggers',
+      db,
+    ];
+  } else {
+    spawnCmd = dumpCmd.bin;
+    spawnArgs = [
+      '-h', host,
+      '-P', port,
+      `-u${user}`,
+      `-p${password}`,
+      '--single-transaction',
+      '--routines',
+      '--triggers',
+      db,
+    ];
+  }
 
   return new Promise((resolve, reject) => {
-    const child = spawn('docker', args);
+    const child = spawn(spawnCmd, spawnArgs);
     const out = fs.createWriteStream(filepath);
     let stderr = '';
 
@@ -80,7 +146,7 @@ async function createBackup() {
     child.on('error', err => {
       out.destroy();
       fs.unlink(filepath, () => {});
-      reject(new Error(`Gagal menjalankan docker exec: ${err.message}`));
+      reject(new Error(`Gagal menjalankan ${spawnCmd}: ${err.message}`));
     });
     out.on('error', err => {
       child.kill();
@@ -124,14 +190,27 @@ async function deleteBackup(name) {
 
 async function restoreBackup(name) {
   const filepath = await resolveBackupPath(name);
-  const { user, password, db } = parseDbUrl();
-  const mysqlBin = await findMysqlBinary();
+  const { user, password, host, port, db } = parseDbUrl();
+  const mysqlCmd = await getMysqlCommand();
 
-  const args = [
-    'exec', '-i', DB_CONTAINER, mysqlBin,
-    `-u${user}`, `-p${password}`,
-    db,
-  ];
+  let spawnCmd, spawnArgs;
+  if (mysqlCmd.isDocker) {
+    spawnCmd = 'docker';
+    spawnArgs = [
+      'exec', '-i', mysqlCmd.container, mysqlCmd.bin,
+      `-u${user}`, `-p${password}`,
+      db,
+    ];
+  } else {
+    spawnCmd = mysqlCmd.bin;
+    spawnArgs = [
+      '-h', host,
+      '-P', port,
+      `-u${user}`,
+      `-p${password}`,
+      db,
+    ];
+  }
 
   return new Promise((resolve, reject) => {
     let rejected = false;
@@ -141,16 +220,12 @@ async function restoreBackup(name) {
       reject(err);
     };
 
-    const child = spawn('docker', args);
+    const child = spawn(spawnCmd, spawnArgs);
     const fileStream = fs.createReadStream(filepath);
     let stderr = '';
 
-    // Handle EPIPE: when child process exits early, writing to its stdin
-    // emits an error. Catch it here to prevent crashing the process.
     child.stdin.on('error', (err) => {
       fileStream.destroy();
-      // EPIPE is expected when child exits early; the real error will
-      // be surfaced via the 'close' event with a non-zero exit code.
       if (err.code !== 'EPIPE') {
         fail(new Error(`Gagal menulis ke proses restore: ${err.message}`));
       }
@@ -160,7 +235,7 @@ async function restoreBackup(name) {
     child.stderr.on('data', d => { stderr += d.toString(); });
     child.on('error', err => {
       fileStream.destroy();
-      fail(new Error(`Gagal menjalankan docker exec: ${err.message}`));
+      fail(new Error(`Gagal menjalankan ${spawnCmd}: ${err.message}`));
     });
     fileStream.on('error', err => {
       child.stdin.end();
