@@ -1,5 +1,6 @@
 const prisma = require('../config/database');
 const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 // Import all services
 const services = {
@@ -74,6 +75,7 @@ const services = {
   'Tidak Adanya Kejadian Linen Hilang': { service: require('../services/modules/laundry-linen-hilang.service'), table: 'laundryLinenHilang', category: 'Laundry' },
 
   // Radiologi
+  'Jadwal Dokter Radiologi': { service: require('../services/modules/radiologi-jadwal-dokter.service'), table: 'radiologiJadwalDokter', category: 'Radiologi' },
   'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': { service: require('../services/modules/radiologi-thorax-sesuai-jadwal.service'), table: 'radiologiThoraxSesuaiJadwal', category: 'Radiologi' },
   'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': { service: require('../services/modules/radiologi-thorax-luar-jadwal.service'), table: 'radiologiThoraxLuarJadwal', category: 'Radiologi' },
   'Kejadian Foto Ulang Pasien': { service: require('../services/modules/radiologi-foto-ulang.service'), table: 'radiologiFotoUlang', category: 'Radiologi' },
@@ -89,6 +91,7 @@ const services = {
   'Tidak adanya kerusakan sampel di laboratorium': { service: require('../services/modules/laboratorium-kerusakan-sampel.service'), table: 'laboratoriumKerusakanSampel', category: 'Laboratorium' },
   'Kepatuhan Identifikasi Pasien Laboratorium': { service: require('../services/modules/laboratorium-kepatuhan-identifikasi.service'), table: 'laboratoriumKepatuhanIdentifikasi', category: 'Laboratorium' },
   'Data Ekspertisi Oleh Dokter Laboratorium': { service: require('../services/modules/laboratorium-ekspertisi-dokter.service'), table: 'laboratoriumEkspertisiDokter', category: 'Laboratorium' },
+  'Tidak Adanya Kesalahan Penyerahan Hasil Lab': { service: require('../services/modules/laboratorium-kesalahan-penyerahan.service'), table: 'laboratoriumKesalahanPenyerahan', category: 'Laboratorium' },
 
   // SIMRS
   'Response Time SIMRS IT': { service: require('../services/modules/simrs-response-time-it.service'), table: 'simrsResponseTimeIt', category: 'SIMRS' },
@@ -105,6 +108,496 @@ const services = {
   'Kecepatan Waktu Tanggap Komplain': { service: require('../services/modules/waktu-tanggap-komplain.service'), table: 'waktuTanggapKomplain', category: 'Kepuasan Pasien' },
 };
 
+const SERVICE_TO_INDICATOR_IDS = {
+  'Risiko Jatuh': ['risiko_jatuh'],
+  'Insiden Keselamatan': ['insiden_keselamatan'],
+  'Identifikasi Pasien': ['identifikasi_pasien'],
+  'Reaksi Transfusi': ['reaksi_transfusi'],
+  'Gelang Identitas': ['gelang_identitas'],
+  'Serah Terima Pasien': ['serah_terima_pasien'],
+  'Kepatuhan Kebersihan Tangan': ['kepatuhan_kebersihan_tangan'],
+  'Kepatuhan Penggunaan APD': ['kepatuhan_apd'],
+
+  'Angka Kematian Ranap': ['angka_kematian_ranap'],
+  'Double Check High Alert': ['double_check_high_alert'],
+  'Visit Dokter Spesialis': ['visit_dokter'],
+  'Kembali ICU < 72 Jam': ['kembali-icu'],
+  'Alur Klinis': ['alur_klinis'],
+
+  'Waktu Tanggap SC': ['waktu-tanggap-sc'],
+  'Emergency Response Time': ['emergency_response_time'],
+  'Angka Kematian IGD': ['angka_kematian_igd'],
+  'Asesmen Awal IGD': ['asesmen_awal_igd'],
+  'Pasien Tertahan IGD': ['pasien_tertahan_igd'],
+
+  'Ketidakpatuhan Pasien HD': ['jadwal-hemodialisa'],
+  'Insiden Clotting Durante HD': ['insiden-clotting-durante'],
+  'Insiden Pasien Jatuh HD': ['insiden-pasien-jatuh-hd'],
+  'Insiden Jarum Vena HD': ['insiden-jarum-vena'],
+
+  'Penundaan Operasi Elektif': ['penundaan_operasi_elektif'],
+  'Informed Consent Bedah': ['informed_consent_pembedahaan'],
+  'Informed Consent Anestesi': ['kelengkapan_ic_anestesi'],
+  'Asesmen Pra Bedah': ['asesmen_pra_bedah'],
+  'Asesmen Pra Anestesi': ['asesmen_pra_anestesi'],
+  'Surgical Safety Checklist SC': ['surgical_checklist_sc'],
+  'Surgical Safety Checklist Op': ['surgical_checklist_operasi'],
+  'Penandaan Lokasi Operasi': ['penandaan_lokasi_operasi'],
+  'Kejadian Kematian di Meja Operasi': ['kematian_meja_operasi'],
+  'Kejadian Operasi Salah Sisi': ['salah_sisi_operasi'],
+  'Kejadian Operasi Salah Orang': ['operasi_salah_pasien'],
+  'Kejadian Operasi Salah Prosedur / Tindakan': ['operasi_salah_prosedur'],
+  'Kelengkapan Laporan Anestesi Sedasi': ['kelengkapan_laporan_anestesi'],
+
+  'Kepatuhan Pelaksanaan Double Check Obat High Alert': ['double-check-obat-farmasi'],
+  'Ketidaktersediaan Obat di Farmasi di Rawat Jalan': ['tidaktersedia-obat-rawat-jalan'],
+  'Ketidaktersediaan Obat di Farmasi di Rawat Inap': ['tidaktersedia-obat-rawat-inap'],
+  'Waktu Tunggu Obat Racikan dan Non Racikan': ['tunggu-obat-racik', 'tunggu-obat-nonracik'],
+  'Rata Rata Menut waktu tunggu': ['rata-tunggu-racikan', 'rata-tunggu-nonracikan'],
+  'Kesalahan Penyerahan Obat Kepada Pasien': ['salah-obat-rajal', 'salah-obat-ranap', 'salah-obat-igd', 'total-salah-obat'],
+  'Kepatuhan penggunaan formularium nasional': ['kepatuhan-formula-nasional'],
+
+  'Ketepatan Waktu Makanan': ['waktu-gizi-pasien'],
+  'Sisa Makanan Pasien': ['sisa-gizi-pasien'],
+  'Akurasi Pemberian Diet': ['salah-gizi-diet'],
+  'Identifikasi Pasien SIMRS': ['simrs-gizi-identifikasi'],
+
+  'Waktu Tunggu Poliklinik': ['waktu_tunggu_poliklinik', 'waktu_tunggu_poliklinik_jam', 'waktu_tunggu_poliklinik_kepatuhan', 'waktu_tunggu_poliklinik_rata_rata'],
+  'Waktu Tunggu Operasi Elektif': ['penundaan_operasi_elektif'],
+
+  'Kejadian drop out pasien terhadap pelayanan rehabilitasi medik yang direncanakan': ['rehab-drop-pasien'],
+  'Tidak adanya kejadian kesalahan tindakan rehabilitasi medik': ['rehab-kesalahan-tindakan'],
+  'Waktu tunggu pelayanan rawat jalan rehabilitasi medik': ['rehab-waktu-tunggu'],
+  'Kepatuhan identitas pasien': ['rehab-identifikasi'],
+  'Kepuasan pasien dengan pelayanan rehabilitasi medik': ['rehab-drop-pasien', 'rehab-kesalahan-tindakan', 'rehab-waktu-tunggu', 'rehab-identifikasi'],
+
+  'Ketepatan Waktu Penyediaan Linen Bersih': ['laundry-waktu-linen'],
+  'Tidak Adanya Kejadian Linen Hilang': ['laundry-linen-hilang'],
+
+  'Jadwal Dokter Radiologi': ['waktu-tunggu-sesuai-foto-thorax', 'waktu-tunggu-diluar-foto-thorax'],
+  'Waktu tunggu hasil pelayanan foto thorax (Sesuai jadwal)': ['waktu-tunggu-sesuai-foto-thorax'],
+  'Waktu tunggu hasil pelayanan foto thorax (Diluar jadwal)': ['waktu-tunggu-diluar-foto-thorax'],
+  'Kejadian Foto Ulang Pasien': ['foto-ulang-pasien-radiologi'],
+  'Kelengkapan pengisian form pemberian info tindakan radiologi': ['kelengkapan-form-radiologi'],
+  'Kepatuhan Identifikasi Pasien (Radiologi)': ['kepatuhan-identifikasi-pasien-radiologi'],
+
+  'Jadwal Dokter Laboratorium': ['waktu-tunggu-lab-kurangdari', 'waktu-tunggu-lab-lebihdari', 'dalam-menit-perpasien'],
+  'Waktu tunggu hasil pemeriksaan laboratorium (< 140 Menit)': ['waktu-tunggu-lab-kurangdari', 'dalam-menit-perpasien'],
+  'Waktu tunggu hasil pemeriksaan laboratorium (> 140 Menit)': ['waktu-tunggu-lab-lebihdari'],
+  'Pelaporan hasil kritis laboratorium  ≤ 30 menit': ['hasil-kritis-lab'],
+  'Tidak adanya kesalahan hasil input pemeriksaan lab': ['kesalahan-input-lab'],
+  'Tidak adanya kerusakan sampel di laboratorium': ['kerusakan-sample-lab'],
+  'Kepatuhan Identifikasi Pasien Laboratorium': ['kepatuhan-identifikasi-lab'],
+  'Data Ekspertisi Oleh Dokter Laboratorium': ['ekpertisi-dokter-lab'],
+  'Tidak Adanya Kesalahan Penyerahan Hasil Lab': ['kesalahan-penyerahan-hasil-lab'],
+
+  'Response Time SIMRS IT': ['simrs-waktu-menanggapi'],
+
+  'Kelengkapan Dokumen Rekam Medis Pasien Ranap': ['rm-dokumen'],
+  'Standar Pengembalian & Pengisian Dok RM 1 x 24 Jam': ['rm-pengisian-dok'],
+  'Pemberian Informasi Antrian Online': ['rm-antrian-online'],
+  'Ketepatan Coding Rawat Inap & Rawat Jalan': ['rm-coding-rwi-rwj'],
+  'Antrian Mobile JKN': ['rm-jkn'],
+
+  'Kepuasan Pasien Pada Pelayanan': ['kepuasan_pasien_pelayanan'],
+  'Kecepatan Waktu Tanggap Komplain': ['waktu_tanggap_komplain'],
+};
+
+function detectUnitDepartment(unit) {
+  if (!unit) return 'all';
+  const code = (unit.kode_unit || '').toUpperCase().trim();
+  const name = (unit.nama_unit || '').toUpperCase().trim();
+  const kat = (unit.kategori_unit || '').toLowerCase().trim();
+
+  if (code === 'FAR' || name.includes('FARMASI') || kat === 'farmasi') return 'farmasi';
+  if (code === 'GIZI' || name.includes('GIZI') || kat === 'gizi') return 'gizi';
+  if (code === 'RAD' || name.includes('RADIOLOGI') || kat === 'radiologi') return 'radiologi';
+  if (code === 'LAB' || name.includes('LABORATORIUM') || kat === 'laboratorium') return 'laboratorium';
+  if (code === 'RM' || code === 'PENDAFTARAN' || name.includes('REKAM MEDIS') || name.includes('PENDAFTARAN') || kat === 'rekam_medis') return 'rekam_medis';
+  if (code === 'REHAB' || name.includes('REHAB') || kat === 'rehab_medis') return 'rehab_medis';
+  if (code === 'LAUNDRY' || name.includes('LAUNDRY') || name.includes('LINEN') || name.includes('CSSD') || kat === 'laundry') return 'laundry';
+  if (code === 'SIMRS' || code === 'IPSRS' || name.includes('SIMRS') || name.includes('IPSRS') || name.includes('IT ') || name === 'IT' || kat === 'simrs') return 'simrs';
+  if (code === 'HD' || name.includes('HEMODIALIS')) return 'hemodialisa';
+  if (code === 'OK' || name.includes('OPERASI') || name.includes('BEDAH') || name.includes('IBS')) return 'operasi';
+  if (code === 'UGD' || code === 'IGD' || name.includes('GAWAT DARURAT') || name.includes('UGD') || name.includes('IGD') || kat === 'igd') return 'igd';
+  if (code === 'RK_ICU' || name === 'ICU' || name.includes('INTENSIVE CARE')) return 'icu';
+  if (code === 'RK_NICU' || name === 'NICU') return 'nicu';
+  if (code.startsWith('KB_') || name.includes('ANNISA') || name.includes('PERINATOLOGI') || name.includes('VK') || name.includes('BERSALIN')) return 'kebidanan';
+  if (code.startsWith('RJ_') || name.includes('POLI') || name.includes('RAWAT JALAN') || kat === 'rawat_jalan') return 'rawat_jalan';
+  if (kat === 'unit_khusus') return 'unit_khusus';
+  if (kat === 'penunjang') return 'penunjang';
+  return 'rawat_inap';
+}
+
+function matchesUnitDepartmentDefault(name, cfg, dept) {
+  // 1. Strict department ownership for tables without unit_id (ignoreUnitId: true)
+  if (cfg.table === 'kembaliIcu') return dept === 'icu';
+  if (cfg.category === 'Hemodialisa') return dept === 'hemodialisa';
+  if (cfg.table === 'penundaanOperasi' || cfg.table === 'penandaanLokasiOperasi' || cfg.table === 'mutuKamarOperasi') {
+    return dept === 'operasi';
+  }
+  if (cfg.category === 'Farmasi') return dept === 'farmasi';
+  if (cfg.category === 'Rekam Medis') return dept === 'rekam_medis';
+
+  // 2. Department-specific categories (with unit_id)
+  if (cfg.category === 'Gizi') return dept === 'gizi';
+  if (cfg.category === 'Radiologi') return dept === 'radiologi';
+  if (cfg.category === 'Laboratorium') return dept === 'laboratorium';
+  if (cfg.category === 'Rehabilitasi Medis') return dept === 'rehab_medis';
+  if (cfg.category === 'Laundry') return dept === 'laundry';
+  if (cfg.category === 'SIMRS') return dept === 'simrs';
+  if (cfg.category === 'Rawat Jalan') return dept === 'rawat_jalan';
+
+  if (cfg.category === 'IGD') {
+    if (name === 'Waktu Tanggap SC') {
+      return ['igd', 'operasi', 'kebidanan'].includes(dept);
+    }
+    return dept === 'igd';
+  }
+
+  if (cfg.category === 'Operasi & Anestesi') {
+    if (name === 'Surgical Safety Checklist SC') {
+      return ['operasi', 'kebidanan'].includes(dept);
+    }
+    return dept === 'operasi';
+  }
+
+  if (cfg.category === 'Rawat Inap') {
+    return ['rawat_inap', 'icu', 'nicu', 'kebidanan', 'unit_khusus'].includes(dept);
+  }
+
+  if (cfg.category === 'Keselamatan Pasien') {
+    if (['Reaksi Transfusi', 'Gelang Identitas', 'Serah Terima Pasien'].includes(name)) {
+      return ['rawat_inap', 'icu', 'nicu', 'kebidanan', 'igd', 'hemodialisa', 'operasi', 'unit_khusus'].includes(dept);
+    }
+    if (['Identifikasi Pasien', 'Risiko Jatuh'].includes(name)) {
+      return ['rawat_inap', 'icu', 'nicu', 'kebidanan', 'igd', 'rawat_jalan', 'hemodialisa', 'operasi', 'unit_khusus'].includes(dept);
+    }
+    return true; // Insiden Keselamatan, Kepatuhan Kebersihan Tangan, Kepatuhan Penggunaan APD
+  }
+
+  if (cfg.category === 'Pelayanan' || cfg.category === 'Kepuasan Pasien') {
+    return true;
+  }
+
+  return false;
+}
+
+function isServiceRelevantForUnit(name, cfg, unit, savedMap, hasSavedSettings) {
+  if (!unit) return true;
+  const dept = detectUnitDepartment(unit);
+  const defaultMatch = matchesUnitDepartmentDefault(name, cfg, dept);
+
+  // Tables without unit_id must strictly belong to their respective department
+  // so hospital-wide data from Farmasi/RM/HD/ICU/OK never leaks into other units.
+  if (cfg.service.ignoreUnitId) {
+    if (!defaultMatch) return false;
+    if (hasSavedSettings) {
+      const indIds = SERVICE_TO_INDICATOR_IDS[name] || [];
+      const knownIds = indIds.filter(id => savedMap.has(id));
+      if (knownIds.length > 0) {
+        return knownIds.some(id => savedMap.get(id) === true);
+      }
+    }
+    return true;
+  }
+
+  if (hasSavedSettings) {
+    const indIds = SERVICE_TO_INDICATOR_IDS[name] || [];
+    const knownIds = indIds.filter(id => savedMap.has(id));
+    if (knownIds.length > 0) {
+      return knownIds.some(id => savedMap.get(id) === true);
+    }
+  }
+
+  return defaultMatch;
+}
+
+function evaluateIndicatorResult(name, s) {
+  let achieved = false;
+  let hasil = `${s.persen || 0}%`;
+
+  if (name === 'Insiden Keselamatan') {
+    hasil = `${s.total || 0} Kasus`;
+    achieved = (s.total || 0) === 0;
+  } else if (s.rataRata !== undefined) {
+    hasil = `${s.rataRata}`;
+    if (name === 'Rata Rata Menut waktu tunggu') {
+      const match = String(s.rataRata).match(/\d+/g);
+      if (match && match.length >= 2) {
+        const racikanVal = parseFloat(match[0]);
+        const nonRacikanVal = parseFloat(match[1]);
+        achieved = racikanVal < 60 && nonRacikanVal < 30;
+      } else {
+        achieved = false;
+      }
+    } else {
+      const standarStr = String(s.standar || '');
+      const targetVal = parseFloat(standarStr.replace(/[^\d.]/g, ''));
+      const rVal = parseFloat(s.rataRata);
+      if (standarStr.includes('≤')) {
+        achieved = rVal <= targetVal;
+      } else {
+        achieved = rVal >= targetVal;
+      }
+    }
+  } else if (
+    (name.includes('Kematian') && name !== 'Kejadian Kematian di Meja Operasi') ||
+    name.includes('Kembali ICU') ||
+    name.includes('Clotting') ||
+    name.includes('Ketidakpatuhan')
+  ) {
+    hasil = `${s.total || 0} Kasus`;
+    achieved = (s.total || 0) === 0;
+  } else {
+    const standarStr = String(s.standar || '');
+    const targetVal = parseFloat(standarStr.replace(/[^\d.]/g, ''));
+    const currentVal = parseFloat(s.persen || 0);
+    if (standarStr.includes('<')) {
+      achieved = currentVal < targetVal;
+    } else if (standarStr.includes('≤')) {
+      achieved = currentVal <= targetVal;
+    } else if (standarStr.includes('≥')) {
+      achieved = currentVal >= targetVal;
+    } else if (standarStr.includes('>')) {
+      achieved = currentVal > targetVal;
+    } else if (targetVal === 0 || standarStr === '0%' || standarStr === '0') {
+      achieved = currentVal <= targetVal;
+    } else if (isNaN(targetVal)) {
+      achieved = (s.total || 0) > 0;
+    } else {
+      achieved = currentVal >= targetVal;
+    }
+  }
+
+  return {
+    hasil,
+    achieved,
+    statusText: achieved ? 'Tercapai' : 'Belum Tercapai'
+  };
+}
+
+function addFormattedExcelSheet(workbook, sheetName, titleText, subtitleText, rows, defaultHeaders = []) {
+  const ws = workbook.addWorksheet(sheetName, {
+    views: [{ showGridLines: true }]
+  });
+
+  const headers = [...defaultHeaders];
+  rows.forEach(r => {
+    Object.keys(r).forEach(k => {
+      if (!headers.includes(k)) headers.push(k);
+    });
+  });
+
+  const colCount = Math.max(headers.length, 1);
+
+  const thinBorder = {
+    top: { style: 'thin', color: { argb: 'FF94A3B8' } },
+    left: { style: 'thin', color: { argb: 'FF94A3B8' } },
+    bottom: { style: 'thin', color: { argb: 'FF94A3B8' } },
+    right: { style: 'thin', color: { argb: 'FF94A3B8' } }
+  };
+
+  // Row 1: Main Title
+  ws.mergeCells(1, 1, 1, colCount);
+  const titleRow = ws.getRow(1);
+  titleRow.height = 28;
+  for (let c = 1; c <= colCount; c++) {
+    const cell = titleRow.getCell(c);
+    if (c === 1) cell.value = titleText;
+    cell.font = { name: 'Calibri', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF0F172A' } },
+      left: { style: 'thin', color: { argb: 'FF0F172A' } },
+      bottom: { style: 'thin', color: { argb: 'FF0F172A' } },
+      right: { style: 'thin', color: { argb: 'FF0F172A' } }
+    };
+  }
+
+  // Row 2: Subtitle (Periode & Unit)
+  ws.mergeCells(2, 1, 2, colCount);
+  const subtitleRow = ws.getRow(2);
+  subtitleRow.height = 22;
+  for (let c = 1; c <= colCount; c++) {
+    const cell = subtitleRow.getCell(c);
+    if (c === 1) cell.value = subtitleText;
+    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF1E293B' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = thinBorder;
+  }
+
+  // Row 3: Blank spacer
+  ws.getRow(3).height = 10;
+
+  // Row 4: Table Header
+  const headerRow = ws.getRow(4);
+  headerRow.height = 25;
+  headers.forEach((h, idx) => {
+    const cell = headerRow.getCell(idx + 1);
+    cell.value = h;
+    cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF334155' } },
+      left: { style: 'thin', color: { argb: 'FF334155' } },
+      bottom: { style: 'medium', color: { argb: 'FF0F172A' } },
+      right: { style: 'thin', color: { argb: 'FF334155' } }
+    };
+  });
+
+  // Row 5+: Table Body
+  if (rows.length === 0) {
+    ws.mergeCells(5, 1, 5, colCount);
+    const emptyRow = ws.getRow(5);
+    emptyRow.height = 24;
+    for (let c = 1; c <= colCount; c++) {
+      const cell = emptyRow.getCell(c);
+      if (c === 1) cell.value = 'Tidak ada data untuk periode dan unit terpilih.';
+      cell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF64748B' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = thinBorder;
+    }
+  } else {
+    rows.forEach((r, rIdx) => {
+      const excelRow = ws.getRow(5 + rIdx);
+      excelRow.height = 20;
+      const isEven = rIdx % 2 === 1;
+
+      headers.forEach((h, cIdx) => {
+        const cell = excelRow.getCell(cIdx + 1);
+        const rawVal = r[h];
+        const val = rawVal !== undefined && rawVal !== null && rawVal !== '' ? rawVal : '-';
+        cell.value = val;
+
+        const hLower = h.toLowerCase();
+        let horiz = 'left';
+        if (
+          hLower === 'no' ||
+          hLower === 'target' ||
+          hLower === 'pencapaian' ||
+          hLower === 'total data' ||
+          hLower === 'status' ||
+          hLower === 'hasil' ||
+          hLower === 'no rm' ||
+          hLower === 'usia' ||
+          hLower.includes('tanggal') ||
+          hLower.includes('jam') ||
+          typeof val === 'number'
+        ) {
+          horiz = 'center';
+        }
+
+        const isStatus = hLower === 'status';
+        const isHighlight = hLower === 'pencapaian' || hLower === 'hasil' || isStatus;
+
+        cell.font = {
+          name: 'Calibri',
+          size: 10,
+          bold: isHighlight,
+          color: isStatus
+            ? { argb: val === 'Tercapai' ? 'FF15803D' : 'FFB91C1C' }
+            : { argb: 'FF0F172A' }
+        };
+
+        if (isStatus) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: val === 'Tercapai' ? 'FFDCFCE7' : 'FFFEE2E2' }
+          };
+        } else if (isEven) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF8FAFC' }
+          };
+        }
+
+        cell.alignment = { vertical: 'middle', horizontal: horiz, wrapText: true };
+        cell.border = thinBorder;
+      });
+    });
+  }
+
+  // Auto-fit column widths
+  headers.forEach((h, cIdx) => {
+    let maxLen = h.length;
+    rows.forEach(r => {
+      const v = r[h] !== undefined && r[h] !== null ? String(r[h]) : '';
+      if (v.length > maxLen) maxLen = v.length;
+    });
+    const minW = h.toLowerCase() === 'no' ? 6 : 12;
+    ws.getColumn(cIdx + 1).width = Math.min(Math.max(maxLen + 4, minW), 50);
+  });
+
+  return ws;
+}
+
+async function getSummary(req, res, next) {
+  try {
+    const { periode_id, unit_id } = req.query;
+    const pid = periode_id ? parseInt(periode_id, 10) : null;
+    const uid = unit_id ? parseInt(unit_id, 10) : null;
+
+    const queryWhere = {};
+    if (pid) queryWhere.periode_id = pid;
+    if (uid) queryWhere.unit_id = uid;
+
+    let unit = null;
+    const savedMap = new Map();
+    let hasSavedSettings = false;
+
+    if (uid) {
+      const [unitDoc, savedConfigs] = await Promise.all([
+        prisma.unit.findUnique({ where: { id: uid } }),
+        prisma.unitIndicatorConfig.findMany({ where: { unit_id: uid } })
+      ]);
+      unit = unitDoc;
+      savedConfigs.forEach(c => savedMap.set(c.indicator_id, c.aktif));
+      hasSavedSettings = savedConfigs.length > 0;
+    }
+
+    const entries = Object.entries(services);
+    const results = await Promise.all(
+      entries.map(async ([name, cfg]) => {
+        if (uid) {
+          if (!unit) return null;
+          const relevant = isServiceRelevantForUnit(name, cfg, unit, savedMap, hasSavedSettings);
+          if (cfg.service.ignoreUnitId && !relevant) {
+            return null;
+          }
+          const sw = { ...queryWhere, ...cfg.extraWhere };
+          const sum = await cfg.service.getSummary(sw);
+          if (!relevant && (!sum || !sum.total || sum.total === 0)) {
+            return null;
+          }
+          return [name, { ...sum, category: cfg.category }];
+        } else {
+          const sw = { ...queryWhere, ...cfg.extraWhere };
+          const sum = await cfg.service.getSummary(sw);
+          return [name, { ...sum, category: cfg.category }];
+        }
+      })
+    );
+
+    const summaries = {};
+    results.forEach(item => {
+      if (item) {
+        const [name, data] = item;
+        summaries[name] = data;
+      }
+    });
+
+    res.json({ success: true, data: summaries });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function exportExcel(req, res, next) {
   try {
     const { periode_id, unit_id } = req.query;
@@ -112,8 +605,8 @@ async function exportExcel(req, res, next) {
       return res.status(400).json({ success: false, message: 'Periode ID wajib disertakan' });
     }
 
-    const pid = parseInt(periode_id);
-    const uid = unit_id ? parseInt(unit_id) : null;
+    const pid = parseInt(periode_id, 10);
+    const uid = unit_id ? parseInt(unit_id, 10) : null;
 
     const queryWhere = { periode_id: pid };
     if (uid) queryWhere.unit_id = uid;
@@ -124,52 +617,101 @@ async function exportExcel(req, res, next) {
       return res.status(404).json({ success: false, message: 'Periode tidak ditemukan' });
     }
 
+    let unit = null;
+    const savedMap = new Map();
+    let hasSavedSettings = false;
+
+    const [unitDoc, savedConfigs, hInfo] = await Promise.all([
+      uid ? prisma.unit.findUnique({ where: { id: uid } }) : null,
+      uid ? prisma.unitIndicatorConfig.findMany({ where: { unit_id: uid } }) : [],
+      prisma.informasiRumahSakit.findFirst()
+    ]);
+
+    if (uid) {
+      unit = unitDoc;
+      if (!unit) {
+        return res.status(404).json({ success: false, message: 'Unit tidak ditemukan' });
+      }
+      savedConfigs.forEach(c => savedMap.set(c.indicator_id, c.aktif));
+      hasSavedSettings = savedConfigs.length > 0;
+    }
+
+    const hospitalName = (hInfo && hInfo.nama_rs) ? hInfo.nama_rs.toUpperCase() : 'RUMAH SAKIT ISLAM KARAWANG';
+
     const listBulan = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
     const namaBulan = listBulan[pDetails.bulan - 1];
+    const unitLabel = unit ? unit.nama_unit : 'Semua Unit';
 
-    const wb = XLSX.utils.book_new();
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = `SIMURS - ${hospitalName}`;
+    workbook.created = new Date();
 
-    // 1. Generate Summary Ringkasan sheet
+    // 1. Evaluate summaries and detailed records per indicator (filtered by unit when uid is set)
     const serviceEntries = Object.entries(services);
-    const summaryRows = await Promise.all(
+    const evaluatedEntries = await Promise.all(
       serviceEntries.map(async ([name, cfg]) => {
-        const sw = { ...queryWhere, ...cfg.extraWhere };
-        const sum = await cfg.service.getSummary(sw);
-        
-        let hasil = `${sum.persen || 0}%`;
-        if (sum.rataRata !== undefined) hasil = sum.rataRata;
-        else if (name.includes('Kematian') || name === 'Insiden Keselamatan') {
-          hasil = sum.total;
+        if (uid) {
+          const relevant = isServiceRelevantForUnit(name, cfg, unit, savedMap, hasSavedSettings);
+          if (cfg.service.ignoreUnitId && !relevant) {
+            return null;
+          }
+          const sumWhere = { ...queryWhere, ...cfg.extraWhere };
+          const sum = await cfg.service.getSummary(sumWhere);
+
+          const findWhere = { ...queryWhere, ...cfg.extraWhere };
+          if (cfg.service.ignoreUnitId) delete findWhere.unit_id;
+          if (cfg.table === 'mutuFarmasiKesalahanObat' || cfg.table === 'mutuRekamMedis') delete findWhere.tipe;
+          const records = await prisma[cfg.table].findMany({ where: findWhere });
+
+          if (!relevant && (!sum || !sum.total || sum.total === 0) && (!records || records.length === 0)) {
+            return null;
+          }
+          return { name, cfg, sum, records };
+        } else {
+          const sumWhere = { ...queryWhere, ...cfg.extraWhere };
+          const sum = await cfg.service.getSummary(sumWhere);
+
+          const findWhere = { ...queryWhere, ...cfg.extraWhere };
+          if (cfg.service.ignoreUnitId) delete findWhere.unit_id;
+          if (cfg.table === 'mutuFarmasiKesalahanObat' || cfg.table === 'mutuRekamMedis') delete findWhere.tipe;
+          const records = await prisma[cfg.table].findMany({ where: findWhere });
+
+          return { name, cfg, sum, records };
         }
-
-        return {
-          'Kategori': cfg.category,
-          'Indikator Mutu': name,
-          'Target': sum.standar,
-          'Pencapaian': hasil,
-          'Total Data': sum.total || 0
-        };
-      })
-    );
-    const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Ringkasan Mutu');
-
-    // 2. Fetch all detailed records concurrently
-    const detailedSheetEntries = await Promise.all(
-      Object.entries(services).map(async ([name, cfg]) => {
-        const sw = { ...queryWhere, ...cfg.extraWhere };
-        if (cfg.service.ignoreUnitId) delete sw.unit_id;
-        if (cfg.table === 'mutuFarmasiKesalahanObat') delete sw.tipe;
-        const records = await prisma[cfg.table].findMany({ where: sw });
-        return { name, cfg, records };
       })
     );
 
-    // 3. Generate detailed sheets for each indicator
-    for (const { name, cfg, records } of detailedSheetEntries) {
+    const activeEntries = evaluatedEntries.filter(Boolean);
+
+    // 2. Build Summary Ringkasan sheet with Title and Borders
+    const summaryRows = activeEntries.map(({ name, cfg, sum }, idx) => {
+      const evalRes = evaluateIndicatorResult(name, sum);
+      return {
+        'No': idx + 1,
+        'Kategori': cfg.category,
+        'Indikator Mutu': name,
+        'Target': sum.standar || '-',
+        'Pencapaian': evalRes.hasil,
+        'Total Data': sum.total || 0,
+        'Status': evalRes.statusText
+      };
+    });
+
+    addFormattedExcelSheet(
+      workbook,
+      'Ringkasan Mutu',
+      `LAPORAN CAPAIAN INDIKATOR MUTU - ${hospitalName}`,
+      `Periode: ${namaBulan} ${pDetails.tahun}   |   Unit: ${unitLabel}`,
+      summaryRows,
+      ['No', 'Kategori', 'Indikator Mutu', 'Target', 'Pencapaian', 'Total Data', 'Status']
+    );
+
+    // 3. Generate detailed sheets for each indicator with Title and Borders
+    const usedSheetNames = new Set(['Ringkasan Mutu']);
+    for (const { name, cfg, records } of activeEntries) {
       if (!records || records.length === 0) continue;
       
       // Map records to readable objects
@@ -267,6 +809,11 @@ async function exportExcel(req, res, next) {
           const jp = r.jumlah_pasien || 0;
           const je = r.ekspertisi_dokter || 0;
           const presentase = jp > 0 ? parseFloat(((je / jp) * 100).toFixed(2)) : 0;
+          hasilVal = `${presentase}%`;
+        } else if (cfg.table === 'laboratoriumKesalahanPenyerahan') {
+          const jp = r.jumlah_pasien || 0;
+          const jk = r.jumlah_kesalahan || 0;
+          const presentase = jp > 0 ? parseFloat((((jp - jk) / jp) * 100).toFixed(2)) : 100;
           hasilVal = `${presentase}%`;
         } else if (cfg.table === 'mutuFarmasi') {
           const t = r.tipe;
@@ -390,24 +937,35 @@ async function exportExcel(req, res, next) {
         return flat;
       });
 
-      // Sheet names must be <= 31 chars
-      let sheetName = name.substring(0, 30);
+      // Sheet names must be <= 31 chars and cannot contain invalid Excel sheet characters
+      const cleanName = name.replace(/[:\\/?*[\]]/g, ' ').trim();
+      let sheetName = cleanName.substring(0, 30);
       let counter = 1;
-      while (wb.SheetNames.includes(sheetName)) {
+      while (usedSheetNames.has(sheetName)) {
         const suffix = `_${counter}`;
-        sheetName = name.substring(0, 30 - suffix.length) + suffix;
+        sheetName = cleanName.substring(0, 30 - suffix.length) + suffix;
         counter++;
       }
-      const ws = XLSX.utils.json_to_sheet(rows);
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      usedSheetNames.add(sheetName);
+
+      addFormattedExcelSheet(
+        workbook,
+        sheetName,
+        `LAPORAN DATA INDIKATOR MUTU: ${name.toUpperCase()}`,
+        `Periode: ${namaBulan} ${pDetails.tahun}   |   Unit: ${unitLabel}   |   Kategori: ${cfg.category}`,
+        rows
+      );
     }
 
     // Write to buffer
-    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    const buf = await workbook.xlsx.writeBuffer();
+    const unitFilePart = unit
+      ? `_${unit.nama_unit.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '')}`
+      : '';
 
-    res.setHeader('Content-Disposition', `attachment; filename=Laporan_Mutu_${namaBulan}_${pDetails.tahun}.xlsx`);
+    res.setHeader('Content-Disposition', `attachment; filename=Laporan_Mutu${unitFilePart}_${namaBulan}_${pDetails.tahun}.xlsx`);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.send(buf);
+    res.send(Buffer.from(buf));
 
   } catch (err) {
     next(err);
@@ -698,7 +1256,10 @@ async function importExcel(req, res, next) {
 
       const [name, cfg] = match;
       const ws = wb.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json(ws);
+      let rows = XLSX.utils.sheet_to_json(ws);
+      if (rows.length > 0 && !rows[0]['Nama Pasien'] && !rows[0]['No RM'] && !rows[0]['Tanggal'] && !rows[0]['No']) {
+        rows = XLSX.utils.sheet_to_json(ws, { range: 3 });
+      }
 
       let rowIdx = 1;
       for (const row of rows) {
@@ -789,4 +1350,4 @@ async function importExcel(req, res, next) {
   }
 }
 
-module.exports = { exportExcel, importExcel, downloadTemplate };
+module.exports = { getSummary, exportExcel, importExcel, downloadTemplate };

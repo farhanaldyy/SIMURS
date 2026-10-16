@@ -7,6 +7,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(verifyToken);
 
+router.get('/summary', ctrl.getSummary);
 router.get('/export/excel', ctrl.exportExcel);
 router.get('/template-excel', ctrl.downloadTemplate);
 router.post('/import-excel', upload.single('file'), ctrl.importExcel);

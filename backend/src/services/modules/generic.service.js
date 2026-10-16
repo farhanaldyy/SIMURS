@@ -73,6 +73,7 @@ function createGenericService(modelName, options = {}) {
   }
 
   return {
+    ignoreUnitId: Boolean(options.ignoreUnitId),
     async getAll(where, page, limit) {
       const skip = (page - 1) * limit;
       const queryWhere = { ...where, ...options.defaultWhere };

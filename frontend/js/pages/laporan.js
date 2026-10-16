@@ -2,29 +2,92 @@ import Store from '../store.js';
 import { api } from '../api/client.js';
 import { showToast } from '../components/toast.js';
 
-let state = { summaries: {} };
+let state = { summaries: {}, cacheKey: null };
 
-async function loadData() {
-  const pid = Store.periodeAktif?.id;
-  const uid = Store.unitAktif?.id;
+function getSelectedFilters() {
+  const filterPeriode = document.getElementById('filter-periode');
+  const filterUnit = document.getElementById('filter-unit');
 
-  // Update print subtitle dynamically
-  const printSubtitle = document.getElementById('print-subtitle');
-  if (printSubtitle) {
-    const bulanNama = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    const pBulan = Store.periodeAktif ? bulanNama[Store.periodeAktif.bulan - 1] : '';
-    const pTahun = Store.periodeAktif ? Store.periodeAktif.tahun : '';
-    const unitText = Store.unitAktif ? `| Unit: ${Store.unitAktif.nama_unit}` : '| Unit: Semua Unit';
-    printSubtitle.innerHTML = `Periode: ${pBulan} ${pTahun} ${unitText}`;
+  const pid = (filterPeriode && filterPeriode.value)
+    ? parseInt(filterPeriode.value, 10)
+    : Store.periodeAktif?.id || null;
+
+  let uid = null;
+  if (filterUnit && filterUnit.options && filterUnit.options.length > 0) {
+    uid = filterUnit.value ? parseInt(filterUnit.value, 10) : null;
+  } else {
+    uid = Store.unitAktif?.id || null;
   }
 
-  const printDate = document.getElementById('print-date');
-  if (printDate) {
-    printDate.innerHTML = `Kendal, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  return { pid, uid };
+}
+
+async function updatePrintHeader(activePeriode, activeUnit) {
+  if (!Store.hospitalInfo) {
+    await Store.loadHospitalInfo();
   }
+  const info = Store.hospitalInfo || {};
+  const namaRs = (info.nama_rs || 'RUMAH SAKIT ISLAM KARAWANG').toUpperCase();
+  const alamat = info.alamat || '';
+  const kota = info.kota || 'Karawang';
+  const logoUrl = info.logo_url || 'assets/img/logo.png';
+  const direkturNama = info.nama_direktur || 'dr. H. Mastemer, Sp.B';
+  const direkturNip = info.nip_direktur ? `NIP. ${info.nip_direktur}` : '';
+
+  const kontakArr = [];
+  if (info.telepon) kontakArr.push(`Telp: ${info.telepon}`);
+  if (info.email) kontakArr.push(`Email: ${info.email}`);
+  if (info.website) kontakArr.push(`Website: ${info.website}`);
+  if (info.kode_rs) kontakArr.push(`Kode Fasyankes: ${info.kode_rs}`);
+  const kontakStr = kontakArr.join('  •  ');
+
+  const bulanNama = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+  const pBulan = activePeriode ? bulanNama[activePeriode.bulan - 1] : '';
+  const pTahun = activePeriode ? activePeriode.tahun : '';
+  const unitText = activeUnit ? `| Unit: ${activeUnit.nama_unit}` : '| Unit: Semua Unit';
+
+  const logoEl = document.getElementById('print-kop-logo');
+  if (logoEl) logoEl.src = logoUrl;
+
+  const namaEl = document.getElementById('print-kop-nama');
+  if (namaEl) namaEl.textContent = namaRs;
+
+  const alamatEl = document.getElementById('print-kop-alamat');
+  if (alamatEl) alamatEl.textContent = alamat ? `${alamat}${kota ? ', ' + kota : ''}` : (kota || '-');
+
+  const kontakEl = document.getElementById('print-kop-kontak');
+  if (kontakEl) kontakEl.textContent = kontakStr || '-';
+
+  const subtitleEl = document.getElementById('print-subtitle');
+  if (subtitleEl) subtitleEl.textContent = `Periode: ${pBulan} ${pTahun}   ${unitText}`;
+
+  const dateEl = document.getElementById('print-date');
+  if (dateEl) {
+    const todayStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    dateEl.textContent = `${kota}, ${todayStr}`;
+  }
+
+  const dirNamaEl = document.getElementById('print-direktur-nama');
+  if (dirNamaEl) dirNamaEl.textContent = direkturNama;
+
+  const dirNipEl = document.getElementById('print-direktur-nip');
+  if (dirNipEl) dirNipEl.textContent = direkturNip;
+}
+
+async function loadData(forceRefresh = false) {
+  const { pid, uid } = getSelectedFilters();
+
+  const activePeriode = (Store.periodeList && pid)
+    ? Store.periodeList.find(p => p.id == pid) || Store.periodeAktif
+    : Store.periodeAktif;
+  const activeUnit = (Store.unitList && uid)
+    ? Store.unitList.find(u => u.id == uid) || Store.unitAktif
+    : (uid ? Store.unitAktif : null);
+
+  await updatePrintHeader(activePeriode, activeUnit);
 
   if (!pid) {
     const previewBody = document.getElementById('report-summary-table-body');
@@ -35,19 +98,18 @@ async function loadData() {
   }
 
   const cacheKey = `${pid}_${uid || 'all'}`;
-  if (Store.indicatorSummariesCache && Store.indicatorSummariesCache.key === cacheKey) {
-    state.summaries = Store.indicatorSummariesCache.data;
+  if (!forceRefresh && state.cacheKey === cacheKey && Object.keys(state.summaries).length > 0) {
     renderReportTable();
     return;
   }
 
-  let url = `/dashboard/indicator-summaries?periode_id=${pid}`;
+  let url = `/laporan/summary?periode_id=${pid}`;
   if (uid) url += `&unit_id=${uid}`;
 
   const res = await api.get(url);
   if (res.success) {
     state.summaries = res.data;
-    Store.indicatorSummariesCache = { key: cacheKey, data: res.data };
+    state.cacheKey = cacheKey;
     renderReportTable();
   }
 }
@@ -73,6 +135,7 @@ const serviceToHash = {
   'Pasien Tertahan IGD': '#/pasien-tertahan-igd',
   'Ketidakpatuhan Pasien HD': '#/ketidakpatuhan-hd',
   'Insiden Clotting Durante HD': '#/insiden-clotting',
+  'Insiden Pasien Jatuh HD': '#/insiden-pasien-jatuh-hd',
   'Insiden Jarum Vena HD': '#/insiden-jarum-vena',
   'Penundaan Operasi Elektif': '#/penundaan-operasi',
   'Informed Consent Bedah': '#/informed-consent-pembedahan',
@@ -86,6 +149,7 @@ const serviceToHash = {
   'Kejadian Operasi Salah Sisi': '#/mutu-kamar-operasi',
   'Kejadian Operasi Salah Orang': '#/mutu-kamar-operasi',
   'Kejadian Operasi Salah Prosedur / Tindakan': '#/mutu-kamar-operasi',
+  'Kelengkapan Laporan Anestesi Sedasi': '#/mutu-kamar-operasi',
 
   // Gizi
   'Ketepatan Waktu Makanan': '#/gizi-waktu-makanan',
@@ -239,8 +303,7 @@ function renderReportTable() {
 }
 
 async function downloadExcelFile() {
-  const pid = Store.periodeAktif?.id;
-  const uid = Store.unitAktif?.id;
+  const { pid, uid } = getSelectedFilters();
   if (!pid) {
     showToast('Pilih periode terlebih dahulu', 'error');
     return;
@@ -264,7 +327,10 @@ async function downloadExcelFile() {
     const a = document.createElement('a');
     a.href = downloadUrl;
     
-    let filename = `Laporan_Mutu_${Store.periodeAktif.bulan}_${Store.periodeAktif.tahun}.xlsx`;
+    const activePeriode = (Store.periodeList && pid)
+      ? Store.periodeList.find(p => p.id == pid) || Store.periodeAktif
+      : Store.periodeAktif;
+    let filename = `Laporan_Mutu_${activePeriode ? activePeriode.bulan : ''}_${activePeriode ? activePeriode.tahun : ''}.xlsx`;
     const disposition = res.headers.get('Content-Disposition');
     if (disposition && disposition.indexOf('attachment') !== -1) {
       const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
@@ -282,22 +348,6 @@ async function downloadExcelFile() {
   } catch (err) {
     console.error(err);
     showToast('Gagal mengekspor data Excel', 'error');
-  }
-}
-
-async function downloadSimarExcelFile() {
-  const periode = Store.periodeAktif;
-  const bulan = periode ? periode.bulan : new Date().getMonth() + 1;
-  const tahun = periode ? periode.tahun : new Date().getFullYear();
-
-  showToast('Menyiapkan file Laporan SIMAR INM Kemenkes (.xlsx)...', 'info');
-  try {
-    const { exportSimarExcel } = await import('../api/settings.js');
-    await exportSimarExcel(bulan, tahun);
-    showToast('File SIMAR INM Kemenkes berhasil diunduh!', 'success');
-  } catch (err) {
-    console.error(err);
-    showToast('Gagal mengekspor laporan SIMAR', 'error');
   }
 }
 
@@ -354,7 +404,7 @@ async function handleImport(e) {
           showToast(`Catatan Import: ${data.errors[0]}`, 'warning');
         }, 1500);
       }
-      loadData();
+      loadData(true);
     } else {
       showToast(data.message || 'Gagal mengimpor data', 'error');
     }
@@ -376,6 +426,14 @@ async function populateFilters() {
     if (res.success) Store.unitList = res.data;
   }
 
+  const user = Store.get('user');
+  if (user && user.unit_id && (user.role === 'petugas' || !Store.unitAktif) && Store.unitList) {
+    const userUnit = Store.unitList.find(u => u.id === user.unit_id);
+    if (userUnit && (!Store.unitAktif || Store.unitAktif.id !== userUnit.id)) {
+      Store.set('unitAktif', userUnit);
+    }
+  }
+
   const filterPeriode = document.getElementById('filter-periode');
   const filterUnit = document.getElementById('filter-unit');
 
@@ -389,11 +447,20 @@ async function populateFilters() {
   }
 
   if (filterUnit && Store.unitList) {
-    filterUnit.innerHTML = '<option value="">Semua Unit</option>' +
-      Store.unitList.map(u => {
-        const selected = Store.unitAktif && Store.unitAktif.id === u.id ? 'selected' : '';
-        return `<option value="${u.id}" ${selected}>${u.nama_unit}</option>`;
-      }).join('');
+    if (user && user.role === 'petugas' && user.unit_id) {
+      filterUnit.innerHTML = Store.unitList
+        .filter(u => u.id === user.unit_id)
+        .map(u => `<option value="${u.id}" selected>${u.nama_unit}</option>`)
+        .join('');
+      filterUnit.disabled = true;
+    } else {
+      filterUnit.disabled = false;
+      filterUnit.innerHTML = '<option value="">Semua Unit</option>' +
+        Store.unitList.map(u => {
+          const selected = Store.unitAktif && Store.unitAktif.id === u.id ? 'selected' : '';
+          return `<option value="${u.id}" ${selected}>${u.nama_unit}</option>`;
+        }).join('');
+    }
   }
 }
 
@@ -407,6 +474,189 @@ function handleGlobalFilterChange() {
 
 export const render = async (container) => {
   container.innerHTML = `
+    <style>
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 10mm 12mm 12mm 12mm;
+        }
+        body {
+          background: #ffffff !important;
+          color: #000000 !important;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-only {
+          display: block !important;
+          width: 100% !important;
+        }
+        .print-kop-wrapper {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 16px !important;
+          padding-bottom: 6px !important;
+        }
+        .print-kop-logo-box {
+          width: 65px !important;
+          height: 65px !important;
+          flex-shrink: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        .print-kop-logo-box img {
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+        .print-kop-text {
+          text-align: center !important;
+          flex: 1 !important;
+        }
+        .print-kop-text h1 {
+          margin: 0 !important;
+          font-size: 1.3rem !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          letter-spacing: 0.5px !important;
+          text-transform: uppercase !important;
+          line-height: 1.2 !important;
+        }
+        .print-kop-text p.print-kop-sub {
+          margin: 2px 0 0 0 !important;
+          font-size: 0.8rem !important;
+          color: #334155 !important;
+          line-height: 1.3 !important;
+        }
+        .print-kop-text p.print-kop-contacts {
+          margin: 1px 0 0 0 !important;
+          font-size: 0.75rem !important;
+          color: #64748b !important;
+          font-style: normal !important;
+        }
+        .print-kop-divider {
+          border-bottom: 2.5px solid #0f172a !important;
+          border-top: 1px solid #0f172a !important;
+          height: 3px !important;
+          margin: 6px 0 14px 0 !important;
+        }
+        .print-title-section {
+          text-align: center !important;
+          margin-bottom: 14px !important;
+        }
+        .print-title {
+          margin: 0 !important;
+          font-size: 1.15rem !important;
+          font-weight: 700 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.5px !important;
+          color: #0f172a !important;
+        }
+        .print-subtitle {
+          margin-top: 4px !important;
+          font-size: 0.85rem !important;
+          font-weight: 600 !important;
+          color: #475569 !important;
+        }
+        .print-table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          margin-top: 8px !important;
+          font-size: 8pt !important;
+        }
+        .print-table thead {
+          display: table-header-group !important;
+        }
+        .print-table tr {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+        .print-table th {
+          background-color: #f1f5f9 !important;
+          color: #0f172a !important;
+          font-weight: 700 !important;
+          border: 1px solid #475569 !important;
+          padding: 6px 6px !important;
+          text-transform: uppercase !important;
+          font-size: 7.5pt !important;
+          letter-spacing: 0.2px !important;
+          vertical-align: middle !important;
+        }
+        .print-table td {
+          border: 1px solid #94a3b8 !important;
+          padding: 5px 6px !important;
+          color: #0f172a !important;
+          vertical-align: middle !important;
+          font-size: 8pt !important;
+          line-height: 1.25 !important;
+        }
+        .print-table tbody tr:nth-child(even) td {
+          background-color: #f8fafc !important;
+        }
+        .print-table .badge {
+          display: inline-block !important;
+          padding: 2px 8px !important;
+          border-radius: 9999px !important;
+          font-size: 7.5pt !important;
+          font-weight: 700 !important;
+          text-align: center !important;
+          line-height: 1.2 !important;
+        }
+        .print-table .badge-success {
+          background-color: #ecfdf5 !important;
+          border: 1px solid #10b981 !important;
+          color: #047857 !important;
+        }
+        .print-table .badge-danger {
+          background-color: #fef2f2 !important;
+          border: 1px solid #ef4444 !important;
+          color: #b91c1c !important;
+        }
+        .print-signature-wrapper {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: flex-start !important;
+          margin-top: 32px !important;
+          padding: 0 24px !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+        .print-signature-col {
+          text-align: center !important;
+          min-width: 220px !important;
+          font-size: 8.5pt !important;
+        }
+        .print-sig-lead {
+          color: #475569 !important;
+          font-size: 8pt !important;
+        }
+        .print-sig-role {
+          font-weight: 700 !important;
+          margin-top: 2px !important;
+          color: #0f172a !important;
+        }
+        .print-sig-space {
+          height: 54px !important;
+        }
+        .print-sig-name {
+          font-weight: 700 !important;
+          color: #0f172a !important;
+          text-decoration: underline !important;
+          font-size: 9pt !important;
+        }
+        .print-sig-nip {
+          margin-top: 2px !important;
+          font-size: 7.5pt !important;
+          color: #64748b !important;
+        }
+      }
+    </style>
+
     <div class="module-page no-print">
       <div class="page-header">
         <div>
@@ -436,8 +686,7 @@ export const render = async (container) => {
       <div class="card" style="margin-bottom: 24px; padding: 24px;">
         <h3 style="margin-top: 0; margin-bottom: 16px;">Opsi Ekspor Laporan</h3>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button class="btn btn-primary" id="btn-export-excel">📁 Unduh Excel Internal (.xlsx)</button>
-          <button class="btn btn-success" id="btn-export-simar" style="background: #166534; border-color: #166534; color: #ffffff;">📥 Unduh SIMAR INM Kemenkes (.xlsx)</button>
+          <button class="btn btn-primary" id="btn-export-excel">📁 Unduh Excel (.xlsx)</button>
           <button class="btn btn-outline" id="btn-print-pdf">🖨️ Cetak PDF / Print</button>
         </div>
       </div>
@@ -466,43 +715,59 @@ export const render = async (container) => {
 
     <!-- Print-only layout container -->
     <div class="print-only">
-      <div style="display: flex; align-items: center; justify-content: center; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px;">
-        <img src="assets/img/logo.png" alt="Logo" style="width: 60px; height: 60px; margin-right: 16px;">
-        <div style="text-align: center;">
-          <h1 style="margin: 0; font-size: 1.6rem; font-weight: 700; color: #000; letter-spacing: 0.5px;">RUMAH SAKIT ISLAM KARAWANG</h1>
-          <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #444;">Jl. Ar-Rahman No. 20, Kendal, Jawa Tengah</p>
-          <p style="margin: 1px 0 0 0; font-size: 0.8rem; color: #666; font-style: italic;">Telp: (0294) 123456 | Email: info@rsi-kendal.co.id</p>
+      <!-- Kop Surat Dinamis Berdasarkan Data Setting & Integrasi -->
+      <div class="print-kop-wrapper">
+        <div class="print-kop-logo-box">
+          <img id="print-kop-logo" src="assets/img/logo.png" alt="Logo RS">
+        </div>
+        <div class="print-kop-text">
+          <h1 id="print-kop-nama">RUMAH SAKIT ISLAM KARAWANG</h1>
+          <p id="print-kop-alamat" class="print-kop-sub">Jl. Pangkal Perjuangan No. 1, Karawang, Jawa Barat</p>
+          <p id="print-kop-kontak" class="print-kop-contacts">Telp: - • Email: -</p>
         </div>
       </div>
-      
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h2 style="margin: 0; font-size: 1.3rem; font-weight: 600; text-decoration: underline;">LAPORAN CAPAIAN INDIKATOR MUTU</h2>
-        <div id="print-subtitle" style="margin-top: 6px; font-size: 0.95rem; font-weight: 500;">
+      <div class="print-kop-divider"></div>
+
+      <!-- Title & Subtitle Laporan -->
+      <div class="print-title-section">
+        <h2 class="print-title">LAPORAN CAPAIAN INDIKATOR MUTU</h2>
+        <div id="print-subtitle" class="print-subtitle">
           Periode: - | Unit: -
         </div>
       </div>
-      
+
+      <!-- Tabel Capaian Mutu -->
       <table class="print-table">
         <thead>
           <tr>
-            <th style="width: 40px; text-align: center;">No</th>
-            <th style="width: 150px; text-align: left;">Kategori</th>
+            <th style="width: 38px; text-align: center;">No</th>
+            <th style="width: 140px; text-align: left;">Kategori</th>
             <th style="text-align: left;">Nama Indikator</th>
-            <th style="width: 100px; text-align: center;">Target</th>
-            <th style="width: 100px; text-align: center;">Pencapaian</th>
-            <th style="width: 130px; text-align: center;">Status</th>
+            <th style="width: 95px; text-align: center;">Target</th>
+            <th style="width: 105px; text-align: center;">Pencapaian</th>
+            <th style="width: 105px; text-align: center;">Status</th>
           </tr>
         </thead>
         <tbody id="print-table-body">
           <!-- Populated dynamically -->
         </tbody>
       </table>
-      
-      <div style="margin-top: 48px; display: flex; justify-content: flex-end;">
-        <div style="text-align: center; width: 250px; font-size: 0.9rem;">
-          <div id="print-date">Kendal, -</div>
-          <div style="margin-top: 8px; font-weight: 600;">Komite Mutu & Keselamatan Pasien</div>
-          <div style="margin-top: 70px; font-weight: 600;">( ___________________________ )</div>
+
+      <!-- Lembar Tanda Tangan -->
+      <div class="print-signature-wrapper">
+        <div class="print-signature-col">
+          <div class="print-sig-lead">Mengetahui,</div>
+          <div class="print-sig-role">Direktur Rumah Sakit</div>
+          <div class="print-sig-space"></div>
+          <div class="print-sig-name" id="print-direktur-nama">dr. H. Mastemer, Sp.B</div>
+          <div class="print-sig-nip" id="print-direktur-nip"></div>
+        </div>
+        <div class="print-signature-col">
+          <div class="print-sig-lead" id="print-date">Karawang, -</div>
+          <div class="print-sig-role">Komite Mutu & Keselamatan Pasien</div>
+          <div class="print-sig-space"></div>
+          <div class="print-sig-name">( ___________________________ )</div>
+          <div class="print-sig-nip">Ketua Komite Mutu</div>
         </div>
       </div>
     </div>
@@ -510,11 +775,17 @@ export const render = async (container) => {
 
   // Bind export/import events
   document.getElementById('btn-export-excel').addEventListener('click', downloadExcelFile);
-  const btnSimar = document.getElementById('btn-export-simar');
-  if (btnSimar) {
-    btnSimar.addEventListener('click', downloadSimarExcelFile);
-  }
-  document.getElementById('btn-print-pdf').addEventListener('click', () => {
+  document.getElementById('btn-print-pdf').addEventListener('click', async () => {
+    const { pid, uid } = getSelectedFilters();
+    const activePeriode = (Store.periodeList && pid)
+      ? Store.periodeList.find(p => p.id == pid) || Store.periodeAktif
+      : Store.periodeAktif;
+    const activeUnit = (Store.unitList && uid)
+      ? Store.unitList.find(u => u.id == uid) || Store.unitAktif
+      : (uid ? Store.unitAktif : null);
+
+    await updatePrintHeader(activePeriode, activeUnit);
+
     const previewBody = document.getElementById('report-summary-table-body');
     const printBody = document.getElementById('print-table-body');
     if (previewBody && printBody) {
@@ -547,7 +818,6 @@ export const render = async (container) => {
     const headerSelect = document.getElementById('header-periode-select');
     if (headerSelect) headerSelect.value = pId;
 
-    loadData();
     window.dispatchEvent(new CustomEvent('periodeChanged'));
   });
 
@@ -559,7 +829,6 @@ export const render = async (container) => {
     const headerSelect = document.getElementById('header-unit-select');
     if (headerSelect) headerSelect.value = uId;
 
-    loadData();
     window.dispatchEvent(new CustomEvent('unitChanged'));
   });
 
